@@ -1,6 +1,7 @@
 extends Node3D
 
 const bike = preload("res://Bike.tscn")
+const drone = preload("res://Drone.tscn")
 var follow_bike = true
 var bike_cameras = []
 var followed_bike_index = 0
@@ -12,7 +13,7 @@ func _ready():
 	for i in range(bike_count):
 		var start_position = Vector3(i, 0, 0)
 		add_bike(start_position)
-
+		add_drone(Vector3(i, 1, 0))
 	
 func _process(delta):
 
@@ -61,9 +62,14 @@ func _input(event):
 		if event.is_action_released("follow_prev_bike"):
 			followed_bike_index = (followed_bike_index - 1 + bike_cameras.size()) % bike_cameras.size()
 
+func add_drone(start_position: Vector3):
+	var drone_instance = drone.instantiate()
+	drone_instance.set_position(start_position)
+	add_child(drone_instance)
+	
 func add_bike(start_position: Vector3):
 	var bike_instance = bike.instantiate()
-	bike_instance.position = start_position
+	bike_instance.set_position(start_position)
 	var bike_camera = bike_instance.get_node("Camera3D")
 	bike_cameras.append(bike_camera)
 	add_child(bike_instance)
