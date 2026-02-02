@@ -4,16 +4,22 @@ const bike = preload("res://Bike.tscn")
 var follow_bike = true
 var bike_cameras = []
 var followed_bike_index = 0
+const bike_count = 5
 
 
 func _ready():
 	# load bike scene
-	for i in 5:
+	for i in range(bike_count):
 		var start_position = Vector3(i, 0, 0)
 		add_bike(start_position)
 
 	
 func _process(delta):
+
+	# close game on escape
+	if Input.is_key_pressed(KEY_ESCAPE):
+		get_tree().quit()
+
 	var camera = $Camera3D
 	if follow_bike:
 		# get bike camera 
