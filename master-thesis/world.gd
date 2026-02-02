@@ -48,11 +48,12 @@ func _input(event):
 	if event.is_action_released("toggle_follow_bike"):
 		follow_bike = !follow_bike
 
-	if event.is_action_released("follow_next_bike"):
-		followed_bike_index = (followed_bike_index + 1) % bike_cameras.size()
-	
-	if event.is_action_released("follow_prev_bike"):
-		followed_bike_index = (followed_bike_index - 1 + bike_cameras.size()) % bike_cameras.size()
+	if follow_bike:
+		if event.is_action_released("follow_next_bike"):
+			followed_bike_index = (followed_bike_index + 1) % bike_cameras.size()
+		
+		if event.is_action_released("follow_prev_bike"):
+			followed_bike_index = (followed_bike_index - 1 + bike_cameras.size()) % bike_cameras.size()
 
 func add_bike(start_position: Vector3):
 	var bike_instance = bike.instantiate()
