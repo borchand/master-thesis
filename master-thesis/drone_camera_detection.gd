@@ -6,8 +6,8 @@ func _ready():
 
 func _on_body_entered(bike: Node) -> void:
 	if bike is Bike_body:
-		print("Bike entered: ", bike.bike_id)
+		pass
 
 func _on_body_exited(bike: Node) -> void:
 	if bike is Bike_body:
-		print("Bike exited: ", bike.bike_id)
+		pass
