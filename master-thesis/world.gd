@@ -4,21 +4,20 @@ const bike = preload("res://Bike.tscn")
 var bike_cameras = []
 var follow_bike = false
 var followed_bike_index = 0
-const bike_count = 1
+const bike_count = 200
 
 func _ready():
 	# load bike scene
 	for i in range(bike_count):
 		add_bike()
 
-	
 func _process(delta):
 	# close game on escape
 	if Input.is_key_pressed(KEY_ESCAPE):
 		get_tree().quit()
 
 	var camera = $Camera3D
-	if follow_bike:
+	if follow_bike and not bike_cameras.is_empty():
 		# get bike camera 
 		var bike_camera = bike_cameras[followed_bike_index]
 		bike_camera.set_current(true)
@@ -65,6 +64,11 @@ func add_bike():
 	# get bike camera and add to list
 	var bike_camera = bike_instance.get_camera_node()
 	bike_cameras.append(bike_camera)
-
+	bike_instance.connect("freeing_bike", bike_freed)
 	# add bike to scene
 	add_child(bike_instance)
+
+func bike_freed(freed_bike: Node3D):
+	# remove bike camera from list when bike is freed
+	var bike_camera = freed_bike.get_camera_node()
+	bike_cameras.erase(bike_camera)
