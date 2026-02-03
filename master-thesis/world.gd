@@ -1,16 +1,18 @@
 extends Node3D
 
-const bike = preload("res://Bike.tscn")
+const bike = preload("res://Scenes/Bike/Bike.tscn")
 const drone = preload("res://Drone.tscn")
 
+var path_instance : Path3D
 var drone_cameras = []
 
 var bike_cameras = []
 var follow_bike = false
 var followed_bike_index = 0
-const bike_count = 200
+const bike_count = 100
 
-func _ready():
+func _ready():	
+	path_instance = $BikePath3d
 	# load bike scene
 	for i in range(bike_count):
 		add_bike()
@@ -24,6 +26,10 @@ func _process(delta):
 	# CAMERA CONTROLS
 	var camera = $Camera3D
 	if follow_bike and not bike_cameras.is_empty():
+		
+		if followed_bike_index >= bike_cameras.size():
+			followed_bike_index = bike_cameras.size() - 1
+			
 		# get bike camera 
 		var bike_camera = bike_cameras[followed_bike_index]
 		bike_camera.set_current(true)
@@ -80,13 +86,14 @@ func add_drone(start_position: Vector3):
 func add_bike():
 	# create bike instance
 	var bike_instance = bike.instantiate()
+	bike_instance.connect("freeing_bike", bike_freed)
 
 	# get bike camera and add to list
 	var bike_camera = bike_instance.get_camera_node()
 	bike_cameras.append(bike_camera)
-	bike_instance.connect("freeing_bike", bike_freed)
+	
 	# add bike to scene
-	add_child(bike_instance)
+	path_instance.add_child(bike_instance)
 
 func bike_freed(freed_bike: Node3D):
 	# remove bike camera from list when bike is freed

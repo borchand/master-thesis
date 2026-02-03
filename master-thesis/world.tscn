@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://b7re652khoe2s" path="res://world.gd" id="1_f3sb7"]
 [ext_resource type="Material" uid="uid://baqw4impxlrog" path="res://sprites/godot-material-mud-cracked/materials/mudCracked/mud.tres" id="2_fj7yv"]
 [ext_resource type="Script" uid="uid://t7drcqgmu3nt" path="res://fps.gd" id="3_tlwt5"]
+[ext_resource type="PackedScene" uid="uid://bxvm5tel50r7s" path="res://Scenes/Bike/Bike_Path3d.tscn" id="4_aqk2v"]
 
 [sub_resource type="Theme" id="Theme_tlwt5"]
 default_font_size = 40
@@ -24,3 +25,5 @@ offset_right = 50.0
 offset_bottom = 273.0
 theme = SubResource("Theme_tlwt5")
 script = ExtResource("3_tlwt5")
+
+[node name="BikePath3d" parent="." unique_id=37574628 instance=ExtResource("4_aqk2v")]

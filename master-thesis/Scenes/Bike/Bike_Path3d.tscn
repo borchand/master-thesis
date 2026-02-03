@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://bxvm5tel50r7s"]
+
+[sub_resource type="Curve3D" id="Curve3D_lpmxa"]
+bake_interval = 5.0
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 50, 0, 70),
+"tilts": PackedFloat32Array(0, 0, 0)
+}
+point_count = 3
+
+[node name="BikePath3d" type="Path3D" unique_id=37574628]
+curve = SubResource("Curve3D_lpmxa")
