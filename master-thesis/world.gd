@@ -16,9 +16,9 @@ const bike_count = 200
 func _ready():
 	# load bike scene
 	for i in range(bike_count):
-		add_bike()
+		_add_bike()
 	for i in range(drone_count):
-		add_drone(Vector3(0, 1, -(i+1)))
+		_add_drone(Vector3(0, 1, -(i+1)))
   
 func _process(delta):
 	# close game on escape
@@ -89,25 +89,25 @@ func _input(event):
 		if event.is_action_released("follow_prev_bike"):
 			followed_bike_index = (followed_bike_index - 1 + bike_cameras.size()) % bike_cameras.size()
 
-func add_drone(start_position: Vector3):
+func _add_drone(start_position: Vector3):
 	var drone_instance = drone.instantiate()
 	drone_instance.set_position(start_position)
 	var drone_camera = drone_instance.get_node("Camera3D")
 	drone_cameras.append(drone_camera)
 	add_child(drone_instance)
 	
-func add_bike():
+func _add_bike():
 	# create bike instance
 	var bike_instance = bike.instantiate()
 
 	# get bike camera and add to list
 	var bike_camera = bike_instance.get_camera_node()
 	bike_cameras.append(bike_camera)
-	bike_instance.connect("freeing_bike", bike_freed)
+	bike_instance.connect("freeing_bike", _bike_freed)
 	# add bike to scene
 	add_child(bike_instance)
 
-func bike_freed(freed_bike: Node3D):
+func _bike_freed(freed_bike: Node3D):
 	# remove bike camera from list when bike is freed
 	var bike_camera = freed_bike.get_camera_node()
 	bike_cameras.erase(bike_camera)
