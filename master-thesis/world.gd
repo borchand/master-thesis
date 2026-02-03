@@ -5,7 +5,6 @@ const drone = preload("res://Drone.tscn")
 
 var drone_cameras = []
 
-var follow_bike = true
 var bike_cameras = []
 var follow_bike = false
 var followed_bike_index = 0
@@ -15,7 +14,7 @@ func _ready():
 	# load bike scene
 	for i in range(bike_count):
 		add_bike()
-  add_drone(Vector3(0, 1, -1))
+	add_drone(Vector3(0, 1, -1))
   
 func _process(delta):
 	# close game on escape
@@ -29,8 +28,6 @@ func _process(delta):
 		var bike_camera = bike_cameras[followed_bike_index]
 		bike_camera.set_current(true)
 	else:
-		#camera.set_current(true)
-		camera = drone_cameras[0]
 		camera.set_current(true)
 		# move camera on key press
 		if Input.is_key_pressed(KEY_W):

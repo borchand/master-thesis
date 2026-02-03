@@ -1,7 +1,7 @@
 extends Node3D
 
-signal freeing_bike
 class_name Bike
+signal freeing_bike
 
 var pathFollow: PathFollow3D
 var rng = RandomNumberGenerator.new()
