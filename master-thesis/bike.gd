@@ -1,9 +1,11 @@
 extends Node3D
 
+class_name Bike
 
 func _ready():
-	pass # Replace with function body.
-
+	pass
+	
 func _process(delta):
+	pass
 	# move bike forward
-	translate(Vector3(0, 0, 1) * delta)
+	#translate(Vector3(0, 0, 1) * delta)
