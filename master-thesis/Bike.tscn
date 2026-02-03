@@ -4,6 +4,14 @@
 [ext_resource type="PackedScene" uid="uid://16pqbauiqyge" path="res://sprites/racing_bicycle/scene.gltf" id="1_pp6at"]
 [ext_resource type="Script" uid="uid://47jusnkjgki" path="res://bike_body_detection.gd" id="2_ela25"]
 
+[sub_resource type="Curve3D" id="Curve3D_lf8oo"]
+bake_interval = 10.0
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 3.079445, 0, 24.623674, 0, 0, 0, 0, 0, 0, 20, 0, 24.997581),
+"tilts": PackedFloat32Array(0, 0, 0, 0)
+}
+point_count = 4
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_lf8oo"]
 size = Vector3(0.5175991, 1.1637268, 1.7457428)
 
@@ -18,8 +26,28 @@ script = ExtResource("2_ela25")
 transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Bike_body" unique_id=46239367]
+[node name="Path3D" type="Path3D" parent="." unique_id=1648039232]
+curve = SubResource("Curve3D_lf8oo")
+
+[node name="PathFollow3D" type="PathFollow3D" parent="Path3D" unique_id=531460053]
+transform = Transform3D(0.5, 0, 0, 0, 0.5000045, 0, 0, 0, 0.5, 0, 0, 0)
+rotation_order = 1
+top_level = true
+rotation_mode = 4
+use_model_front = true
+loop = false
+tilt_enabled = false
+
+[node name="Camera3D" type="Camera3D" parent="Path3D/PathFollow3D" unique_id=1291569017]
+transform = Transform3D(-2, -1.2363347e-07, 1.2363347e-07, 0, 1.414202, 1.414202, -1.7484555e-07, 1.414202, -1.414202, 0.009475656, 2.5, -0.8548331)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Path3D/PathFollow3D" unique_id=747083627]
+transform = Transform3D(-1.0000004, 0, 8.707866e-08, 0, 1, 0, -8.707866e-08, 0, -1.0000004, -0.0038393736, 0, 0.8325832)
+collision_mask = 0
+
+[node name="Sketchfab_Scene" parent="Path3D/PathFollow3D/StaticBody3D" unique_id=1746360556 instance=ExtResource("1_pp6at")]
+transform = Transform3D(-0.01, 8.7422775e-10, 0, 8.7422775e-10, 0.01, 8.7422775e-10, 7.642742e-17, 8.7422775e-10, -0.01, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Path3D/PathFollow3D/StaticBody3D" unique_id=46239367]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5781708, 0)
 shape = SubResource("BoxShape3D_lf8oo")
-
-[node name="Camera3D" type="Camera3D" parent="." unique_id=1291569017]
-transform = Transform3D(-2, 0, 1.7484555e-07, 8.742278e-08, 1.7320508, 1, -1.5142069e-07, 1, -1.7320508, 0, 2, -2)
