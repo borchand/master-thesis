@@ -1,5 +1,6 @@
 extends Node3D
 
+class_name Bike
 signal freeing_bike
 
 var pathFollow: PathFollow3D
@@ -12,6 +13,7 @@ func _ready():
 	max_progress = pathFollow.get_parent().curve.get_baked_length()
 	
 func _process(delta):
+	pass
 	# move bike forward
 	pathFollow.progress += speed * delta
 

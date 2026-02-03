@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dw0pwul0l0ckj"
-path.s3tc="res://.godot/imported/material_0_baseColor.png-3123853fc7fd46a33ef009149d24e8e6.s3tc.ctex"
+uid="uid://q3msmneuydq"
+path.s3tc="res://.godot/imported/material_0_metallicRoughness.png-bfb52afc830ba27546a5acffc6235422.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://animated_drone/textures/material_0_baseColor.png"
-dest_files=["res://.godot/imported/material_0_baseColor.png-3123853fc7fd46a33ef009149d24e8e6.s3tc.ctex"]
+source_file="res://sprites/animated_drone/textures/material_0_metallicRoughness.png"
+dest_files=["res://.godot/imported/material_0_metallicRoughness.png-bfb52afc830ba27546a5acffc6235422.s3tc.ctex"]
 
 [params]
 
@@ -26,8 +26,8 @@ compress/normal_map=0
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-roughness/mode=0
-roughness/src_normal=""
+roughness/mode=8
+roughness/src_normal="res://animated_drone/textures/material_0_normal.png"
 process/channel_remap/red=0
 process/channel_remap/green=1
 process/channel_remap/blue=2

@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://4qvlvq7nlg67"]
+
+[ext_resource type="Script" uid="uid://bx2jrc4drq8o" path="res://drone.gd" id="1_3rlx3"]
+[ext_resource type="PackedScene" uid="uid://mxhdvsfjqqtv" path="res://sprites/animated_drone/scene.gltf" id="1_uvgqj"]
+[ext_resource type="Script" uid="uid://cuo14t1rph0hn" path="res://drone_camera_detection.gd" id="3_5j1j2"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_uvgqj"]
+size = Vector3(0.2685547, 0.09057617, 0.20922852)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_3rlx3"]
+points = PackedVector3Array(1, -1, 0.2, -1, -1, 0.2, 4, -1, 4.5, -4, -1, 4.5, 0, 0, 0)
+
+[node name="Drone" type="Node3D" unique_id=1486961107]
+script = ExtResource("1_3rlx3")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=813411417]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1101559629]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00048828125, 0.03894043, 0.006225586)
+shape = SubResource("BoxShape3D_uvgqj")
+
+[node name="Drone_body" parent="StaticBody3D" unique_id=1967317189 instance=ExtResource("1_uvgqj")]
+
+[node name="Camera_detection" type="Area3D" parent="StaticBody3D" unique_id=303911449]
+script = ExtResource("3_5j1j2")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D/Camera_detection" unique_id=1133267120]
+shape = SubResource("ConvexPolygonShape3D_3rlx3")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=435078670]
+transform = Transform3D(-1, 6.41447e-08, -5.9398648e-08, 0, 0.67944133, 0.73372984, 8.742278e-08, 0.73372984, -0.67944133, 0, 0.011386909, 0.0511285)
