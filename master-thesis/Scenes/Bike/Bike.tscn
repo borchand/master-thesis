@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://7f0tuhwy0gs3"]
+
+[ext_resource type="Script" uid="uid://jhdxc8a8bmo1" path="res://Scripts/Bike/bike.gd" id="1_l5bd3"]
+[ext_resource type="Script" uid="uid://47jusnkjgki" path="res://Scripts/Bike/bike_body_detection.gd" id="2_l5bd3"]
+[ext_resource type="PackedScene" uid="uid://16pqbauiqyge" path="res://sprites/racing_bicycle/scene.gltf" id="3_u4jce"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_l0kmq"]
+size = Vector3(0.5175991, 1.1637268, 1.7457428)
+
+[node name="Bike" type="PathFollow3D" unique_id=1407203146]
+loop = false
+script = ExtResource("1_l5bd3")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=241749523]
+transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0, 2.5, 2)
+
+[node name="BikeBody" type="StaticBody3D" parent="." unique_id=944942489]
+transform = Transform3D(-1.0000004, 0, 8.707866e-08, 0, 1, 0, -8.707866e-08, 0, -1.0000004, -0.0038393736, 0, 0.8325832)
+collision_mask = 0
+script = ExtResource("2_l5bd3")
+
+[node name="Sketchfab_Scene" parent="BikeBody" unique_id=1746360556 instance=ExtResource("3_u4jce")]
+transform = Transform3D(0.009999999, 0, 0, 0, 0.01, 0, 0, 0, 0.009999999, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BikeBody" unique_id=1827410077]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5781708, 0)
+shape = SubResource("BoxShape3D_l0kmq")
