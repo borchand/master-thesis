@@ -3,10 +3,13 @@ extends Node3D
 const bike = preload("res://Bike.tscn")
 const drone = preload("res://Drone.tscn")
 
+var drone_count = 20
 var drone_cameras = []
+var followed_drone_index = 0
 
 var bike_cameras = []
 var follow_bike = false
+var follow_drone = false
 var followed_bike_index = 0
 const bike_count = 200
 
@@ -14,7 +17,8 @@ func _ready():
 	# load bike scene
 	for i in range(bike_count):
 		add_bike()
-	add_drone(Vector3(0, 1, -1))
+	for i in range(drone_count):
+		add_drone(Vector3(0, 1, -(i+1)))
   
 func _process(delta):
 	# close game on escape
@@ -27,6 +31,9 @@ func _process(delta):
 		# get bike camera 
 		var bike_camera = bike_cameras[followed_bike_index]
 		bike_camera.set_current(true)
+	elif follow_drone and not drone_cameras.is_empty():
+		var drone_camera = drone_cameras[followed_drone_index]
+		drone_camera.set_current(true)
 	else:
 		camera.set_current(true)
 		# move camera on key press
@@ -61,8 +68,20 @@ func _process(delta):
 
 func _input(event):
 	if event.is_action_released("toggle_follow_bike"):
+		follow_drone = false
 		follow_bike = !follow_bike
-
+	
+	if event.is_action_released("switch_drone_camera"):
+		follow_bike = false
+		follow_drone = !follow_drone
+	
+	if follow_drone:
+		if event.is_action_released("follow_next_drone"):
+			followed_drone_index = (followed_drone_index + 1) % drone_cameras.size()
+		
+		if event.is_action_released("follow_prev_drone"):
+			followed_drone_index = (followed_drone_index - 1 + drone_cameras.size()) % drone_cameras.size()
+		
 	if follow_bike:
 		if event.is_action_released("follow_next_bike"):
 			followed_bike_index = (followed_bike_index + 1) % bike_cameras.size()
