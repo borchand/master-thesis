@@ -1,21 +1,18 @@
 extends Node3D
 
 const bike = preload("res://Bike.tscn")
-var follow_bike = true
 var bike_cameras = []
+var follow_bike = false
 var followed_bike_index = 0
-const bike_count = 5
-
+const bike_count = 1
 
 func _ready():
 	# load bike scene
 	for i in range(bike_count):
-		var start_position = Vector3(i, 0, 0)
-		add_bike(start_position)
+		add_bike()
 
 	
 func _process(delta):
-
 	# close game on escape
 	if Input.is_key_pressed(KEY_ESCAPE):
 		get_tree().quit()
@@ -61,9 +58,13 @@ func _input(event):
 		if event.is_action_released("follow_prev_bike"):
 			followed_bike_index = (followed_bike_index - 1 + bike_cameras.size()) % bike_cameras.size()
 
-func add_bike(start_position: Vector3):
+func add_bike():
+	# create bike instance
 	var bike_instance = bike.instantiate()
-	bike_instance.position = start_position
-	var bike_camera = bike_instance.get_node("Camera3D")
+
+	# get bike camera and add to list
+	var bike_camera = bike_instance.get_camera_node()
 	bike_cameras.append(bike_camera)
+
+	# add bike to scene
 	add_child(bike_instance)
