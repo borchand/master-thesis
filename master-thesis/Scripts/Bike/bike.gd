@@ -6,14 +6,14 @@ signal freeing_bike
 var rng = RandomNumberGenerator.new()
 var max_progress: float
 
-var Maxspeed = 7.0
-var Minspeed = 2.5
+var Maxspeed = 22
+var Minspeed = 4.5
 var speed = 4.0
 var acceleration = 0.0
 var stamina = 100.0
 var staminaSpeedupThreashold = 70
 var staminaSlowdownThreashold = 40
-var staminaRegen: float #should be something between 4
+var staminaRegen: float
 
 
 func _ready():

@@ -33,9 +33,9 @@ func add_bike():
 	camera_instance.bike_cameras.append(bike_camera)
 	
 	#Add variation in bike preformance
-	var rn = rng.randfn(4.0, 0.5)
-	if (rn>2.9 and rn<3.4) or (rn>4.7 and rn<5.1):
-		rn = rng.randfn(4.0, 0.5)
+	var rn = rng.randfn(23, 1.15)
+	#if (rn>value1 and rn<valu2) or (rn>value3 and rn<value4):
+		#rn = rng.randfn(23, 1.15)
 	bike_instance.setRegen(rn)
 	
 	# add bike to scene
