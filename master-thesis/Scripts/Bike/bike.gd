@@ -4,7 +4,6 @@ class_name Bike
 signal freeing_bike
 
 var rng = RandomNumberGenerator.new()
-var speed = rng.randf_range(50.0, 60.0)
 var max_progress: float
 
 var Maxspeed = 7.0
@@ -36,9 +35,9 @@ func _process(delta):
 		stamina += staminaRegen*0.5 
 		
 	# move bike forward
-	pathFollow.progress += speed * delta
-	#Termination Tjek
-	if pathFollow.progress >= max_progress:
+	self.progress += speed * delta
+
+	if self.progress >= max_progress:
 		# remove bike when it reaches the end of the path
 		safe_queue_free()
 	
@@ -52,8 +51,7 @@ func safe_queue_free() -> void:
 	freeing_bike.emit(self)
 	queue_free()
 
-#Neigbor bike accelerating ahead
-func _on_proximity_are_bike_body_exited(body: Node3D) -> void:
+func _on_bike_proximity_area_body_exited(body: Node3D) -> void:
 	if body.name == "BikeHitBox" and stamina >= staminaSlowdownThreashold:
 		var pObject = body
 		while pObject.get_parent() == null:

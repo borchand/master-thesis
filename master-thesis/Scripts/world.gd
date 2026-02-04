@@ -4,6 +4,7 @@ const bike = preload("res://Scenes/Bike/Bike.tscn")
 const drone = preload("res://Scenes/Drone/Drone.tscn")
 
 @onready var path_instance : Path3D
+var rng = RandomNumberGenerator.new()
 var camera_instance : Camera3D
 const bike_count = 100
 
@@ -30,6 +31,12 @@ func add_bike():
 	# get bike camera and add to list
 	var bike_camera = bike_instance.get_camera_node()
 	camera_instance.bike_cameras.append(bike_camera)
+	
+	#Add variation in bike preformance
+	var rn = rng.randfn(4.0, 0.5)
+	if (rn>2.9 and rn<3.4) or (rn>4.7 and rn<5.1):
+		rn = rng.randfn(4.0, 0.5)
+	bike_instance.setRegen(rn)
 	
 	# add bike to scene
 	path_instance.add_child(bike_instance)
