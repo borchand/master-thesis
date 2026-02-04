@@ -8,6 +8,20 @@
 [ext_resource type="Script" uid="uid://b3ui8wkm4hyq" path="res://Scripts/Bike/bike_path.gd" id="5_5ukr8"]
 [ext_resource type="Script" uid="uid://t7drcqgmu3nt" path="res://Scripts/fps.gd" id="6_5ukr8"]
 
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_o06y3"]
+sky_horizon_color = Color(0.64528894, 0.67970026, 0.66589224, 1)
+ground_bottom_color = Color(0.13039571, 0.19904113, 0.047809124, 1)
+ground_horizon_color = Color(0.64528894, 0.67970026, 0.66589224, 1)
+
+[sub_resource type="Sky" id="Sky_k7acu"]
+sky_material = SubResource("ProceduralSkyMaterial_o06y3")
+
+[sub_resource type="Environment" id="Environment_5v1tr"]
+background_mode = 2
+sky = SubResource("Sky_k7acu")
+tonemap_mode = 2
+ssao_enabled = true
+
 [sub_resource type="Theme" id="Theme_dwbse"]
 default_font_size = 18
 
@@ -16,6 +30,13 @@ default_font_size = 40
 
 [node name="World" type="Node3D" unique_id=1006143094]
 script = ExtResource("1_fo5ed")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1158102650]
+environment = SubResource("Environment_5v1tr")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1854748252]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=79264867]
 process_mode = 3
@@ -30,7 +51,6 @@ material = ExtResource("3_k7acu")
 
 [node name="BikePath3d" parent="." unique_id=37574628 instance=ExtResource("4_5v1tr")]
 script = ExtResource("5_5ukr8")
-file_path = "res://stages/stage-20-route.json"
 
 [node name="MenuBar" type="MenuBar" parent="." unique_id=1622272157]
 process_mode = 3
