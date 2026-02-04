@@ -1,10 +1,10 @@
 import os
 import json
 import gpxpy
+from pyproj import Transformer
 
-BASE_DIR = "master-thesis/stage_converter" 
-INPUT_DIR = os.path.join(BASE_DIR, "input_files")
-STAGES_DIR = os.path.join(BASE_DIR, "stages")
+INPUT_DIR = os.path.join("stage_converter", "input_files")
+STAGES_DIR = os.path.join("master-thesis", "stages")
 
 os.makedirs(STAGES_DIR, exist_ok=True)
 
@@ -14,26 +14,23 @@ def gpx_to_points(gpx_path: str):
 
     points = []
 
-    # Tracks
     for track in gpx.tracks:
         for segment in track.segments:
-            for p in segment.points:
+            for i, p in enumerate(segment.points):
+                transformer = Transformer.from_crs("EPSG:4326", "EPSG:32633", always_xy=True)
+                lon, lat = transformer.transform(p.longitude, p.latitude)
+                if i == 0:
+                    null_point = {
+                        "lat": lat,
+                        "lon": lon,
+                        "elevation": p.elevation
+                    }
                 points.append({
-                    "lat": p.latitude,
-                    "lon": p.longitude,
-                    "elevation": p.elevation
+                    "lat": (lat - null_point["lat"]),
+                    "lon": (lon - null_point["lon"]),
+                    "elevation": p.elevation - null_point["elevation"]
                 })
-
-    for route in gpx.routes:
-        for p in route.points:
-            points.append({
-                "lat": p.latitude,
-                "lon": p.longitude,
-                "elevation": p.elevation
-            })
-
     return points
-
 
 for name in os.listdir(INPUT_DIR):
     if not name.lower().endswith(".gpx"):
