@@ -3,7 +3,7 @@ extends Node3D
 const bike = preload("res://Scenes/Bike/Bike.tscn")
 const drone = preload("res://Scenes/Drone/Drone.tscn")
 
-var path_instance : Path3D
+@onready var path_instance : Path3D
 var camera_instance : Camera3D
 const bike_count = 100
 

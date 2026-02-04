@@ -5,6 +5,7 @@
 [ext_resource type="Material" uid="uid://baqw4impxlrog" path="res://sprites/godot-material-mud-cracked/materials/mudCracked/mud.tres" id="3_k7acu"]
 [ext_resource type="PackedScene" uid="uid://bxvm5tel50r7s" path="res://Scenes/Bike/Bike_Path3d.tscn" id="4_5v1tr"]
 [ext_resource type="Script" uid="uid://buennhw6hcyks" path="res://Scripts/menu_bar.gd" id="5_0fj1v"]
+[ext_resource type="Script" uid="uid://b3ui8wkm4hyq" path="res://Scripts/Bike/bike_path.gd" id="5_5ukr8"]
 
 [sub_resource type="Theme" id="Theme_dwbse"]
 default_font_size = 18
@@ -22,10 +23,13 @@ script = ExtResource("2_o06y3")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=876893626]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.49975073, 0)
+visible = false
 size = Vector3(400, 1, 400)
 material = ExtResource("3_k7acu")
 
 [node name="BikePath3d" parent="." unique_id=37574628 instance=ExtResource("4_5v1tr")]
+script = ExtResource("5_5ukr8")
+file_path = "res://stages/stage-20-route.json"
 
 [node name="MenuBar" type="MenuBar" parent="." unique_id=1622272157]
 process_mode = 3

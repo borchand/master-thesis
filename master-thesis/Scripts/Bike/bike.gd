@@ -4,7 +4,7 @@ class_name Bike
 signal freeing_bike
 
 var rng = RandomNumberGenerator.new()
-var speed = rng.randf_range(2.0, 6.0)
+var speed = rng.randf_range(50.0, 60.0)
 var max_progress: float
 
 func _ready():
