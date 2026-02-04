@@ -4,11 +4,12 @@ const bike = preload("res://Bike.tscn")
 const drone = preload("res://Drone.tscn")
 
 var drone_cameras = []
+var rng = RandomNumberGenerator.new()
 
 var bike_cameras = []
 var follow_bike = false
 var followed_bike_index = 0
-const bike_count = 200
+const bike_count = 10
 
 func _ready():
 	# load bike scene
@@ -85,6 +86,10 @@ func add_bike():
 	var bike_camera = bike_instance.get_camera_node()
 	bike_cameras.append(bike_camera)
 	bike_instance.connect("freeing_bike", bike_freed)
+	var rn = rng.randfn(4.0, 0.5)
+	if (rn>2.9 and rn<3.4) or (rn>4.7 and rn<5.1):
+		rn = rng.randfn(4.0, 0.5)
+	bike_instance.setRegen(rn)
 	# add bike to scene
 	add_child(bike_instance)
 

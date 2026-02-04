@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://cykgeyg287ik1" path="res://bike.gd" id="1_lf8oo"]
 [ext_resource type="PackedScene" uid="uid://16pqbauiqyge" path="res://sprites/racing_bicycle/scene.gltf" id="1_pp6at"]
-[ext_resource type="Script" uid="uid://47jusnkjgki" path="res://bike_body_detection.gd" id="2_ela25"]
 
 [sub_resource type="Curve3D" id="Curve3D_lf8oo"]
 bake_interval = 10.0
@@ -14,6 +13,9 @@ point_count = 4
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_lf8oo"]
 size = Vector3(0.5175991, 1.1637268, 1.7457428)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ela25"]
+size = Vector3(4, 1.2, 6)
 
 [node name="Bike" type="Node3D" unique_id=2063828058]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
@@ -34,14 +36,21 @@ tilt_enabled = false
 [node name="Camera3D" type="Camera3D" parent="Path3D/PathFollow3D" unique_id=1291569017]
 transform = Transform3D(-2, -1.2363347e-07, 1.2363347e-07, 0, 1.414202, 1.414202, -1.7484555e-07, 1.414202, -1.414202, 0.009475656, 2.5, -0.8548331)
 
-[node name="BikeBody" type="StaticBody3D" parent="Path3D/PathFollow3D" unique_id=66934252]
+[node name="BikeHitBox" type="StaticBody3D" parent="Path3D/PathFollow3D" unique_id=747083627]
 transform = Transform3D(-1.0000004, 0, 8.707866e-08, 0, 1, 0, -8.707866e-08, 0, -1.0000004, -0.0038393736, 0, 0.8325832)
 collision_mask = 0
-script = ExtResource("2_ela25")
 
-[node name="Sketchfab_Scene" parent="Path3D/PathFollow3D/BikeBody" unique_id=1215956104 instance=ExtResource("1_pp6at")]
+[node name="Sketchfab_Scene" parent="Path3D/PathFollow3D/BikeHitBox" unique_id=1746360556 instance=ExtResource("1_pp6at")]
 transform = Transform3D(-0.01, 8.7422775e-10, 0, 8.7422775e-10, 0.01, 8.7422775e-10, 7.642742e-17, 8.7422775e-10, -0.01, 0, 0, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Path3D/PathFollow3D/BikeBody" unique_id=1633623319]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Path3D/PathFollow3D/BikeHitBox" unique_id=46239367]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5781708, 0)
 shape = SubResource("BoxShape3D_lf8oo")
+
+[node name="ProximityAreBike" type="Area3D" parent="Path3D/PathFollow3D" unique_id=906755253]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Path3D/PathFollow3D/ProximityAreBike" unique_id=138276065]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 2)
+shape = SubResource("BoxShape3D_ela25")
+
+[connection signal="body_exited" from="Path3D/PathFollow3D/ProximityAreBike" to="." method="_on_proximity_are_bike_body_exited"]
