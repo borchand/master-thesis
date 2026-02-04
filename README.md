@@ -3,15 +3,15 @@
 # Keybindings in simulator
 keybinding | action
 --- | ---
-`W` | Move forward
-`S` | Move backward
-`A` | Move left
-`D` | Move right
+`W` | Move forward in free camera mode. Zoom in when not in free camera mode
+`S` | Move backward in free camera mode. Zoom out when not in free camera mode  
+`A` | Move left in free camera mode
+`D` | Move right in free camera mode
 `Shift`| Move faster
 `Ctrl` | Move slower
 `Esc` | Exit simulator
 `P` | Toggle pause
-`M` | Toggle movement with mouse
 `F` | Toggle follow bike mode
 `N` | Next bike when in follow bike mode
 `B` | Previous bike when in follow bike mode
+`R`| Toggle free camera mode
