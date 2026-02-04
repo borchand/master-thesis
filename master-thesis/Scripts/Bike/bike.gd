@@ -8,7 +8,6 @@ var speed = rng.randf_range(2.0, 6.0)
 var max_progress: float
 
 func _ready():
-	print(self.get_parent())
 	max_progress = self.get_parent().curve.get_baked_length()
 	
 func _process(delta):
