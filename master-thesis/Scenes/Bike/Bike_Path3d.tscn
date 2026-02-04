@@ -1,12 +1,32 @@
 [gd_scene format=3 uid="uid://bxvm5tel50r7s"]
 
+[ext_resource type="Texture2D" uid="uid://c437wb3chaysj" path="res://sprites/cracked-asphalt-texture.jpg" id="1_nejmg"]
+
 [sub_resource type="Curve3D" id="Curve3D_lpmxa"]
 bake_interval = 5.0
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 50, 0, 70),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 50, 0, 0, 0, 0, 0, 0, 50, -1, 70),
 "tilts": PackedFloat32Array(0, 0, 0)
 }
 point_count = 3
 
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_ofr8b"]
+albedo_texture = ExtResource("1_nejmg")
+
 [node name="BikePath3d" type="Path3D" unique_id=37574628]
 curve = SubResource("Curve3D_lpmxa")
+
+[node name="CSGPolygon3D" type="CSGPolygon3D" parent="." unique_id=1603494665]
+polygon = PackedVector2Array(-1, 0, -1, 0.001, 1, 0.001, 1, 0)
+mode = 2
+path_node = NodePath("..")
+path_interval_type = 0
+path_interval = 1.0
+path_simplify_angle = 0.2
+path_rotation = 1
+path_rotation_accurate = false
+path_local = false
+path_continuous_u = true
+path_u_distance = 1.0
+path_joined = false
+material = SubResource("ORMMaterial3D_ofr8b")

@@ -28,7 +28,7 @@ func _process(delta):
 		set_current(true)
 		var speed_multiplier = 1.0
 		if Input.is_key_pressed(KEY_SHIFT):
-			speed_multiplier = 3.0
+			speed_multiplier = 10.0
 		elif Input.is_key_pressed(KEY_CTRL):
 			speed_multiplier = 0.3
 
