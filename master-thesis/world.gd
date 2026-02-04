@@ -22,7 +22,7 @@ func add_drone(start_position: Vector3):
 	camera_instance.drone_cameras.append(drone_camera)
 	add_child(drone_instance)
 	
-func _add_bike():
+func add_bike():
 	# create bike instance
 	var bike_instance = bike.instantiate()
 	bike_instance.connect("freeing_bike", bike_freed)
@@ -34,7 +34,7 @@ func _add_bike():
 	# add bike to scene
 	path_instance.add_child(bike_instance)
 
-func _bike_freed(freed_bike: Node3D):
+func bike_freed(freed_bike: Node3D):
 	# remove bike camera from list when bike is freed
 	var bike_camera = freed_bike.get_camera_node()
 	camera_instance.bike_cameras.erase(bike_camera)
