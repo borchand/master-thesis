@@ -8,28 +8,32 @@ STAGES_DIR = os.path.join("master-thesis", "stages")
 
 os.makedirs(STAGES_DIR, exist_ok=True)
 
-def gpx_to_points(gpx_path: str):
+def gpx_to_points(gpx_path):
     with open(gpx_path, "r", encoding="utf-8") as f:
         gpx = gpxpy.parse(f)
 
     points = []
+    prev_ele = 0
 
     for track in gpx.tracks:
         for segment in track.segments:
             for i, p in enumerate(segment.points):
                 transformer = Transformer.from_crs("EPSG:4326", "EPSG:32633", always_xy=True)
                 lon, lat = transformer.transform(p.longitude, p.latitude)
+                ele = (p.elevation if p.elevation else prev_ele)
+
                 if i == 0:
                     null_point = {
                         "lat": lat,
                         "lon": lon,
-                        "elevation": p.elevation
+                        "elevation": ele
                     }
                 points.append({
                     "lat": (lat - null_point["lat"]),
                     "lon": (lon - null_point["lon"]),
-                    "elevation": p.elevation - null_point["elevation"]
+                    "elevation": ele - null_point["elevation"]
                 })
+                prev_ele = ele
     return points
 
 for name in os.listdir(INPUT_DIR):
