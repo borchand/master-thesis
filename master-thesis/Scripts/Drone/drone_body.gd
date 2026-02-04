@@ -1,15 +1,23 @@
 extends RigidBody3D
 
 @onready var drone_detector: DroneDetection = $"Camera_detection"
-var target_position = global_position
+@onready var target_position = global_position
+
 var speed: float = 1
 
 func _ready():
 	pass
 
-func _process(delta):
+func _process(_delta):
 	if drone_detector.bike_set.size() > 0:
 		target_position = get_nearest_position(drone_detector.bike_set)
+
+func _integrate_forces(state):
+	look_follow(state, global_transform, target_position)
+	var forward = state.transform.basis.z
+	forward.y = 0
+	forward = forward.normalized()
+	state.apply_central_force(forward * speed)
 
 func look_follow(state: PhysicsDirectBodyState3D, current_transform: Transform3D, target_pos: Vector3) -> void:
 	var forward_dir = current_transform.basis.z
@@ -33,13 +41,6 @@ func look_follow(state: PhysicsDirectBodyState3D, current_transform: Transform3D
 
 	var cross_y = forward_dir.cross(target_dir).y
 	state.angular_velocity = Vector3(0, cross_y * 6.0, 0)
-
-func _integrate_forces(state):
-	look_follow(state, global_transform, target_position)
-	var forward = state.transform.basis.z
-	forward.y = 0
-	forward = forward.normalized()
-	state.apply_central_force(forward * speed)
 
 func get_nearest_position(bikes: Dictionary) -> Vector3:
 	var closest = Vector3.ZERO

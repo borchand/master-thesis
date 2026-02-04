@@ -16,9 +16,9 @@ func toggle_mouse_movement():
 func toggle_pause():
 	$Panel/Pause.button_pressed = !$Panel/Pause.button_pressed
 
-func _on_pause_toggled(toggled_on):
+func _on_pause_toggled(_toggled_on):
 	shared.pause()
 
 
-func _on_mouse_movement_toggled(toggled_on):
+func _on_mouse_movement_toggled(_toggled_on):
 	shared.toggle_mouse_movement()
