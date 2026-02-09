@@ -6,7 +6,6 @@ var follow_drone = false
 var drone_controlled = false
 var follow_bike = false
 
-		
 func toggle_free_roam():
 	free_roam = !free_roam
 	if free_roam:
@@ -24,4 +23,5 @@ func toggle_drone():
 
 func toggle_bike():
 	follow_drone = false
+	drone_controlled = false
 	follow_bike = !follow_bike

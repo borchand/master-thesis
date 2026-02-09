@@ -13,7 +13,7 @@ func _ready():
 	# load bike scene
 	for i in range(bike_count):
 		add_bike()
-	add_drone(Vector3(0, 1, -1))
+	add_drone(Vector3(0, 5, -1))
   	
 func add_drone(start_position: Vector3):
 	var drone_instance = drone.instantiate()

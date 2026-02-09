@@ -1,5 +1,9 @@
 extends MenuBar
 
+func _process(delta):
+	if !shared.drone_controlled and $Panel/DroneControl.button_pressed:
+		toggle_drone()
+	
 func _input(event):
 	if event.is_action_released("mouse_movement_enabled", true):
 		toggle_mouse_movement()
@@ -11,7 +15,10 @@ func _input(event):
 		toggle_drone()
 		
 	if event.is_action_released("free_roam", true):
+		if shared.follow_drone:
+			toggle_drone()
 		toggle_free_roam()
+		
 	if event.is_action_released("close_game", true):
 		get_tree().quit()
 
