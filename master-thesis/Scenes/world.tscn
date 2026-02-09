@@ -28,6 +28,9 @@ default_font_size = 18
 [sub_resource type="Theme" id="Theme_tlwt5"]
 default_font_size = 40
 
+[sub_resource type="LabelSettings" id="LabelSettings_o06y3"]
+font_size = 13
+
 [node name="World" type="Node3D" unique_id=1006143094]
 script = ExtResource("1_fo5ed")
 
@@ -64,7 +67,7 @@ script = ExtResource("5_0fj1v")
 [node name="Panel" type="Panel" parent="MenuBar" unique_id=636232160]
 layout_mode = 0
 offset_right = 165.0
-offset_bottom = 171.0
+offset_bottom = 249.0
 
 [node name="Pause" type="CheckButton" parent="MenuBar/Panel" unique_id=1010535086]
 layout_mode = 0
@@ -89,6 +92,12 @@ scale = Vector2(0.57894737, 1)
 points = PackedVector2Array(3, 50, 280, 50)
 width = 4.0
 
+[node name="Line2D" type="Line2D" parent="MenuBar/Panel/Line2D" unique_id=590414461]
+position = Vector2(0.578948, 121)
+scale = Vector2(0.57894737, 1)
+points = PackedVector2Array(3, 50, 483.5785, 50)
+width = 4.0
+
 [node name="FreeRoam" type="CheckButton" parent="MenuBar/Panel" unique_id=2034858452]
 layout_mode = 0
 offset_top = 62.0
@@ -98,10 +107,10 @@ text = "Free roam"
 
 [node name="FollowBikeInPos" type="SpinBox" parent="MenuBar/Panel" unique_id=175309359]
 layout_mode = 0
-offset_left = 204.0
-offset_top = 6.0
-offset_right = 298.0625
-offset_bottom = 40.0
+offset_left = 8.0
+offset_top = 202.0
+offset_right = 155.0
+offset_bottom = 236.0
 
 [node name="DroneControl" type="CheckButton" parent="MenuBar/Panel" unique_id=1520780650]
 layout_mode = 0
@@ -111,7 +120,16 @@ offset_right = 168.0
 offset_bottom = 167.0
 text = "Drone control"
 
+[node name="Label" type="Label" parent="MenuBar/Panel" unique_id=258437761]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 180.0
+offset_right = 155.0
+offset_bottom = 235.0
+text = "Follow bike at position"
+label_settings = SubResource("LabelSettings_o06y3")
+
 [connection signal="toggled" from="MenuBar/Panel/Pause" to="MenuBar" method="_on_pause_toggled"]
 [connection signal="toggled" from="MenuBar/Panel/FreeRoam" to="MenuBar" method="_on_free_roam_toggled"]
-[connection signal="toggled" from="MenuBar/Panel/DroneControl" to="MenuBar" method="_on_drone_control_toggled"]
 [connection signal="value_changed" from="MenuBar/Panel/FollowBikeInPos" to="MenuBar" method="_on_follow_bike_in_pos_value_changed"]
+[connection signal="toggled" from="MenuBar/Panel/DroneControl" to="MenuBar" method="_on_drone_control_toggled"]
