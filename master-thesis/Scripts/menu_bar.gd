@@ -1,6 +1,6 @@
 extends MenuBar
 
-func _process(delta):
+func _process(_delta):
 	if !shared.drone_controlled and $Panel/DroneControl.button_pressed:
 		toggle_drone()
 	
@@ -40,7 +40,7 @@ func toggle_check_btn(btn: CheckButton):
 func _on_pause_toggled(_toggled_on):
 	shared.pause()
 
-func _on_free_roam_toggled(toggled_on):
+func _on_free_roam_toggled(_toggled_on):
 	shared.toggle_free_roam()
 
 func _on_drone_control_toggled(toggled_on):
