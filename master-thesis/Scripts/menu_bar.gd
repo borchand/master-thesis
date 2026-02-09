@@ -1,15 +1,18 @@
 extends MenuBar
 
 func _input(event):
-	if event.is_action_released("mouse_movement_enabled"):
+	if event.is_action_released("mouse_movement_enabled", true):
 		toggle_mouse_movement()
 
-	if event.is_action_released("pause"):
+	if event.is_action_released("pause", true):
 		toggle_pause()
+
+	if event.is_action_released("drone_control", true):
+		toggle_drone()
 		
-	if event.is_action_released("free_roam"):
+	if event.is_action_released("free_roam", true):
 		toggle_free_roam()
-	if event.is_action_released("close_game"):
+	if event.is_action_released("close_game", true):
 		get_tree().quit()
 
 func toggle_mouse_movement():
@@ -17,6 +20,9 @@ func toggle_mouse_movement():
 
 func toggle_pause():
 	toggle_check_btn($Panel/Pause)
+
+func toggle_drone():
+	toggle_check_btn($Panel/DroneControl)
 
 func toggle_free_roam():
 	toggle_check_btn($Panel/FreeRoam)
@@ -29,3 +35,8 @@ func _on_pause_toggled(_toggled_on):
 
 func _on_free_roam_toggled(toggled_on):
 	shared.toggle_free_roam()
+
+func _on_drone_control_toggled(toggled_on):
+	if !toggled_on == shared.follow_drone:
+		shared.toggle_drone()
+	shared.drone_controlled = toggled_on

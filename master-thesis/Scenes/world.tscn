@@ -64,7 +64,7 @@ script = ExtResource("5_0fj1v")
 [node name="Panel" type="Panel" parent="MenuBar" unique_id=636232160]
 layout_mode = 0
 offset_right = 165.0
-offset_bottom = 139.0
+offset_bottom = 171.0
 
 [node name="Pause" type="CheckButton" parent="MenuBar/Panel" unique_id=1010535086]
 layout_mode = 0
@@ -96,5 +96,14 @@ offset_right = 138.0
 offset_bottom = 96.0
 text = "Free roam"
 
+[node name="DroneControl" type="CheckButton" parent="MenuBar/Panel" unique_id=1520780650]
+layout_mode = 0
+offset_left = -1.0
+offset_top = 133.0
+offset_right = 168.0
+offset_bottom = 167.0
+text = "Drone control"
+
 [connection signal="toggled" from="MenuBar/Panel/Pause" to="MenuBar" method="_on_pause_toggled"]
 [connection signal="toggled" from="MenuBar/Panel/FreeRoam" to="MenuBar" method="_on_free_roam_toggled"]
+[connection signal="toggled" from="MenuBar/Panel/DroneControl" to="MenuBar" method="_on_drone_control_toggled"]

@@ -3,10 +3,7 @@ extends Camera3D
 var drone_cameras = []
 var bike_cameras = []
 
-var follow_drone = false
 var followed_drone_index = 0
-
-var follow_bike = false
 var followed_bike_index = 0
 
 const camera_speed = 10.0
@@ -21,7 +18,7 @@ var default_offset = Vector3(0, 20, 10)
 func _process(delta):
 	# CAMERA CONTROLS
 
-	if follow_bike and not bike_cameras.is_empty():
+	if shared.follow_bike and not bike_cameras.is_empty():
 		
 		if followed_bike_index >= bike_cameras.size():
 			followed_bike_index = bike_cameras.size() - 1
@@ -29,7 +26,7 @@ func _process(delta):
 		# get bike camera 
 		var bike_camera = bike_cameras[followed_bike_index]
 		bike_camera.set_current(true)
-	elif follow_drone and not drone_cameras.is_empty():
+	elif shared.follow_drone and not drone_cameras.is_empty():
 		var drone_camera = drone_cameras[followed_drone_index]
 		drone_camera.set_current(true)
 	else:
@@ -65,6 +62,7 @@ func _process(delta):
 				# rotate to look at bike
 				look_at(first_bike_camera.global_transform.origin, Vector3.UP)
 
+		
 func _input(event):
 	if event is InputEventMouseMotion and shared.free_roam:
 		yaw -= event.relative.x * mouse_sens
@@ -73,21 +71,19 @@ func _input(event):
 		rotation_degrees = Vector3(pitch, yaw, 0)
 	
 	if event.is_action_released("toggle_follow_drone"):
-		follow_bike = false
-		follow_drone = !follow_drone
+		shared.toggle_drone()
 		
 	if event.is_action_released("toggle_follow_bike"):
-		follow_drone = false
-		follow_bike = !follow_bike
+		shared.toggle_bike()
 	
-	if follow_drone:
+	if shared.follow_drone:
 		if event.is_action_released("follow_next_bike"):
 			followed_drone_index = (followed_drone_index + 1) % drone_cameras.size()
 		
 		if event.is_action_released("follow_prev_bike"):
 			followed_drone_index = (followed_drone_index - 1 + drone_cameras.size()) % drone_cameras.size()
 
-	if follow_bike:
+	if shared.follow_bike:
 		if event.is_action_released("follow_next_bike"):
 			followed_bike_index = (followed_bike_index + 1) % bike_cameras.size()
 		
