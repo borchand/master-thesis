@@ -1,0 +1,12 @@
+--- Strava Data Analysis ---
+Total Data Points: 13917
+
+RAW DATA (m/s):
+Lowest:  4.54
+Highest: 21.88
+Average: 13.15
+
+CONVERTED DATA (km/h):
+Lowest:  16.34 km/h
+Highest: 78.77 km/h
+Average: 47.34 km/h
