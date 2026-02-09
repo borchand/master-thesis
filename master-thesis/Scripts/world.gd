@@ -15,8 +15,8 @@ func _ready():
 	for i in range(bike_count):
 		add_bike()
 	add_drone(Vector3(0, 5, -1))
-
-	$MenuBar/Panel/FollowBikeInPos.max_value = bike_count - 1
+	
+	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 
 func add_drone(start_position: Vector3):
 	var drone_instance = drone.instantiate()
