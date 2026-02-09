@@ -13,6 +13,8 @@ var pitch_limit = 85.0 # degrees
 @onready var pitch = rotation_degrees.x
 
 var default_offset = Vector3(0, 20, 10)
+var default_follow_camera_position = Vector3(0, 2.5, 3)
+var target_bike_camera_position = default_follow_camera_position
 
 func _process(delta):
 	# CAMERA CONTROLS
@@ -22,7 +24,27 @@ func _process(delta):
 			shared.follow_bike_in_pos = bikes.size() - 1
 
 		var bike_camera = get_camera_of_bike_in_pos(shared.follow_bike_in_pos)
-		bike_camera.set_current(true)
+
+		# if free roam is disabled reset camera rotation
+		if not shared.free_roam:
+			bike_camera.set_current(true)
+			bike_camera.position = default_follow_camera_position
+		else:
+			set_current(true)
+
+			if Input.is_key_pressed(KEY_W):
+				target_bike_camera_position *= 0.95
+			if Input.is_key_pressed(KEY_S):
+				target_bike_camera_position *= 1.05
+
+			bike_camera.position = target_bike_camera_position
+			var offset = Vector3(0, 0, target_bike_camera_position.z).rotated(Vector3.UP, deg_to_rad(yaw))
+			offset.y = target_bike_camera_position.y
+
+			global_transform.origin = bike_camera.global_transform.origin + offset
+			look_at(bike_camera.global_transform.origin, Vector3.UP)
+
+
 	elif shared.follow_drone and not drone_cameras.is_empty():
 		var drone_camera = drone_cameras[followed_drone_index]
 		drone_camera.set_current(true)
@@ -54,6 +76,7 @@ func _process(delta):
 					default_offset *= 1.05
 
 				global_transform.origin = bike_camera.global_transform.origin + default_offset
+				
 				# rotate to look at bike
 				look_at(bike_camera.global_transform.origin, Vector3.UP)
 
@@ -67,9 +90,6 @@ func _input(event):
 
 	if event.is_action_released("toggle_follow_drone"):
 		shared.toggle_drone()
-
-	if event.is_action_released("toggle_follow_bike"):
-		shared.toggle_bike()
 
 	if shared.follow_drone:
 		if event.is_action_released("follow_next_bike"):

@@ -21,12 +21,19 @@ func _input(event):
 			toggle_drone()
 		toggle_free_roam()
 
+	if event.is_action_released("toggle_follow_bike"):
+		toggle_follow_bike()
+		
 	if event.is_action_released("close_game", true):
 		get_tree().quit()
+		
 
 func set_target_bike(value:int):
 	var follow_bike_in_pos = $Panel/FollowBikeInPos
 	follow_bike_in_pos.value = value
+
+func toggle_follow_bike():
+	toggle_check_btn($Panel/FollowBike)
 
 func toggle_mouse_movement():
 	toggle_check_btn($Panel/MouseMovement)
@@ -57,3 +64,8 @@ func _on_drone_control_toggled(toggled_on):
 	if !toggled_on == shared.follow_drone:
 		shared.toggle_drone()
 	shared.drone_controlled = toggled_on
+
+
+func _on_follow_bike_toggled(toggled_on):
+	shared.toggle_bike()
+	
