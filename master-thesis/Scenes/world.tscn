@@ -66,14 +66,21 @@ script = ExtResource("5_0fj1v")
 
 [node name="Panel" type="Panel" parent="MenuBar" unique_id=636232160]
 layout_mode = 0
-offset_right = 165.0
-offset_bottom = 249.0
+offset_right = 178.0
+offset_bottom = 262.0
+
+[node name="Line2D2" type="Line2D" parent="MenuBar/Panel" unique_id=590414461]
+position = Vector2(5, 135)
+scale = Vector2(0.33518004, 1)
+points = PackedVector2Array(-8.950413, 50, 510.17358, 50)
+width = 4.0
 
 [node name="Pause" type="CheckButton" parent="MenuBar/Panel" unique_id=1010535086]
 layout_mode = 0
-offset_top = 98.0
-offset_right = 101.0
-offset_bottom = 132.0
+offset_left = 4.0
+offset_top = 113.0
+offset_right = 105.0
+offset_bottom = 147.0
 text = "Pause"
 
 [node name="FPS" type="Label" parent="MenuBar/Panel" unique_id=680064311]
@@ -89,47 +96,54 @@ script = ExtResource("6_5ukr8")
 [node name="Line2D" type="Line2D" parent="MenuBar/Panel" unique_id=716495507]
 position = Vector2(0.578948, 0)
 scale = Vector2(0.57894737, 1)
-points = PackedVector2Array(3, 50, 280, 50)
-width = 4.0
-
-[node name="Line2D" type="Line2D" parent="MenuBar/Panel/Line2D" unique_id=590414461]
-position = Vector2(0.578948, 121)
-scale = Vector2(0.57894737, 1)
-points = PackedVector2Array(3, 50, 483.5785, 50)
+points = PackedVector2Array(3, 50, 301.27274, 50)
 width = 4.0
 
 [node name="FreeRoam" type="CheckButton" parent="MenuBar/Panel" unique_id=2034858452]
 layout_mode = 0
-offset_top = 62.0
-offset_right = 138.0
-offset_bottom = 96.0
+offset_left = 4.0
+offset_top = 83.0
+offset_right = 142.0
+offset_bottom = 117.0
 text = "Free roam"
 
 [node name="FollowBikeInPos" type="SpinBox" parent="MenuBar/Panel" unique_id=175309359]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 202.0
-offset_right = 155.0
-offset_bottom = 236.0
+offset_left = 5.0
+offset_top = 212.0
+offset_right = 152.0
+offset_bottom = 246.0
 
 [node name="DroneControl" type="CheckButton" parent="MenuBar/Panel" unique_id=1520780650]
 layout_mode = 0
-offset_left = -1.0
-offset_top = 133.0
-offset_right = 168.0
-offset_bottom = 167.0
+offset_left = 5.0
+offset_top = 143.0
+offset_right = 174.0
+offset_bottom = 177.0
 text = "Drone control"
 
 [node name="Label" type="Label" parent="MenuBar/Panel" unique_id=258437761]
 layout_mode = 0
-offset_left = 7.0
-offset_top = 180.0
-offset_right = 155.0
-offset_bottom = 235.0
+offset_left = 3.0
+offset_top = 193.0
+offset_right = 151.0
+offset_bottom = 219.0
 text = "Follow bike at position"
 label_settings = SubResource("LabelSettings_o06y3")
+
+[node name="FollowBike" type="CheckButton" parent="MenuBar/Panel" unique_id=1656184899]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = -2.088
+anchor_bottom = -2.088
+offset_left = 3.0
+offset_top = 603.056
+offset_right = 149.0
+offset_bottom = 637.056
+text = "Follow bike"
 
 [connection signal="toggled" from="MenuBar/Panel/Pause" to="MenuBar" method="_on_pause_toggled"]
 [connection signal="toggled" from="MenuBar/Panel/FreeRoam" to="MenuBar" method="_on_free_roam_toggled"]
 [connection signal="value_changed" from="MenuBar/Panel/FollowBikeInPos" to="MenuBar" method="_on_follow_bike_in_pos_value_changed"]
 [connection signal="toggled" from="MenuBar/Panel/DroneControl" to="MenuBar" method="_on_drone_control_toggled"]
+[connection signal="toggled" from="MenuBar/Panel/FollowBike" to="MenuBar" method="_on_follow_bike_toggled"]
