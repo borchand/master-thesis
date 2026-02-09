@@ -7,6 +7,9 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_l0kmq"]
 size = Vector3(0.5175991, 1.1637268, 1.7457428)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_l5bd3"]
+size = Vector3(4, 1.2, 6)
+
 [node name="Bike" type="PathFollow3D" unique_id=1407203146]
 loop = false
 script = ExtResource("1_l5bd3")
@@ -25,3 +28,13 @@ transform = Transform3D(0.009999999, 0, 0, 0, 0.01, 0, 0, 0, 0.009999999, 0, 0, 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BikeBody" unique_id=1827410077]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5781708, 0)
 shape = SubResource("BoxShape3D_l0kmq")
+
+[node name="BikeProximityArea" type="Area3D" parent="." unique_id=1742747253]
+
+[node name="BikeProximityCollision" type="CollisionShape3D" parent="BikeProximityArea" unique_id=1279565171]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("BoxShape3D_l5bd3")
+disabled = true
+debug_color = Color(0.9716378, 0, 0.44983965, 0.41960785)
+
+[connection signal="body_exited" from="BikeProximityArea" to="." method="_on_bike_proximity_area_body_exited"]
