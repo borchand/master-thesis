@@ -3,6 +3,9 @@ extends Camera3D
 var drone_cameras = []
 var bike_cameras = []
 
+var follow_drone = false
+var followed_drone_index = 0
+
 var follow_bike = false
 var followed_bike_index = 0
 
@@ -26,6 +29,9 @@ func _process(delta):
 		# get bike camera 
 		var bike_camera = bike_cameras[followed_bike_index]
 		bike_camera.set_current(true)
+	elif follow_drone and not drone_cameras.is_empty():
+		var drone_camera = drone_cameras[followed_drone_index]
+		drone_camera.set_current(true)
 	else:
 		set_current(true)
 		if shared.free_roam:
@@ -65,9 +71,21 @@ func _input(event):
 		pitch -= event.relative.y * mouse_sens
 		pitch = clamp(pitch, -pitch_limit, pitch_limit)
 		rotation_degrees = Vector3(pitch, yaw, 0)
-
+	
+	if event.is_action_released("toggle_follow_drone"):
+		follow_bike = false
+		follow_drone = !follow_drone
+		
 	if event.is_action_released("toggle_follow_bike"):
+		follow_drone = false
 		follow_bike = !follow_bike
+	
+	if follow_drone:
+		if event.is_action_released("follow_next_bike"):
+			followed_drone_index = (followed_drone_index + 1) % drone_cameras.size()
+		
+		if event.is_action_released("follow_prev_bike"):
+			followed_drone_index = (followed_drone_index - 1 + drone_cameras.size()) % drone_cameras.size()
 
 	if follow_bike:
 		if event.is_action_released("follow_next_bike"):

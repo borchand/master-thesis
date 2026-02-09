@@ -12,6 +12,7 @@ keybinding | action
 `Esc` | Exit simulator
 `P` | Toggle pause
 `F` | Toggle follow bike mode
-`N` | Next bike when in follow bike mode
-`B` | Previous bike when in follow bike mode
+`G`| Toggle follow drone mode
+`N` | Next bike/drone when in follow bike/drone mode
+`B` | Previous bike/drone when in follow bike/drone mode
 `R`| Toggle free camera mode
