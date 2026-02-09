@@ -96,5 +96,14 @@ offset_right = 138.0
 offset_bottom = 96.0
 text = "Free roam"
 
+[node name="FollowBikeInPos" type="SpinBox" parent="MenuBar/Panel" unique_id=175309359]
+layout_mode = 0
+offset_left = 204.0
+offset_top = 6.0
+offset_right = 298.0625
+offset_bottom = 40.0
+
 [connection signal="toggled" from="MenuBar/Panel/Pause" to="MenuBar" method="_on_pause_toggled"]
 [connection signal="toggled" from="MenuBar/Panel/FreeRoam" to="MenuBar" method="_on_free_roam_toggled"]
+[connection signal="changed" from="MenuBar/Panel/FollowBikeInPos" to="MenuBar" method="_on_follow_bike_in_pos_changed"]
+[connection signal="value_changed" from="MenuBar/Panel/FollowBikeInPos" to="MenuBar" method="_on_follow_bike_in_pos_value_changed"]

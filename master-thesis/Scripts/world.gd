@@ -15,6 +15,8 @@ func _ready():
 	for i in range(bike_count):
 		add_bike()
 	add_drone(Vector3(0, 1, -1))
+	
+	$MenuBar/Panel/FollowBikeInPos.max_value = bike_count - 1
   	
 func add_drone(start_position: Vector3):
 	var drone_instance = drone.instantiate()
@@ -27,10 +29,6 @@ func add_bike():
 	# create bike instance
 	var bike_instance = bike.instantiate()
 	bike_instance.connect("freeing_bike", bike_freed)
-
-	# get bike camera and add to list
-	var bike_camera = bike_instance.get_camera_node()
-	camera_instance.bike_cameras.append(bike_camera)
 	
 	#Add variation in bike preformance
 	var rn = rng.randfn(23, 1.15)
@@ -40,6 +38,8 @@ func add_bike():
 	
 	# add bike to scene
 	path_instance.add_child(bike_instance)
+	
+	camera_instance.bikes.append(bike_instance)
 
 func bike_freed(freed_bike: Node3D):
 	# remove bike camera from list when bike is freed

@@ -2,7 +2,8 @@ extends Node
 
 var paused = false
 var free_roam = false
-		
+var follow_bike_in_pos : int = 0
+
 func toggle_free_roam():
 	free_roam = !free_roam
 	if free_roam:
