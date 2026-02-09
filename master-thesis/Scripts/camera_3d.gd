@@ -3,7 +3,7 @@ extends Camera3D
 var drone_cameras = []
 var bikes = []
 
-var follow_bike = false
+var followed_drone_index = 0
 
 const camera_speed = 10.0
 
@@ -13,17 +13,19 @@ var pitch_limit = 85.0 # degrees
 @onready var pitch = rotation_degrees.x
 
 var default_offset = Vector3(0, 20, 10)
-	
+
 func _process(delta):
 	# CAMERA CONTROLS
+	if shared.follow_bike and not bikes.is_empty():
 
-	if follow_bike and not bikes.is_empty():
-		
 		if shared.follow_bike_in_pos >= bikes.size():
 			shared.follow_bike_in_pos = bikes.size() - 1
 
 		var bike_camera = get_camera_of_bike_in_pos(shared.follow_bike_in_pos)
 		bike_camera.set_current(true)
+	elif shared.follow_drone and not drone_cameras.is_empty():
+		var drone_camera = drone_cameras[followed_drone_index]
+		drone_camera.set_current(true)
 	else:
 		set_current(true)
 		if shared.free_roam:
@@ -55,6 +57,7 @@ func _process(delta):
 				# rotate to look at bike
 				look_at(bike_camera.global_transform.origin, Vector3.UP)
 
+
 func _input(event):
 	if event is InputEventMouseMotion and shared.free_roam:
 		yaw -= event.relative.x * mouse_sens
@@ -62,8 +65,18 @@ func _input(event):
 		pitch = clamp(pitch, -pitch_limit, pitch_limit)
 		rotation_degrees = Vector3(pitch, yaw, 0)
 
+	if event.is_action_released("toggle_follow_drone"):
+		shared.toggle_drone()
+
 	if event.is_action_released("toggle_follow_bike"):
-		follow_bike = !follow_bike
+		shared.toggle_bike()
+
+	if shared.follow_drone:
+		if event.is_action_released("follow_next_bike"):
+			followed_drone_index = (followed_drone_index + 1) % drone_cameras.size()
+
+		if event.is_action_released("follow_prev_bike"):
+			followed_drone_index = (followed_drone_index - 1 + drone_cameras.size()) % drone_cameras.size()
 
 
 	if event.is_action_released("follow_next_bike"):
@@ -75,16 +88,16 @@ func _input(event):
 
 func get_camera_of_bike_in_pos(pos: int) -> Camera3D:
 	var bike_progress = []
-	
+
 	for bike : Bike in bikes:
 		var dict = {
 			bike.progress: bike.get_camera_node()
 		}
 		bike_progress.append(dict)
-		
+
 	# sort by progress
 	bike_progress.sort_custom(func(a, b):
 		return a.keys()[0] > b.keys()[0]
 	)
-	
+
 	return bike_progress[pos].values()[0]
