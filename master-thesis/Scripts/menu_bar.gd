@@ -1,9 +1,11 @@
 extends MenuBar
 
-func _process(delta):
+func _process(_delta):
+	set_target_bike(shared.follow_bike_in_pos)
+
 	if !shared.drone_controlled and $Panel/DroneControl.button_pressed:
 		toggle_drone()
-	
+
 func _input(event):
 	if event.is_action_released("mouse_movement_enabled", true):
 		toggle_mouse_movement()
@@ -13,14 +15,18 @@ func _input(event):
 
 	if event.is_action_released("drone_control", true):
 		toggle_drone()
-		
+
 	if event.is_action_released("free_roam", true):
 		if shared.follow_drone:
 			toggle_drone()
 		toggle_free_roam()
-		
+
 	if event.is_action_released("close_game", true):
 		get_tree().quit()
+
+func set_target_bike(value:int):
+	var follow_bike_in_pos = $Panel/FollowBikeInPos
+	follow_bike_in_pos.value = value
 
 func toggle_mouse_movement():
 	toggle_check_btn($Panel/MouseMovement)
@@ -42,6 +48,10 @@ func _on_pause_toggled(_toggled_on):
 
 func _on_free_roam_toggled(toggled_on):
 	shared.toggle_free_roam()
+
+
+func _on_follow_bike_in_pos_value_changed(value):
+	shared.follow_bike_in_pos = value
 
 func _on_drone_control_toggled(toggled_on):
 	if !toggled_on == shared.follow_drone:

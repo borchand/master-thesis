@@ -15,7 +15,6 @@ var staminaSpeedupThreashold = 70
 var staminaSlowdownThreashold = 40
 var staminaRegen: float
 
-
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
 	
