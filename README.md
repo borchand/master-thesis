@@ -16,3 +16,8 @@ keybinding | action
 `N` | Next bike/drone when in follow bike/drone mode
 `B` | Previous bike/drone when in follow bike/drone mode
 `R`| Toggle free camera mode
+`Shift​+​D` | Toggle to move drone around using arrows
+`↑ Up`| Move drone forward when drone movement is toggled on
+`↓ Down`| Move drone backwards when drone movement is toggled on
+`← Left`| Turn drone left when drone movement is toggled on
+`→ Right`| Turn drone right when drone movement is toggled on
