@@ -65,6 +65,6 @@ func _on_drone_control_toggled(toggled_on):
 		shared.toggle_drone()
 	shared.drone_controlled = toggled_on
 
-func _on_follow_bike_toggled(toggled_on):
+func _on_follow_bike_toggled(_toggled_on):
 	shared.toggle_bike()
 	
