@@ -11,8 +11,6 @@ func _ready():
 	tick_count = slider_multipliers.size()
 	value_changed.connect(_on_value_changed)
 	
-	var _multiplier_idx = slider_multipliers.find(current_speed)
-	
 	set_label(current_speed)
 
 func _on_value_changed(new_value: int):
