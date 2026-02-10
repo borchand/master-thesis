@@ -39,7 +39,7 @@ func add_bike():
 	# add bike to scene
 	path_instance.add_child(bike_instance)
 
-	camera_instance.bikes.append(bike_instance)
+	shared.bikes.append(bike_instance)
 
 func bike_freed(freed_bike: Node3D):
 	# remove bike camera from list when bike is freed

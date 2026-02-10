@@ -7,6 +7,37 @@ var follow_drone = false
 var drone_controlled = false
 var follow_bike = false
 
+var bikes : Array[Bike]
+
+func get_progress_ratio_of_bike_in_pos(pos: int) -> float:
+	var bike_progress = []
+	
+	for bike : Bike in bikes:
+		bike_progress.append(bike.progress_ratio)
+		
+	# sort by progress
+	bike_progress.sort_custom(func(a, b):
+		return a > b
+	)
+	
+	return bike_progress[pos]
+
+func get_camera_of_bike_in_pos(pos: int) -> Camera3D:
+	var bike_progress = []
+
+	for bike : Bike in bikes:
+		var dict = {
+			bike.progress: bike.get_camera_node()
+		}
+		bike_progress.append(dict)
+
+	# sort by progress
+	bike_progress.sort_custom(func(a, b):
+		return a.keys()[0] > b.keys()[0]
+	)
+
+	return bike_progress[pos].values()[0]
+
 func toggle_free_roam():
 	free_roam = !free_roam
 	if free_roam:

@@ -1,7 +1,6 @@
 extends Camera3D
 
 var drone_cameras = []
-var bikes = []
 
 var followed_drone_index = 0
 
@@ -18,12 +17,12 @@ var target_bike_camera_position = default_follow_camera_position
 
 func _process(delta):
 	# CAMERA CONTROLS
-	if shared.follow_bike and not bikes.is_empty():
+	if shared.follow_bike and not shared.bikes.is_empty():
 
-		if shared.follow_bike_in_pos >= bikes.size():
-			shared.follow_bike_in_pos = bikes.size() - 1
+		if shared.follow_bike_in_pos >= shared.bikes.size():
+			shared.follow_bike_in_pos = shared.bikes.size() - 1
 
-		var bike_camera = get_camera_of_bike_in_pos(shared.follow_bike_in_pos)
+		var bike_camera = shared.get_camera_of_bike_in_pos(shared.follow_bike_in_pos)
 
 		# if free roam is disabled reset camera rotation
 		if not shared.free_roam:
@@ -67,8 +66,8 @@ func _process(delta):
 			if Input.is_key_pressed(KEY_D):
 				translate(Vector3(1, 0, 0) * delta * camera_speed * speed_multiplier)
 		else:
-			if not bikes.is_empty():
-				var bike_camera = get_camera_of_bike_in_pos(shared.follow_bike_in_pos)
+			if not shared.bikes.is_empty():
+				var bike_camera = shared.get_camera_of_bike_in_pos(shared.follow_bike_in_pos)
 
 				if Input.is_key_pressed(KEY_W):
 					default_offset *= 0.95
@@ -100,24 +99,7 @@ func _input(event):
 
 
 	if event.is_action_released("follow_next_bike"):
-		shared.follow_bike_in_pos = (shared.follow_bike_in_pos - 1 + bikes.size()) % bikes.size()
+		shared.follow_bike_in_pos = (shared.follow_bike_in_pos - 1 + shared.bikes.size()) % shared.bikes.size()
 
 	if event.is_action_released("follow_prev_bike"):
-		shared.follow_bike_in_pos = (shared.follow_bike_in_pos + 1) % bikes.size()
-
-
-func get_camera_of_bike_in_pos(pos: int) -> Camera3D:
-	var bike_progress = []
-
-	for bike : Bike in bikes:
-		var dict = {
-			bike.progress: bike.get_camera_node()
-		}
-		bike_progress.append(dict)
-
-	# sort by progress
-	bike_progress.sort_custom(func(a, b):
-		return a.keys()[0] > b.keys()[0]
-	)
-
-	return bike_progress[pos].values()[0]
+		shared.follow_bike_in_pos = (shared.follow_bike_in_pos + 1) % shared.bikes.size()
