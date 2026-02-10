@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://b3ui8wkm4hyq" path="res://Scripts/Bike/bike_path.gd" id="5_5ukr8"]
 [ext_resource type="Script" uid="uid://t7drcqgmu3nt" path="res://Scripts/fps.gd" id="6_5ukr8"]
 [ext_resource type="Script" uid="uid://b2qiyxefmfote" path="res://Scripts/h_slider.gd" id="8_k7acu"]
+[ext_resource type="Script" uid="uid://cmlgykcqebdwh" path="res://Scripts/progress_bars.gd" id="9_5v1tr"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_o06y3"]
 sky_horizon_color = Color(0.64528894, 0.67970026, 0.66589224, 1)
@@ -25,6 +26,18 @@ ssao_enabled = true
 
 [sub_resource type="Theme" id="Theme_tlwt5"]
 default_font_size = 40
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_0fj1v"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ikia7"]
+texture = SubResource("CanvasTexture_0fj1v")
+modulate_color = Color(0.08235294, 0.94509804, 0.08627451, 1)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_5v1tr"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_0fj1v"]
+texture = SubResource("CanvasTexture_5v1tr")
+modulate_color = Color(1, 0, 0, 1)
 
 [node name="World" type="Node3D" unique_id=1006143094]
 script = ExtResource("1_fo5ed")
@@ -198,6 +211,44 @@ offset_top = -24.0
 offset_right = 84.0
 offset_bottom = 2.0
 text = "Time scale"
+
+[node name="ProgressBars" type="Control" parent="." unique_id=405179963]
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -37.0
+offset_right = 15.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("9_5v1tr")
+
+[node name="ProgressBarLeader" type="ProgressBar" parent="ProgressBars" unique_id=532233375]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -27.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/fill = SubResource("StyleBoxTexture_ikia7")
+value = 60.0
+show_percentage = false
+
+[node name="ProgressBarBackMarker" type="ProgressBar" parent="ProgressBars" unique_id=1423101682]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -27.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/fill = SubResource("StyleBoxTexture_0fj1v")
+value = 50.0
+show_percentage = false
 
 [connection signal="toggled" from="Menu/ToggleContainer/DroneControl" to="Menu" method="_on_drone_control_toggled"]
 [connection signal="toggled" from="Menu/ToggleContainer/Pause" to="Menu" method="_on_pause_toggled"]

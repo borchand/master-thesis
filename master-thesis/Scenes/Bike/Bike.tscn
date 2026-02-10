@@ -11,6 +11,7 @@ size = Vector3(0.5175991, 1.1637268, 1.7457428)
 size = Vector3(4, 1.2, 6)
 
 [node name="Bike" type="PathFollow3D" unique_id=1407203146]
+rotation_mode = 2
 loop = false
 script = ExtResource("1_l5bd3")
 
