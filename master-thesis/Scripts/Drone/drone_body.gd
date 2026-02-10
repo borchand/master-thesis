@@ -116,14 +116,14 @@ func move_by_keyboard():
 
 func get_nearest_position(bikes: Dictionary):
 	var closest = Vector3.ZERO
-	var min_distance = INF
+	var _minimum_distance = INF
 	var speed = 0
 
 	for bike_id in bikes:
 		var pos = bikes[bike_id].global_position
 		var dist = global_position.distance_to(pos)
 		if dist < min_distance:
-			min_distance = dist
+			_minimum_distance = dist
 			closest = pos
 			speed = bikes[bike_id].get_parent().speed
 			target_bike = bikes[bike_id].get_parent()
