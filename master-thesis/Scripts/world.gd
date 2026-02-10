@@ -5,12 +5,12 @@ const drone = preload("res://Scenes/Drone/Drone.tscn")
 
 @onready var path_instance : Path3D
 var rng = RandomNumberGenerator.new()
-var camera_instance : Camera3D
+
 const bike_count = 10
 
 func _ready():
 	path_instance = $BikePath3d
-	camera_instance = $Camera3D
+
 	# load bike scene
 	for i in range(bike_count):
 		add_bike()
@@ -22,7 +22,7 @@ func add_drone(start_position: Vector3):
 	var drone_instance = drone.instantiate()
 	drone_instance.set_position(start_position)
 	var drone_camera = drone_instance.get_node("Camera3D")
-	camera_instance.drone_cameras.append(drone_camera)
+	shared.drone_cameras.append(drone_camera)
 	add_child(drone_instance)
 
 func add_bike():
@@ -32,8 +32,7 @@ func add_bike():
 
 	#Add variation in bike preformance
 	var rn = rng.randfn(23, 1.15)
-	#if (rn>value1 and rn<valu2) or (rn>value3 and rn<value4):
-		#rn = rng.randfn(23, 1.15)
+
 	bike_instance.setRegen(rn)
 
 	# add bike to scene
@@ -43,5 +42,4 @@ func add_bike():
 
 func bike_freed(freed_bike: Node3D):
 	# remove bike camera from list when bike is freed
-	var bike_camera = freed_bike.get_camera_node()
-	camera_instance.bike_cameras.erase(bike_camera)
+	shared.bikes.erase(freed_bike)

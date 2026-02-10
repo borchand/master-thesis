@@ -1,9 +1,5 @@
 extends Camera3D
 
-var drone_cameras = []
-
-var followed_drone_index = 0
-
 const camera_speed = 10.0
 
 var mouse_sens = 0.2
@@ -44,8 +40,8 @@ func _process(delta):
 			look_at(bike_camera.global_transform.origin, Vector3.UP)
 
 
-	elif shared.follow_drone and not drone_cameras.is_empty():
-		var drone_camera = drone_cameras[followed_drone_index]
+	elif shared.follow_drone and not shared.drone_cameras.is_empty():
+		var drone_camera = shared.drone_cameras[shared.followed_drone_index]
 		drone_camera.set_current(true)
 	else:
 		set_current(true)
@@ -92,10 +88,10 @@ func _input(event):
 
 	if shared.follow_drone:
 		if event.is_action_released("follow_next_bike"):
-			followed_drone_index = (followed_drone_index + 1) % drone_cameras.size()
+			shared.followed_drone_index = (shared.followed_drone_index + 1) % shared.drone_cameras.size()
 
 		if event.is_action_released("follow_prev_bike"):
-			followed_drone_index = (followed_drone_index - 1 + drone_cameras.size()) % drone_cameras.size()
+			shared.followed_drone_index = (shared.followed_drone_index - 1 + shared.drone_cameras.size()) % shared.drone_cameras.size()
 
 
 	if event.is_action_released("follow_next_bike"):

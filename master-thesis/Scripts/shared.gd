@@ -2,14 +2,21 @@ extends Node
 
 var paused = false
 var free_roam = false
-var follow_bike_in_pos : int = 0
 var follow_drone = false
 var drone_controlled = false
 var follow_bike = false
 
 var bikes : Array[Bike]
+var follow_bike_in_pos : int = 0
+
+var drone_cameras : Array[Camera3D]
+var followed_drone_index = 0
 
 func get_progress_ratio_of_bike_in_pos(pos: int) -> float:
+	
+	if bikes.is_empty():
+		return 1.0
+
 	var bike_progress = []
 	
 	for bike : Bike in bikes:
