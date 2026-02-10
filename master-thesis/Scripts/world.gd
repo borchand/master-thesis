@@ -6,7 +6,7 @@ const drone = preload("res://Scenes/Drone/Drone.tscn")
 @onready var path_instance : Path3D
 var rng = RandomNumberGenerator.new()
 var camera_instance : Camera3D
-const bike_count = 100
+const bike_count = 10
 
 func _ready():
 	path_instance = $BikePath3d
@@ -14,7 +14,7 @@ func _ready():
 	# load bike scene
 	for i in range(bike_count):
 		add_bike()
-	add_drone(Vector3(0, 5, -1))
+		add_drone(Vector3(-i, 5, 2))
 	
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 

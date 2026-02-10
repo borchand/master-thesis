@@ -11,6 +11,7 @@ func _on_body_entered(bike: Node) -> void:
 	if bike is Bike_body:
 		bike_set[bike.bike_id] = bike
 
+
 func _on_body_exited(bike: Node) -> void:
 	if bike is Bike_body:
 		bike_set.erase(bike.bike_id)

@@ -54,7 +54,7 @@ func toggle_check_btn(btn: CheckButton):
 func _on_pause_toggled(_toggled_on):
 	shared.pause()
 
-func _on_free_roam_toggled(toggled_on):
+func _on_free_roam_toggled(_toggled_on):
 	shared.toggle_free_roam()
 
 func _on_follow_bike_in_pos_value_changed(value):
