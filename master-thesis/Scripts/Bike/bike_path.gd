@@ -29,6 +29,14 @@ func load_coords():
 			var prev_point = self.curve.get_point_position(i - 1)
 			if vectorPoint.distance_to(prev_point) < 0.1:
 				continue
+			
+			# check if points are collinear, if so skip it
+			if i > 1:
+				var prev_prev_point = self.curve.get_point_position(i - 2)
+				var dir1 = (prev_point - prev_prev_point).normalized()
+				var dir2 = (vectorPoint - prev_point).normalized()
+				if dir1.dot(dir2) > 0.99:
+					continue
 
 		self.curve.add_point(vectorPoint)
 		i += 1	
