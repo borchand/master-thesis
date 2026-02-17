@@ -3,9 +3,6 @@ extends Panel
 func _process(_delta):
 	set_target_bike(shared.follow_bike_in_pos)
 
-	if !shared.drone_controlled and $ToggleContainer/DroneControl.button_pressed:
-		toggle_drone()
-
 func _input(event):
 	if event.is_action_released("mouse_movement_enabled", true):
 		toggle_mouse_movement()
@@ -13,12 +10,7 @@ func _input(event):
 	if event.is_action_released("pause", true):
 		toggle_pause()
 
-	if event.is_action_released("drone_control", true):
-		toggle_drone()
-
 	if event.is_action_released("free_roam", true):
-		if shared.follow_drone:
-			toggle_drone()
 		toggle_free_roam()
 
 	if event.is_action_released("toggle_follow_bike"):
@@ -41,9 +33,6 @@ func toggle_mouse_movement():
 
 func toggle_pause():
 	toggle_check_btn($ToggleContainer/Pause)
-
-func toggle_drone():
-	toggle_check_btn($ToggleContainer/DroneControl)
 
 func toggle_free_roam():
 	toggle_check_btn($ToggleContainer/FreeRoam)

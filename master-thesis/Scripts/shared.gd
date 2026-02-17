@@ -3,7 +3,6 @@ extends Node
 var paused = false
 var free_roam = false
 var follow_drone = false
-var drone_controlled = false
 var follow_bike = false
 
 var bikes : Array[Bike]
@@ -62,5 +61,4 @@ func toggle_drone():
 
 func toggle_bike():
 	follow_drone = false
-	drone_controlled = false
 	follow_bike = !follow_bike

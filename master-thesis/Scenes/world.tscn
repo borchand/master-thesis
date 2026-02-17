@@ -107,25 +107,14 @@ offset_top = 57.0
 offset_right = 200.0
 offset_bottom = 186.0
 
-[node name="DroneControl" type="CheckButton" parent="Menu/ToggleContainer" unique_id=1520780650]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -31.0
-grow_horizontal = 2
-grow_vertical = 0
-text = "Drone control"
-
 [node name="Pause" type="CheckButton" parent="Menu/ToggleContainer" unique_id=1010535086]
 layout_mode = 1
 anchors_preset = 14
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_top = 2.5
-offset_bottom = 33.5
+offset_top = 20.5
+offset_bottom = 51.5
 grow_horizontal = 2
 grow_vertical = 2
 text = "Pause"
@@ -136,8 +125,8 @@ anchors_preset = 14
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_top = -30.5
-offset_bottom = 0.5
+offset_top = -20.5
+offset_bottom = 10.5
 grow_horizontal = 2
 grow_vertical = 2
 text = "Free roam"
@@ -250,7 +239,6 @@ theme_override_styles/fill = SubResource("StyleBoxTexture_0fj1v")
 value = 50.0
 show_percentage = false
 
-[connection signal="toggled" from="Menu/ToggleContainer/DroneControl" to="Menu" method="_on_drone_control_toggled"]
 [connection signal="toggled" from="Menu/ToggleContainer/Pause" to="Menu" method="_on_pause_toggled"]
 [connection signal="toggled" from="Menu/ToggleContainer/FreeRoam" to="Menu" method="_on_free_roam_toggled"]
 [connection signal="toggled" from="Menu/ToggleContainer/FollowBike" to="Menu" method="_on_follow_bike_toggled"]
