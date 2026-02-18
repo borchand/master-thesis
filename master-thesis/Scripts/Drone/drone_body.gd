@@ -3,7 +3,7 @@ extends RigidBody3D
 class_name Drone
 static var RAB_RANGE := 40
 static var _next_id: int = 1
-var drone_id: int
+var id: int
 
 
 @onready var drone_detector: DroneDetection = $"Camera_detection"
@@ -13,15 +13,17 @@ var drone_id: int
 @export var yaw_p = 1
 @export var yaw_d = 1
 @export var max_torque = 3
-@export var max_steer_force = 100
-@export var offset = 10
-
+@export var max_steer_force = 150
+@export var offset = 15
+@export var slow_radius = 15.0
+@export var stop_radius = 3.0
+@export var brake_strength = 2 
 var rab_signals := []
 
 #These values should already be set on the body inspector itself, however I set it here
 #For clarity and to make sure accidental changes don't change values
 func _ready() -> void: 
-	drone_id = _next_id
+	id = _next_id
 	_next_id += 1
 	mass = 30.0
 	linear_damp = 0.2 
@@ -29,7 +31,10 @@ func _ready() -> void:
 	add_to_group("drones")
 	
 func _physics_process(_delta):
-	get_nearest_position(drone_detector.bike_set)
+	if self.id % 2 == 0:
+		get_nearest_position(drone_detector.bike_set)
+	else:
+		get_furthest_position(drone_detector.bike_set)
 	read_sensors()
 	
 	if not target_bike:
@@ -53,13 +58,27 @@ func _physics_process(_delta):
 	var torque = yaw_p * yaw_error - yaw_d * yaw_rate
 	apply_torque(up * clamp(torque, -max_torque, max_torque))
 	
-	var dist_to_bike = global_position.distance_to(target_bike.global_position)
-	var catchup = clamp(dist_to_bike / offset*4, 0.0, 1.0)
-	if dist_to_bike < offset:
-		catchup = 0.0
-	
+	var to_target = target_bike.global_position - global_position
+	var dist = to_target.length()
+	var dir = to_target / max(dist, 0.001)
+
+	var catchup = 0.0
+	if dist > stop_radius:
+		catchup = clamp((dist - stop_radius) / (slow_radius - stop_radius), 0.0, 1.0)
 	apply_central_force(steer_flat * max_steer_force * catchup)
+
+	var v = linear_velocity
+	var closing_speed = v.dot(dir)
+	if dist < slow_radius and closing_speed > 0.0:
+		var brake_force = -dir * closing_speed * brake_strength * mass
+		brake_force.y = 0
+		apply_central_force(brake_force)
+
 	apply_central_force(steer_height)
+
+func kmh():
+	var speed_kmh = linear_velocity.length() * 3.6
+	print("Speed:", speed_kmh, "km/h")
 	
 func flocking():
 	var align_vector = Vector3.ZERO
@@ -70,7 +89,7 @@ func flocking():
 	var w_target = 10.6
 	var w_align = 0.01
 	var w_cohesion = 0.1
-	var w_separation = .5
+	var w_separation = 1.5
 	var w_RAB_RANGE = 0.35
 	
 	for sig in self.rab_signals:
@@ -112,7 +131,7 @@ func read_sensors():
 			if dist <= RAB_RANGE:
 				self.rab_signals.append(
 					{
-						"id": drone.drone_id,
+						"id": drone.id,
 						"distance": dist,
 						"linear_velocity": drone.linear_velocity,
 						"heading": -1 * drone.global_transform.basis.z,
@@ -131,6 +150,19 @@ func get_nearest_position(bikes: Dictionary):
 		var pos = bikes[bike_id].global_position
 		var dist = global_position.distance_to(pos)
 		if dist < minimum_distance:
+			minimum_distance = dist
+			target_bike = bikes[bike_id].get_parent()
+
+func get_furthest_position(bikes: Dictionary):
+	var minimum_distance = -INF
+	
+	if not bikes:
+		target_bike = null
+		
+	for bike_id in bikes:
+		var pos = bikes[bike_id].global_position
+		var dist = global_position.distance_to(pos)
+		if dist > minimum_distance:
 			minimum_distance = dist
 			target_bike = bikes[bike_id].get_parent()
 
