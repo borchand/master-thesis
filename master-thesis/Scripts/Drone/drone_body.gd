@@ -32,9 +32,9 @@ func _ready() -> void:
 	
 func _physics_process(_delta):
 	if self.id % 2 == 0:
-		get_nearest_position(drone_detector.bike_set)
+		get_target(drone_detector.bike_set, true)
 	else:
-		get_furthest_position(drone_detector.bike_set)
+		get_target(drone_detector.bike_set, false)
 	read_sensors()
 	
 	if not target_bike:
@@ -119,6 +119,9 @@ func search_spin():
 	var up = global_transform.basis.y
 	apply_torque(up * max_torque)
 
+func decide_to_split():
+	pass
+
 func read_sensors():
 	self.rab_signals = []
 	
@@ -140,30 +143,18 @@ func read_sensors():
 					}
 				)
 
-func get_nearest_position(bikes: Dictionary):
-	var minimum_distance = INF
+func get_target(bikes: Dictionary, furthest: bool):
+	var distance = -INF if furthest else INF
 	
 	if not bikes:
 		target_bike = null
-		
-	for bike_id in bikes:
-		var pos = bikes[bike_id].global_position
-		var dist = global_position.distance_to(pos)
-		if dist < minimum_distance:
-			minimum_distance = dist
-			target_bike = bikes[bike_id].get_parent()
-
-func get_furthest_position(bikes: Dictionary):
-	var minimum_distance = -INF
 	
-	if not bikes:
-		target_bike = null
-		
 	for bike_id in bikes:
 		var pos = bikes[bike_id].global_position
 		var dist = global_position.distance_to(pos)
-		if dist > minimum_distance:
-			minimum_distance = dist
+		var should_pick = dist > distance if furthest else dist < distance
+		if should_pick:
+			distance = dist
 			target_bike = bikes[bike_id].get_parent()
 
 func get_camera_node() -> Camera3D:
