@@ -8,7 +8,7 @@ var id: int
 
 @onready var drone_detector: DroneDetection = $"Camera_detection"
 @onready var target_bike = null
-
+@onready var bikes_in_range = 0
 
 @export var yaw_p = 1
 @export var yaw_d = 1
@@ -30,12 +30,11 @@ func _ready() -> void:
 	angular_damp = 1.5
 	add_to_group("drones")
 	
-func _physics_process(_delta):
-	if self.id % 2 == 0:
-		get_target(drone_detector.bike_set, true)
-	else:
-		get_target(drone_detector.bike_set, false)
+func _physics_process(_delta):	
+	get_target(drone_detector.bike_set, true)
+	
 	read_sensors()
+	decide_to_split()
 	
 	if not target_bike:
 		search_spin()
@@ -122,6 +121,22 @@ func search_spin():
 func decide_to_split():
 	pass
 
+func get_target(bikes: Dictionary, furthest: bool):
+	var distance = -INF if furthest else INF
+	
+	if not bikes:
+		target_bike = null
+	
+	bikes_in_range = len(bikes)
+	
+	for bike_id in bikes:
+		var pos = bikes[bike_id].global_position
+		var dist = global_position.distance_to(pos)
+		var should_pick = dist > distance if furthest else dist < distance
+		if should_pick:
+			distance = dist
+			target_bike = bikes[bike_id].get_parent()
+
 func read_sensors():
 	self.rab_signals = []
 	
@@ -142,20 +157,6 @@ func read_sensors():
 						"message": []
 					}
 				)
-
-func get_target(bikes: Dictionary, furthest: bool):
-	var distance = -INF if furthest else INF
-	
-	if not bikes:
-		target_bike = null
-	
-	for bike_id in bikes:
-		var pos = bikes[bike_id].global_position
-		var dist = global_position.distance_to(pos)
-		var should_pick = dist > distance if furthest else dist < distance
-		if should_pick:
-			distance = dist
-			target_bike = bikes[bike_id].get_parent()
 
 func get_camera_node() -> Camera3D:
 	return $Camera3D
