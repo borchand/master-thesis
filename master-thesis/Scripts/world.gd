@@ -6,7 +6,7 @@ const drone = preload("res://Scenes/Drone/Drone.tscn")
 @onready var path_instance : Path3D
 var rng = RandomNumberGenerator.new()
 
-const bike_count = 10
+const bike_count = 1
 
 func _ready():
 	path_instance = $BikePath3d
@@ -47,3 +47,13 @@ func add_bike():
 func bike_freed(freed_bike: Node3D):
 	# remove bike camera from list when bike is freed
 	shared.bikes.erase(freed_bike)
+
+func reset():
+	for bike in shared.bikes:
+		bike.queue_free()
+	shared.bikes.clear()
+
+	for i in range(bike_count):
+		add_bike()
+	
+	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1

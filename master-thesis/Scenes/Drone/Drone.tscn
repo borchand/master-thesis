@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://mxhdvsfjqqtv" path="res://sprites/animated_drone/scene.gltf" id="1_uvgqj"]
 [ext_resource type="Script" uid="uid://bmlo511l3yfy2" path="res://Scripts/Drone/drone_body.gd" id="2_0xxxp"]
 [ext_resource type="Script" uid="uid://cuo14t1rph0hn" path="res://Scripts/Drone/drone_camera_detection.gd" id="3_5j1j2"]
+[ext_resource type="Script" uid="uid://c87ispsqnfbai" path="res://Scripts/Drone/rl_test.gd" id="4_30xiw"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uvgqj"]
 size = Vector3(0.2685547, 0.09057617, 0.20922852)
@@ -40,3 +41,6 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, -
 visible = false
 polygon = PackedVector2Array(-5, 0.55, -27, 26.5, 27, 26.5, 5, 0.55)
 depth = 0.01
+
+[node name="AIController3D" type="Node3D" parent="." unique_id=354461931]
+script = ExtResource("4_30xiw")

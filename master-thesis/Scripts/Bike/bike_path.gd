@@ -1,11 +1,13 @@
 extends Path3D
 
 @export var route_file_path : String = "res://stages/stage-1-route.json"
+@export var use_test_track : bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	self.curve.clear_points()
-	load_coords()
+	if not use_test_track:
+		self.curve.clear_points()
+		load_coords()
 
 func load_coords():
 	var file = FileAccess.open(route_file_path, FileAccess.READ)

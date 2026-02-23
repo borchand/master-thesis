@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://ba7ff26e6jgx"
+
+[deps]
+
+files=["res://drone_data_per_episode. step.translation", "res://drone_data_per_episode. reward.translation", "res://drone_data_per_episode. direction.translation", "res://drone_data_per_episode. direction.translation", "res://drone_data_per_episode. direction.translation", "res://drone_data_per_episode. central.translation", "res://drone_data_per_episode. torque.translation"]
+
+source_file="res://drone_data_per_episode.csv"
+dest_files=["res://drone_data_per_episode. step.translation", "res://drone_data_per_episode. reward.translation", "res://drone_data_per_episode. direction.translation", "res://drone_data_per_episode. direction.translation", "res://drone_data_per_episode. direction.translation", "res://drone_data_per_episode. central.translation", "res://drone_data_per_episode. torque.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

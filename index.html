@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Master Thesis - Reinforcement Learning training data</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const last = 10; // Number of last episodes to display in the second chart
+
+            async function loadCSVData() {
+                return fetch('master-thesis/drone_data.csv?t=' + new Date().getTime()) // Cache busting
+                    .then(response => response.text())
+                    .then(csvData => {
+                        const lines = csvData.split('\n').slice(1); // Skip header
+                        const episodes = [];
+                        const rewards = [];
+                        lines.forEach(line => {
+                            const [episode, steps, reward] = line.split(',').map(item => item.trim());
+                            if (episode && reward) {
+                                console.log("Episode: " + episode + ", Reward: " + reward);
+                                episodes.push(episode);
+                                rewards.push(reward);
+                            }
+                        });
+                        return { episodes, rewards };
+                    });
+            }
+
+            async function createChart(episodes, rewards, chartId, title) {
+                const ctx = document.getElementById(chartId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: episodes,
+                        datasets: [{
+                            label: title,
+                            data: rewards,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Episode'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Accumulated Reward'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            async function updateChart() {
+                const { episodes, rewards } = await loadCSVData();
+                const chart = Chart.getChart('rewardChart');
+                if (chart) {
+                    chart.data.labels = episodes;
+                    chart.data.datasets[0].data = rewards;
+                    chart.update();
+                }
+
+                const last_episodes = episodes.slice(-last);
+                const last_rewards = rewards.slice(-last);
+                const lastChart = Chart.getChart('lastRewardChart');
+                if (lastChart) {
+                    lastChart.data.labels = last_episodes;
+                    lastChart.data.datasets[0].data = last_rewards;
+                    lastChart.update();
+                }
+            }
+
+
+            document.addEventListener('DOMContentLoaded', () => {
+                loadCSVData().then(({ episodes, rewards }) => {
+                    createChart(episodes, rewards, 'rewardChart', 'Accumulated Reward per Episode');
+                    
+                    const last_episodes = episodes.slice(-last);
+                    const last_rewards = rewards.slice(-last);
+                    createChart(last_episodes, last_rewards, 'lastRewardChart', 'Last ' + last + ' Reward per Episode');
+                });
+            });
+
+            setInterval(updateChart, 1000);
+
+        </script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+            h1 {
+                color: #333;
+            }
+            p {
+                font-size: 1.2em;
+                color: #666;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Master Thesis - Reinforcement Learning training data</h1>
+        <p>This page is used to visualize training data during the reinforcement learning process.</p>
+
+        <canvas id="rewardChart" width="800" height="400"></canvas>
+        <canvas id="lastRewardChart" width="800" height="400"></canvas>
+    </body>
+</html>

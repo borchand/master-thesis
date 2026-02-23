@@ -5,6 +5,7 @@ extends RigidBody3D
 @onready var target_speed = null
 @onready var target_bike = null
 @onready var total_time_since_last_scan = 10
+@onready var ai_controller = $AIController3D
 
 @export var max_torque := 2
 @export var max_force := 10
@@ -19,6 +20,128 @@ extends RigidBody3D
 @export var max_up_force := 8.0
 @export var torque_zone := 0.8
 
+@export var use_rl : bool = true
+
+var steps_with_no_bike = 0
+var max_steps_with_no_bike = 1000
+
+var start_position = Vector3.ZERO
+
+func _ready():
+	if use_rl:
+		ai_controller.init(self)
+		start_position = global_position
+
+func _physics_process(delta):
+	if use_rl:
+		rl_procces(delta)
+	else:
+		drone_process(delta)
+
+
+func rl_procces(_delta):
+	
+	if shared.bikes.size() == 0:
+		ai_controller.done = true
+		ai_controller.needs_reset = true	
+	
+	if ai_controller.needs_reset:
+		ai_controller.reset()
+		get_parent().reset()
+		reset()
+		return
+	
+	var torque = ai_controller.torque
+	var central_force = ai_controller.central_force
+	var direction = ai_controller.direction
+	
+	# write data to file
+	var file = FileAccess.open("res://drone_data_per_episode.csv", FileAccess.READ_WRITE)
+	file.seek_end()
+	file.store_line(str(ai_controller.episode) + ", " + str(ai_controller.n_steps) + ", " + str(ai_controller.reward) + ", " + str(direction.x) + ", " + str(direction.y) + ", " + str(direction.z) + ", " + str(central_force) + ", " + str(torque))
+	file.close()
+
+	apply_central_force(direction * central_force)
+	apply_torque(global_transform.basis.y * torque)
+
+func get_reward() -> float:
+
+	var reward = 0.0
+
+	# reward for standing still
+	if linear_velocity.length() < 0.1:
+		reward += 1
+
+	# punsih for moving 
+	if linear_velocity.length() > 0.1:
+		reward -= linear_velocity.length() * 0.5
+
+	# punsih for spinning
+	if angular_velocity.length() > 0.1:
+		reward -= angular_velocity.length() * 0.5
+
+	return reward
+
+	reward = -0.1
+
+	if shared.total_visible_bikes() == 0:
+		reward -= 2.0 # Smaller per-step penalty to encourage searching
+		steps_with_no_bike += 1
+		if steps_with_no_bike >= max_steps_with_no_bike:
+			ai_controller.needs_reset = true
+			reward -= 20.0 # Final "failure" penalty
+	else:
+		steps_with_no_bike = 0
+		var closest_bike = shared.get_closest_bike_to_drone($Camera3D)
+		var dist = global_position.distance_to(closest_bike.global_position)
+		
+		# 1. Optimal Distance Reward (Gaussian-style)
+		# Target a "sweet spot" (e.g., 5 meters away)
+		var ideal_dist = 5.0
+		var dist_error = abs(dist - ideal_dist)
+		reward += exp(-dist_error * 0.5) * 5 # High reward when close to 5m, tapers off
+		
+		# 2. Centering Reward (Keep the bike in the middle of the screen)
+		# This is better than just "counting" bikes
+		var screen_pos = $Camera3D.unproject_position(closest_bike.global_position)
+		var screen_center = get_viewport().size / 2
+		var center_error = screen_pos.distance_to(screen_center) / get_viewport().size.length()
+		reward += (1.0 - center_error) * 0.5
+
+		# 3. Movement/Smoothing Penalty
+		# Penalize the drone for being too "twitchy" (high angular velocity)
+		reward -= angular_velocity.length() * 0.1
+
+		# 4. punsih for going under the bike
+		if closest_bike.global_position.y > global_position.y:
+			reward -= to_local(closest_bike.global_position).y * 0.2
+
+		# 5. Bonus for bike in camera view
+		if shared.total_visible_bikes() > 0:
+			reward += 10.0
+	
+	return reward
+	
+
+func drone_process(delta):
+	total_time_since_last_scan += delta
+		
+	if drone_detector.bike_set.size() > 0 and total_time_since_last_scan >= 10:
+		total_time_since_last_scan = 0
+		#get_nearest_position(drone_detector.bike_set)
+		get_random_position(drone_detector.bike_set)
+	
+	if target_position:
+		if shared.drone_controlled:
+			move_by_keyboard()
+		else:
+			follow_target()
+	else:
+		search_spin()
+
+func game_over():
+	ai_controller.done = true
+	ai_controller.needs_reset = true		
 
 func follow_target():
 	if target_bike == null:
@@ -75,22 +198,6 @@ func follow_target():
 
 	apply_central_force(Vector3(0, y_force, 0))
 	
-func _physics_process(_delta):
-	total_time_since_last_scan += _delta
-	
-	if drone_detector.bike_set.size() > 0 and total_time_since_last_scan >= 10:
-		total_time_since_last_scan = 0
-		#get_nearest_position(drone_detector.bike_set)
-		get_random_position(drone_detector.bike_set)
-	
-	if target_position:
-		if shared.drone_controlled:
-			move_by_keyboard()
-		else:
-			follow_target()
-	else:
-		search_spin()
-
 func search_spin():
 	var up = global_transform.basis.y
 	apply_torque(up * max_torque)
@@ -145,3 +252,12 @@ func get_random_position(bikes: Dictionary):
 
 func get_camera_node() -> Camera3D:
 	return $Camera3D
+
+func reset():
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+	global_transform.origin = start_position
+	# set random rotation around y axis to avoid symmetry in the start position
+	var random_rotation = randf() * PI * 2
+	var random_basis = Basis(Vector3.UP, random_rotation)
+	global_transform.basis = random_basis

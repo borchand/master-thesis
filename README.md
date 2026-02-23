@@ -31,6 +31,10 @@ keybinding | action
 ## Python scripts
 We have written some Python scripts to parse data used in the simulator. Below is a brief description of each script.
 
+Additionally we use python to train the reinforcement learning agent using the `godot-rl` library. (more when done)
+
+We use ´Python 3.12´ for the scripts, as it is the latest version `godot-rl` supports.
+
 ### Setup
 Install the required dependencies using pip:
 ```bash
