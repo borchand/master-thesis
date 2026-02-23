@@ -14,18 +14,27 @@ func get_obs() -> Dictionary:
 
 	var closest_bike_pos = Vector3.ZERO
 	var closest_distance = INF
+	var bike_speed = 0
+	var bike_direction = Vector3.ZERO
+
 	for bike in bikes_in_camera:
 		var pos = to_local(bikes_in_camera[bike].global_position)
 		var distance = pos.length()
 		if distance < closest_distance:
 			closest_distance = distance
 			closest_bike_pos = pos
+			bike_speed = bikes_in_camera[bike].get_parent().speed
+			bike_direction = bikes_in_camera[bike].get_parent().direction
 
 	# get drone data
 	var local_velocity = get_parent().global_transform.basis.inverse() * get_parent().linear_velocity
 
 	var obs = [
 		1.0 if bikes_in_camera.size() > 0 else 0.0,
+		bike_speed,
+		bike_direction.x,
+		bike_direction.y,
+		bike_direction.z,
 		closest_bike_pos.x,
 		closest_bike_pos.y,
 		closest_bike_pos.z,

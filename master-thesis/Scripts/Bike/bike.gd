@@ -14,6 +14,8 @@ var stamina = 100.0
 var staminaSpeedupThreashold = 70
 var staminaSlowdownThreashold = 40
 var staminaRegen: float
+@onready var prev_position = self.global_position
+@onready var direction = Vector3.ZERO
 
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
@@ -35,6 +37,7 @@ func _process(delta):
 		
 	# move bike forward
 	self.progress += speed * delta
+	direction = global_position - prev_position
 
 	if self.progress >= max_progress:
 		# remove bike when it reaches the end of the path

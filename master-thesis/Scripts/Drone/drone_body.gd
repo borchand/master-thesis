@@ -65,62 +65,71 @@ func rl_procces(_delta):
 	apply_torque(global_transform.basis.y * torque)
 
 func get_reward() -> float:
-
+	target_bike = null
+	get_nearest_position(drone_detector.bike_set)
 	var reward = 0.0
 
 	# reward for standing still
 	if linear_velocity.length() < 0.1:
 		reward += 1
+	
+	# reward for seeing bike, punish 0 bikes
+	if not target_bike:
+		reward -= 1
+	else:
+		if target_bike.global_position.y + self.global_position.y != 5:
+			reward -= 1
+		reward += 1
 
 	# punsih for moving 
-	if linear_velocity.length() > 0.1:
+	if linear_velocity.length() > 0.1 and not target_bike:
 		reward -= linear_velocity.length() * 0.5
 
 	# punsih for spinning
 	if angular_velocity.length() > 0.1:
-		reward -= angular_velocity.length() * 0.5
+		reward -= angular_velocity.length() * 1
 
 	return reward
 
-	reward = -0.1
+	# reward = -0.1
 
-	if shared.total_visible_bikes() == 0:
-		reward -= 2.0 # Smaller per-step penalty to encourage searching
-		steps_with_no_bike += 1
-		if steps_with_no_bike >= max_steps_with_no_bike:
-			ai_controller.needs_reset = true
-			reward -= 20.0 # Final "failure" penalty
-	else:
-		steps_with_no_bike = 0
-		var closest_bike = shared.get_closest_bike_to_drone($Camera3D)
-		var dist = global_position.distance_to(closest_bike.global_position)
+	# if shared.total_visible_bikes() == 0:
+	# 	reward -= 2.0 # Smaller per-step penalty to encourage searching
+	# 	steps_with_no_bike += 1
+	# 	if steps_with_no_bike >= max_steps_with_no_bike:
+	# 		ai_controller.needs_reset = true
+	# 		reward -= 20.0 # Final "failure" penalty
+	# else:
+	# 	steps_with_no_bike = 0
+	# 	var closest_bike = shared.get_closest_bike_to_drone($Camera3D)
+	# 	var dist = global_position.distance_to(closest_bike.global_position)
 		
-		# 1. Optimal Distance Reward (Gaussian-style)
-		# Target a "sweet spot" (e.g., 5 meters away)
-		var ideal_dist = 5.0
-		var dist_error = abs(dist - ideal_dist)
-		reward += exp(-dist_error * 0.5) * 5 # High reward when close to 5m, tapers off
+	# 	# 1. Optimal Distance Reward (Gaussian-style)
+	# 	# Target a "sweet spot" (e.g., 5 meters away)
+	# 	var ideal_dist = 5.0
+	# 	var dist_error = abs(dist - ideal_dist)
+	# 	reward += exp(-dist_error * 0.5) * 5 # High reward when close to 5m, tapers off
 		
-		# 2. Centering Reward (Keep the bike in the middle of the screen)
-		# This is better than just "counting" bikes
-		var screen_pos = $Camera3D.unproject_position(closest_bike.global_position)
-		var screen_center = get_viewport().size / 2
-		var center_error = screen_pos.distance_to(screen_center) / get_viewport().size.length()
-		reward += (1.0 - center_error) * 0.5
+	# 	# 2. Centering Reward (Keep the bike in the middle of the screen)
+	# 	# This is better than just "counting" bikes
+	# 	var screen_pos = $Camera3D.unproject_position(closest_bike.global_position)
+	# 	var screen_center = get_viewport().size / 2
+	# 	var center_error = screen_pos.distance_to(screen_center) / get_viewport().size.length()
+	# 	reward += (1.0 - center_error) * 0.5
 
-		# 3. Movement/Smoothing Penalty
-		# Penalize the drone for being too "twitchy" (high angular velocity)
-		reward -= angular_velocity.length() * 0.1
+	# 	# 3. Movement/Smoothing Penalty
+	# 	# Penalize the drone for being too "twitchy" (high angular velocity)
+	# 	reward -= angular_velocity.length() * 0.1
 
-		# 4. punsih for going under the bike
-		if closest_bike.global_position.y > global_position.y:
-			reward -= to_local(closest_bike.global_position).y * 0.2
+	# 	# 4. punsih for going under the bike
+	# 	if closest_bike.global_position.y > global_position.y:
+	# 		reward -= to_local(closest_bike.global_position).y * 0.2
 
-		# 5. Bonus for bike in camera view
-		if shared.total_visible_bikes() > 0:
-			reward += 10.0
+	# 	# 5. Bonus for bike in camera view
+	# 	if shared.total_visible_bikes() > 0:
+	# 		reward += 10.0
 	
-	return reward
+	# return reward
 	
 
 func drone_process(delta):
