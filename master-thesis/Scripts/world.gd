@@ -32,12 +32,14 @@ func add_bike():
 
 	#Add variation in bike preformance
 	var rn = rng.randfn(23, 1.15)
+	var rnW = rng.randfn(100, 1)
 
 	#if we want more grouped bikes.
 	#if (rn>value1 and rn<valu2) or (rn>value3 and rn<value4):
 		#rn = rng.randfn(23, 1.15)
 
 	bike_instance.setRegen(rn)
+	bike_instance.set_watts(255+rnW,431+rnW)
 
 	# add bike to scene
 	path_instance.add_child(bike_instance)
