@@ -45,5 +45,3 @@ debug_color = Color(0.9182522, 0.212338, 0.49273127, 0.41960785)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 target_position = Vector3(0, 0, -1)
 script = ExtResource("4_l0kmq")
-
-[connection signal="body_exited" from="BikeProximityArea" to="." method="_on_bike_proximity_area_body_exited"]

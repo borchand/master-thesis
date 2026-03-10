@@ -6,7 +6,7 @@ const drone = preload("res://Scenes/Drone/Drone.tscn")
 @onready var path_instance : Path3D
 var rng = RandomNumberGenerator.new()
 
-const bike_count = 10
+const bike_count = 40
 
 func _ready():
 	path_instance = $BikePath3d
@@ -32,14 +32,14 @@ func add_bike():
 
 	#Add variation in bike preformance
 	var rn = rng.randfn(23, 1.15)
-	var rnW = rng.randfn(100, 1)
+	var rnW = rng.randfn(5, 0.6)
 
 	#if we want more grouped bikes.
 	#if (rn>value1 and rn<valu2) or (rn>value3 and rn<value4):
 		#rn = rng.randfn(23, 1.15)
 
 	bike_instance.setRegen(rn)
-	bike_instance.set_watts(255+rnW,431+rnW)
+	bike_instance.set_watts(350+rnW,526+rnW)
 
 	# add bike to scene
 	path_instance.add_child(bike_instance)

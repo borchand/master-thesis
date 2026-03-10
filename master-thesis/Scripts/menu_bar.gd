@@ -21,7 +21,7 @@ func _input(event):
 			toggle_drone()
 		toggle_free_roam()
 
-	if event.is_action_released("toggle_follow_"):
+	if event.is_action_released("toggle_follow_bike"):
 		toggle_follow_bike()
 		
 	if event.is_action_released("close_game", true):

@@ -26,16 +26,14 @@ func run_raycast():
 	for y in results: 
 		if y["collider"] is Bike_body:
 			n_bikes += 1
-			print(self.global_position, " ", y["collider"].position)
-			sum += self.global_position.distance_to(y["collider"].position)
+			sum += origin.distance_to(y["position"])
 			if n_bikes == 1: 
-				dist_to_bike_1st = self.global_position.distance_to(y["collider"].position)
+				dist_to_bike_1st = origin.distance_to(y["position"])
 			if n_bikes == 2: 
-				dist_to_bike_2th = self.global_position.distance_to(y["collider"].position)
+				dist_to_bike_2th = origin.distance_to(y["position"])
 		else:
-			print(y["collider"].get_parent().name)
+			print("collided with ", y["collider"].get_parent().name)
 		
-	print(sum, " ", n_bikes)
 	return [n_bikes, (sum/max(1, n_bikes)), dist_to_bike_1st ,dist_to_bike_2th,]
 
 func multi_raycast(space_state: PhysicsDirectSpaceState3D, query: PhysicsRayQueryParameters3D, max_iterations: int = 6) -> Array[Dictionary]:
