@@ -6,10 +6,10 @@ uid="uid://vbavnr8au4k3"
 
 [deps]
 
-files=["res://drone_data.en.translation", "res://drone_data.en.translation"]
+files=["res://drone_data. steps.translation", "res://drone_data. accumulated.translation"]
 
 source_file="res://drone_data.csv"
-dest_files=["res://drone_data.en.translation", "res://drone_data.en.translation"]
+dest_files=["res://drone_data. steps.translation", "res://drone_data. accumulated.translation"]
 
 [params]
 

@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://b2qiyxefmfote" path="res://Scripts/h_slider.gd" id="8_k7acu"]
 [ext_resource type="Script" uid="uid://cmlgykcqebdwh" path="res://Scripts/progress_bars.gd" id="9_5v1tr"]
 [ext_resource type="Script" uid="uid://djhujtd25hl8c" path="res://addons/godot_rl_agents/sync.gd" id="10_0fj1v"]
+[ext_resource type="Script" uid="uid://d8rn4s2tgd11x" path="res://Scripts/drone_stats.gd" id="11_drnst"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_o06y3"]
 sky_horizon_color = Color(0.64528894, 0.67970026, 0.66589224, 1)
@@ -252,8 +253,31 @@ theme_override_styles/fill = SubResource("StyleBoxTexture_0fj1v")
 value = 50.0
 show_percentage = false
 
+[node name="DroneStats" type="Panel" parent="." unique_id=2041837461]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -380.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = 320.0
+grow_horizontal = 0
+script = ExtResource("11_drnst")
+
+[node name="Label" type="Label" parent="DroneStats" unique_id=2041837462]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 22
+
 [node name="Sync" type="Node" parent="." unique_id=1786814025]
 script = ExtResource("10_0fj1v")
+action_repeat = 1
 speed_up = 100.0
 
 [connection signal="toggled" from="Menu/ToggleContainer/DroneControl" to="Menu" method="_on_drone_control_toggled"]

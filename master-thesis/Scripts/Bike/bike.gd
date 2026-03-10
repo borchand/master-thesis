@@ -38,6 +38,7 @@ func _process(delta):
 	# move bike forward
 	self.progress += speed * delta
 	direction = global_position - prev_position
+	prev_position = self.global_position
 
 	if self.progress >= max_progress:
 		# remove bike when it reaches the end of the path

@@ -55,6 +55,6 @@ python3.12 -m http.server 8000 &
 
 # remove log file
 
-python3.12 stable_baselines3_example.py --save_model_path=model.zip --save_checkpoint_frequency=20_000 --experiment_name=exp1
+python3.12 stable_baselines3_example.py --save_model_path="$SAVE_MODEL_PATH" --save_checkpoint_frequency=20_000 --experiment_name="$EXPERIMENT_NAME" --timesteps=2_000_000 --speedup=8
 
 

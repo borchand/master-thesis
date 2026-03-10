@@ -191,11 +191,11 @@ if args.resume_model_path is None:
     model: PPO = PPO(
         "MultiInputPolicy",
         env,
-        ent_coef=0.0001,
-        verbose=2,
-        n_steps=32,
-        tensorboard_log=args.experiment_dir,
         learning_rate=learning_rate,
+        ent_coef=0.01,
+        verbose=2,
+        tensorboard_log=args.experiment_dir,
+        n_steps=2048
     )
 else:
     path_zip = pathlib.Path(args.resume_model_path)
@@ -206,9 +206,10 @@ if args.inference:
     obs = env.reset()
     for i in range(args.timesteps):
         action, _state = model.predict(obs, deterministic=True)
+        print("Step: " + str(i) + " Action: " + str(action))
         obs, reward, done, info = env.step(action)
 else:
-    learn_arguments = dict(total_timesteps=args.timesteps, tb_log_name=args.experiment_name)
+    learn_arguments = dict(total_timesteps=args.timesteps, tb_log_name=args.experiment_name, progress_bar=True)
     if args.save_checkpoint_frequency:
         print("Checkpoint saving enabled. Checkpoints will be saved to: " + abs_path_checkpoint)
         checkpoint_callback = CheckpointCallback(

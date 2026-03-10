@@ -12,10 +12,12 @@ size = Vector3(0.2685547, 0.09057617, 0.20922852)
 points = PackedVector3Array(5, -5, 0.55, -5, -5, 0.55, 27, -5, 26.5, -27, -5, 26.5, 0, 0.01, 0.05)
 
 [node name="RigidBody" type="RigidBody3D" unique_id=1754414733]
+transform = Transform3D(-1.0000001, 0, 8.7422784e-08, 0, 1, 0, -8.7422784e-08, 0, -1.0000001, 0, 0, 0)
 axis_lock_angular_x = true
 axis_lock_angular_z = true
 gravity_scale = 0.0
 can_sleep = false
+linear_damp = 0.5
 angular_damp = 6.0
 script = ExtResource("2_0xxxp")
 

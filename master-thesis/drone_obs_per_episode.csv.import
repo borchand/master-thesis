@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://cbwjwl6sfi7wp"
+
+[deps]
+
+files=["res://drone_obs_per_episode.en.translation", "res://drone_obs_per_episode.en.translation"]
+
+source_file="res://drone_obs_per_episode.csv"
+dest_files=["res://drone_obs_per_episode.en.translation", "res://drone_obs_per_episode.en.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

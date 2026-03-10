@@ -14,7 +14,7 @@ func _ready():
 	# load bike scene
 	for i in range(bike_count):
 		add_bike()
-		add_drone(Vector3(-i, 5, 2))
+		add_drone(Vector3(0, 5, -2))
 	
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 

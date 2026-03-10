@@ -46,6 +46,11 @@ func init(player: Node3D):
 	file.store_line("episode, steps, accumulated_reward")
 	file.close()
 
+	# create file for writing observations and actions per step
+	var per_episode_file = FileAccess.open("res://drone_obs_per_episode.csv", FileAccess.WRITE)
+	per_episode_file.store_line("episode, step, observations")
+	per_episode_file.close()
+
 
 #-- Methods that need implementing using the "extend script" option in Godot --#
 func get_obs() -> Dictionary:
@@ -101,11 +106,6 @@ func get_obs_space():
 
 func reset():
 	if not episode == 0:
-		# create file for writing data
-		var per_episode_file = FileAccess.open("res://drone_data_per_episode.csv", FileAccess.WRITE)
-		per_episode_file.store_line("episode, step, reward, direction_x, direction_y, direction_z, central_force, torque")
-		per_episode_file.close()
-
 		# add data to file
 		var file = FileAccess.open("res://drone_data.csv", FileAccess.READ_WRITE)
 		file.seek_end()

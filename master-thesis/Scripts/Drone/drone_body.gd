@@ -7,8 +7,8 @@ extends RigidBody3D
 @onready var total_time_since_last_scan = 10
 @onready var ai_controller = $AIController3D
 
-@export var max_torque := 2
-@export var max_force := 10
+@export var max_torque := .1
+@export var max_force := 5
 @export var behind_distance := 3
 @export var yaw_gain := 1.6
 @export var min_distance := 3
@@ -23,14 +23,17 @@ extends RigidBody3D
 @export var use_rl : bool = true
 
 var steps_with_no_bike = 0
-var max_steps_with_no_bike = 1000
+var steps_with_bike = 0
+var max_steps_with_no_bike = 500
 
 var start_position = Vector3.ZERO
+var start_rotation = Vector3.ZERO
 
 func _ready():
 	if use_rl:
 		ai_controller.init(self)
 		start_position = global_position
+		start_rotation = rotation
 
 func _physics_process(delta):
 	if use_rl:
@@ -54,82 +57,58 @@ func rl_procces(_delta):
 	var torque = ai_controller.torque
 	var central_force = ai_controller.central_force
 	var direction = ai_controller.direction
-	
-	# write data to file
-	var file = FileAccess.open("res://drone_data_per_episode.csv", FileAccess.READ_WRITE)
-	file.seek_end()
-	file.store_line(str(ai_controller.episode) + ", " + str(ai_controller.n_steps) + ", " + str(ai_controller.reward) + ", " + str(direction.x) + ", " + str(direction.y) + ", " + str(direction.z) + ", " + str(central_force) + ", " + str(torque))
-	file.close()
-
-	apply_central_force(direction * central_force)
+	# direction is in drone-local space — convert to global before applying force
+	apply_central_force(global_transform.basis * direction * central_force)
 	apply_torque(global_transform.basis.y * torque)
+	
 
 func get_reward() -> float:
 	target_bike = null
 	get_nearest_position(drone_detector.bike_set)
 	var reward = 0.0
 
-	# reward for standing still
-	if linear_velocity.length() < 0.1:
-		reward += 1
-	
-	# reward for seeing bike, punish 0 bikes
-	if not target_bike:
-		reward -= 1
+	if shared.total_visible_bikes() == 0:
+		steps_with_no_bike += 1
+		steps_with_bike = 0
+
+		# Flat penalty per step — encourages actively re-acquiring the bike
+		reward -= 0.5
+
+		if steps_with_no_bike >= max_steps_with_no_bike:
+			ai_controller.done = true
+			ai_controller.needs_reset = true
+			steps_with_no_bike = 0
+
 	else:
-		if target_bike.global_position.y + self.global_position.y != 5:
-			reward -= 1
-		reward += 1
+		steps_with_no_bike = 0
+		steps_with_bike += 1
 
-	# punsih for moving 
-	if linear_velocity.length() > 0.1 and not target_bike:
-		reward -= linear_velocity.length() * 0.5
+		if target_bike != null:
+			# Ideal follow position: behind the bike at height_offset above it
+			var bike_forward = -target_bike.global_transform.basis.z
+			bike_forward.y = 0.0
+			bike_forward = bike_forward.normalized()
+			var desired_pos = target_bike.global_position - bike_forward * behind_distance
+			desired_pos.y = target_bike.global_position.y + height_offset
 
-	# punsih for spinning
-	if angular_velocity.length() > 0.1:
-		reward -= angular_velocity.length() * 1
+			# Dense position reward: 1/(1+error) gives useful gradient at all distances.
+			# exp(-error/sigma) collapses to ~0 when far away, giving no signal to move.
+			var pos_error = global_position.distance_to(desired_pos)
+			reward += 1.0 / (1.0 + pos_error)
+
+			# Speed-matching penalty: penalise forward speed mismatch to prevent overtaking.
+			# Uses the bike's forward axis so only the along-track component is compared.
+			var drone_fwd_speed = linear_velocity.dot(bike_forward)
+			var speed_diff = abs(drone_fwd_speed - target_bike.speed)
+			reward -= speed_diff * 0.03
+
+			# Camera centering bonus: smaller secondary signal so it does not dominate.
+			# Clamped to 0 so negative values (bike behind) do not subtract.
+			var cam_forward = -get_camera_node().global_transform.basis.z
+			var to_bike = (target_bike.global_position - global_position).normalized()
+			reward += maxf(0.0, cam_forward.dot(to_bike)) * 0.2
 
 	return reward
-
-	# reward = -0.1
-
-	# if shared.total_visible_bikes() == 0:
-	# 	reward -= 2.0 # Smaller per-step penalty to encourage searching
-	# 	steps_with_no_bike += 1
-	# 	if steps_with_no_bike >= max_steps_with_no_bike:
-	# 		ai_controller.needs_reset = true
-	# 		reward -= 20.0 # Final "failure" penalty
-	# else:
-	# 	steps_with_no_bike = 0
-	# 	var closest_bike = shared.get_closest_bike_to_drone($Camera3D)
-	# 	var dist = global_position.distance_to(closest_bike.global_position)
-		
-	# 	# 1. Optimal Distance Reward (Gaussian-style)
-	# 	# Target a "sweet spot" (e.g., 5 meters away)
-	# 	var ideal_dist = 5.0
-	# 	var dist_error = abs(dist - ideal_dist)
-	# 	reward += exp(-dist_error * 0.5) * 5 # High reward when close to 5m, tapers off
-		
-	# 	# 2. Centering Reward (Keep the bike in the middle of the screen)
-	# 	# This is better than just "counting" bikes
-	# 	var screen_pos = $Camera3D.unproject_position(closest_bike.global_position)
-	# 	var screen_center = get_viewport().size / 2
-	# 	var center_error = screen_pos.distance_to(screen_center) / get_viewport().size.length()
-	# 	reward += (1.0 - center_error) * 0.5
-
-	# 	# 3. Movement/Smoothing Penalty
-	# 	# Penalize the drone for being too "twitchy" (high angular velocity)
-	# 	reward -= angular_velocity.length() * 0.1
-
-	# 	# 4. punsih for going under the bike
-	# 	if closest_bike.global_position.y > global_position.y:
-	# 		reward -= to_local(closest_bike.global_position).y * 0.2
-
-	# 	# 5. Bonus for bike in camera view
-	# 	if shared.total_visible_bikes() > 0:
-	# 		reward += 10.0
-	
-	# return reward
 	
 
 func drone_process(delta):
@@ -266,7 +245,6 @@ func reset():
 	linear_velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
 	global_transform.origin = start_position
-	# set random rotation around y axis to avoid symmetry in the start position
-	var random_rotation = randf() * PI * 2
-	var random_basis = Basis(Vector3.UP, random_rotation)
-	global_transform.basis = random_basis
+	global_transform.basis = Basis().rotated(Vector3(1, 0, 0), start_rotation.x).rotated(Vector3(0, 1, 0), start_rotation.y).rotated(Vector3(0, 0, 1), start_rotation.z)
+	steps_with_no_bike = 0
+	steps_with_bike = 0
