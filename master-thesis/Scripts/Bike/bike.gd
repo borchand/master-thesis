@@ -3,29 +3,72 @@ extends PathFollow3D
 class_name Bike
 signal freeing_bike
 
+@onready var raycast = $RayCast3D
+@onready var bikebody = $BikeBody
 var rng = RandomNumberGenerator.new()
 var max_progress: float
 
+var pr_sec_checks = 4
+var timer_threashold = 1.0/pr_sec_checks
+var timer = 0
+var total_time = 0 
+
 var Maxspeed = 22
 var Minspeed = 4.5
-var speed = 4.0
-var acceleration = 0.0
-var stamina = 100.0
-var staminaSpeedupThreashold = 70
+var staminaSpeedupThreashold = 85
 var staminaSlowdownThreashold = 40
 var staminaRegen: float
+var speedUpProbability = 2
+var accelerationRate = 0.0001
+var deaccelerationRate = 0.0002
+var stamina = 100.0
+
+var speed = 9.0
+var acceleration = 0.0
+
+var sustainable_force = 25 # not used  
+var sustainable_watt = null
+var initial_breakout_watt = 531
+var a_fatigue_resistence = 0.00003
+var fatigue_threashold = 52800.0
+var b_stamina_degresse = 0.0000002
+var fatigue = 0
+var in_peloton = false
+var behavior = "cruise"  #cruise, attack
+
+var cohesion_c =  0.05      #Set by trial and error
+var separation_c = 0.02   #Set by trial and error 
 
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
-	
-func _process(delta):
 	if staminaRegen == null:
 		staminaRegen = rng.randf_range(3.0, 4.0)
+	
+func _process(delta):
+	timer += delta
+	total_time += delta
+	if timer >= timer_threashold:
+		timer = timer-timer_threashold
+		coltroler(delta)
+		
+	# move bike forward
+	self.progress += speed * delta
+	if self.progress >= max_progress:
+		# remove bike when it reaches the end of the path
+		print("Bike: ", self.name, " Finish time: ", total_time)
+		safe_queue_free()
+	
+func coltroler(delta):
+	#control1(delta)
+	control2(delta)
+
+#Controller1 
+func control1(delta): #No longer used
 	#Slow down if stamina low
 	if stamina<staminaSlowdownThreashold:
-		acceleration -= 0.0003*(staminaSlowdownThreashold-stamina)
-	elif stamina>staminaSpeedupThreashold and (rng.randi_range(0,100)+(staminaSpeedupThreashold-stamina)*0.5) < 2 :
-		acceleration += 0.0002
+		acceleration -= deaccelerationRate*(staminaSlowdownThreashold-stamina)
+	elif stamina>staminaSpeedupThreashold and (rng.randi_range(0,100)+(staminaSpeedupThreashold-stamina)*0.3) < speedUpProbability :
+		acceleration += accelerationRate
 	#Change in speed and stamina
 	speed = max(Minspeed, min(Maxspeed, speed+acceleration))
 	stamina = min(100.0, stamina+staminaRegen*0.25-speed*0.5)
@@ -33,28 +76,119 @@ func _process(delta):
 		acceleration = max(0,acceleration)
 		stamina += staminaRegen*0.5 
 		
-	# move bike forward
-	self.progress += speed * delta
-
-	if self.progress >= max_progress:
-		# remove bike when it reaches the end of the path
-		safe_queue_free()
-	
 func setRegen(regen: float) -> void:
 	staminaRegen = regen
+
+#Controller2
+func control2(delta):
+	var elevation = -1*bikebody.global_rotation.x #positive = going up
+	var wanted_power  = sustainable_watt
 	
+	var raycast_result = raycast.run_raycast()
+	if len(raycast_result) != 4: 
+		print("Ray_cast length is not 3")
+		return
+	if raycast_result[0]==0 or raycast_result[2]>3: #you left the peleton or are in front
+		in_peloton = false
+	else:
+		in_peloton = true
+	
+	#behaviorChange(delta, elevation)
+	if behavior == "cruise":
+		wanted_power = cruise(elevation, raycast_result)
+	elif  behavior == "attack":
+		wanted_power = attack()
+	
+	var atcual_power = wanted_power
+	if wanted_power > sustainable_watt:
+		atcual_power = min(max_possible_power(), wanted_power)
+		
+	acceleration = acceleration_based_on_speed(speed, elevation, atcual_power, in_peloton)
+	fatigue_changes(atcual_power)
+	speed = max(0.5,speed+acceleration*delta)
+
+func cruise(elevation_, ray_hits):
+	if not in_peloton:
+		return solo()
+	var dist_to_center = ray_hits[1]
+	var dist_to_1 = ray_hits[2]
+	var dist_to_2 = ray_hits[3]
+	if dist_to_center != null:
+		var sep_mod = 0
+		if dist_to_2 != null and dist_to_2 != 0:
+			sep_mod = (1/dist_to_2) #something high
+		elif dist_to_1 != null and dist_to_1 != 0: 
+			sep_mod = (1/dist_to_1) #something high
+		var wanted_additional_acceleration = dist_to_center * cohesion_c - sep_mod * separation_c
+		return max(calc_watt_current_state(speed, elevation_ , wanted_additional_acceleration, true), sustainable_watt*0.8)
+	else: 
+		print("shouldn't happen")	
+		return 
+	
+func attack():
+	return initial_breakout_watt
+
+func solo():
+	return sustainable_watt
+	
+func behaviorChange(delta, elevation_):
+	if self.progress_ratio > 0.99:
+		behavior = "attack"
+		return
+	
+	if behavior == "attack":
+		if elevation_<0 or rng.randi_range(0,1000) < 8*delta:
+			behavior = "cruise"
+			return
+	
+	if behavior == "cruise" and elevation_>0.06: # 0.314 rad is 5%
+		if rng.randi_range(0,10000) < 8*(elevation_/0.12)*delta:
+			behavior = "attack"
+	
+func fatigue_changes(current_watt):
+	fatigue = max(0, fatigue + current_watt - sustainable_watt)
+	return
+
+func calc_watt_current_state(speed_ms, elevation, acceleration_mss, in_peloton_=false):
+	#see acceleration_based_on_speed for constant explain
+	var drag_modifier = 1
+	if in_peloton_:
+		drag_modifier = 0.7
+	return 82.9897 * speed_ms * (acceleration_mss + 0.0024 * drag_modifier * speed_ms**2 + 0.0390 + 9.81 * sin(elevation))
+	
+func acceleration_based_on_speed(speed_ms, elevation, power, in_peloton_ = false):
+	#Power: 1,200 W (300-1500)   -   DriveTrain efficientcy: 0.97, aka 3% loss
+	#Air density: $1.225 \, kg/m^3 at Sea level, 15C$   -  Drag Area: 0.32 m^2
+	#Mass: 80 kg -  Rotating mass: 0.5 kg   -   Gravity: 9.81 m/s^2
+	#Rolling Resistance: 0.004   -    Speed in meter pr sec
+	#(((1200*0.97)/speed)-(0.5*1.225*0.32*speed^2)-(80*9.81*0.004)-9.81*sin(elevation)*80.5/(80+0.5)
+	var drag_modifier = 1
+	if in_peloton_:
+		drag_modifier = 0.7
+	return ((power*0.97/80.5)/speed_ms)-0.0024*drag_modifier*speed_ms**2-0.0390-9.81*sin(elevation)
+	
+func max_possible_power():
+	if fatigue < fatigue_threashold:
+		return sustainable_watt + watt_limited_by_stamina()
+	else:
+		return watt_limited_by_fatigue()
+	
+func watt_limited_by_fatigue():
+	return (sustainable_watt+watt_limited_by_stamina())*exp(-a_fatigue_resistence * (fatigue - fatigue_threashold))
+	
+func watt_limited_by_stamina():
+	var break_away_bonus = initial_breakout_watt-sustainable_watt
+	return break_away_bonus*exp(-1*b_stamina_degresse*break_away_bonus*total_time)
+	
+func set_watts(sustainable_watt_ = 355, initial_breakout_watt_ = 531):
+	sustainable_watt = sustainable_watt_
+	initial_breakout_watt = initial_breakout_watt_
+
+#Helper Functions
 func get_camera_node() -> Camera3D:
 	return $Camera3D
 	
 func safe_queue_free() -> void:
 	freeing_bike.emit(self)
 	queue_free()
-
-func _on_bike_proximity_area_body_exited(body: Node3D) -> void:
-	if body.name == "BikeHitBox" and stamina >= staminaSlowdownThreashold:
-		var pObject = body
-		while pObject.get_parent() == null:
-			pObject = pObject.get_parent()
-		var bike = pObject
-		if bike.name == "Bike": 
-			acceleration = max(acceleration, bike.acceleration)
+	

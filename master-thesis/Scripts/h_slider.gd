@@ -1,6 +1,6 @@
 extends HSlider
 
-@export var slider_multipliers: Array[float] = [.5, 1, 2, 10, 20, 100]
+@export var slider_multipliers: Array[float] = [.5, 1, 2, 4, 8, 16]
 
 @export var label_prefix = "Time scale: " 
 
@@ -19,9 +19,6 @@ func _on_value_changed(new_value: int):
 	Engine.time_scale = new_multiplier
 	
 	set_label(new_multiplier)
-	
-	
-	
 	
 func set_label(multiplier : float):
 	$Label.text = label_prefix + str(multiplier)
