@@ -105,12 +105,6 @@ func control2(delta):
 		
 	acceleration = acceleration_based_on_speed(speed, elevation, atcual_power, in_peloton)
 	fatigue_changes(atcual_power)
-	#if in_peloton and fatigue != 0:
-		#print("wanted power:", wanted_power, " Atual power:", atcual_power, " Difference:", atcual_power-wanted_power, " Elevation:", elevation)
-		#if rng.randi_range(0,4)<1:
-			#print(fatigue)
-	if int(floor(total_time))%10 == 0:
-		print(speed, "  ", fatigue)
 	speed = max(0.5,speed+acceleration*delta)
 
 func cruise(elevation_, ray_hits):

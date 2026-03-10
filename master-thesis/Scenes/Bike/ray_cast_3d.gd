@@ -1,7 +1,7 @@
 extends RayCast3D
 var timer := 0.0
 var timer_threashold = 0
-var RayCastLength = 20
+var RayCastLength = 30
 
 func _ready() -> void:
 	timer_threashold= 1.0/get_parent().pr_sec_checks
