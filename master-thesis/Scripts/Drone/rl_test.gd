@@ -46,9 +46,9 @@ func get_obs() -> Dictionary:
 	var local_velocity = _player.global_transform.basis.inverse() * _player.linear_velocity
 
 	# Normalize
-	closest_bike_pos = closest_bike_pos / 50.0   # max expected distance
-	bike_speed = bike_speed / 30.0               # max bike speed ~30 m/s
-	local_velocity = local_velocity / 10.0       # max expected drone speed
+	closest_bike_pos = closest_bike_pos / sqrt(pow(26.0, 2) + pow(5.0, 2))   # max expected distance. Max distance is sqrt(26^2 + 5^2) ~ 26.5 m (diagonal of drone detection box)
+	bike_speed = bike_speed / 22.0               # max bike speed ~22 m/s
+	local_velocity = local_velocity / 15.0       # max expected drone speed
 
 	var obs = [
 		1.0 if bikes_in_camera.size() > 0 else 0.0,  # bike visible flag
@@ -97,4 +97,4 @@ func set_action(action) -> void:
 		action["direction"][0],
 		action["direction"][1],
 		action["direction"][2]
-	).normalized()
+	)
