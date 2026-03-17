@@ -6,7 +6,7 @@ const drone = preload("res://Scenes/Drone/Drone.tscn")
 @onready var path_instance : Path3D
 var rng = RandomNumberGenerator.new()
 
-const bike_count = 40
+const bike_count = 60
 
 func _ready():
 	path_instance = $BikePath3d
