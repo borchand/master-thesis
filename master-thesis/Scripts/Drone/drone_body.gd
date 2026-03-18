@@ -4,6 +4,20 @@ extends RigidBody3D
 @onready var target_position = null
 @onready var target_speed = null
 @onready var target_bike = null
+@export var behind_distance := 4.0
+@export var height_offset := 5.0
+@export var max_torque := 2.0
+@export var yaw_gain := 2.2
+@export var torque_zone := 0.05
+@export var min_distance := 3.5
+@export var max_distance := 4.5
+@export var catchup_gain := 3.5
+@export var max_catchup_speed := 14.0
+@export var max_force := 18.0
+@export var brake_force := 40.0
+@export var y_gain := 8.0
+@export var y_damp := 4.0
+@export var max_up_force := 8.0
 
 func _physics_process(_delta):
 	get_nearest_position(drone_detector.bike_set)
@@ -31,8 +45,6 @@ func search_spin():
 	var up = global_transform.basis.y
 	apply_torque(up * max_torque)
 	
-@export var behind_distance := 4.0
-@export var height_offset := 5.0
 func get_follow_data():
 	# Info from bike that is being followed. Flattened to reduce interference from height offset
 	# Direction forward is -z 
@@ -79,9 +91,6 @@ func get_follow_data():
 		"side_offset": side_offset
 	}
 
-@export var max_torque := 2.0
-@export var yaw_gain := 2.2
-@export var torque_zone := 0.05
 func rotate_towards_bike(bike_forward: Vector3, drone_forward: Vector3):
 	#The axis to rotate about. 
 	var up = global_transform.basis.y
@@ -98,10 +107,6 @@ func rotate_towards_bike(bike_forward: Vector3, drone_forward: Vector3):
 		var torque_strength = clamp(yaw_error * yaw_gain, -1.0, 1.0) * max_torque
 		apply_torque(up * torque_strength)
 
-@export var min_distance := 3.5
-@export var max_distance := 4.5
-@export var catchup_gain := 3.5
-@export var max_catchup_speed := 14.0
 func compute_desired_velocity(data) -> Vector3:
 	var desired_velocity = data.bike_velocity
 	#How far is the drone off in terms of direction, too far behind/in front. Ideally behind
@@ -121,17 +126,12 @@ func compute_desired_velocity(data) -> Vector3:
 
 	return desired_velocity
 
-@export var max_force := 18.0
-@export var brake_force := 40.0
 func apply_horizontal_follow_force(desired_velocity: Vector3, data):
 	apply_central_force(clamp_vector(desired_velocity - data.drone_velocity, max_force))
 
 	if data.forward_offset > 0.5:
 		apply_central_force(-data.bike_forward * brake_force)
 
-@export var y_gain := 8.0
-@export var y_damp := 4.0
-@export var max_up_force := 8.0
 func control_height(desired_pos: Vector3):
 	#How far from the target height
 	var y_error = desired_pos.y - global_position.y
