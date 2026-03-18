@@ -33,18 +33,28 @@ func _ready():
 		
 	for i in range(bike_count):
 		add_bike()
-		add_drone(Vector3(-i, 5, 2))
+		add_drone(i)
 
 	$Menu/OtherContainer/FollowDroneInPos.max_value = bike_count - 1
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 
-func add_drone(start_position: Vector3):
+func add_drone(bike_index: int):
 	var drone_instance = drone.instantiate()
-	drone_instance.set_position(start_position)
 	drone_instance.is_rl = is_rl
 	var drone_camera = drone_instance.get_node("Camera3D")
 	shared.drone_camera_lists[instance_id].append(drone_camera)
 	add_child(drone_instance)
+	if is_rl and bike_index < shared.bike_lists[instance_id].size():
+		var bike = shared.bike_lists[instance_id][bike_index]
+		var bike_forward = -bike.global_transform.basis.z
+		bike_forward.y = 0
+		bike_forward = bike_forward.normalized()
+		var desired_pos = bike.global_position - bike_forward * drone_instance.behind_distance
+		desired_pos.y = bike.global_position.y + drone_instance.height_offset
+		drone_instance.set_position(desired_pos)
+		drone_instance.look_at(desired_pos + bike_forward, Vector3.UP)
+	else:
+		drone_instance.set_position(Vector3(-bike_index, 5, 2))
 
 func add_bike():
 	# create bike instance

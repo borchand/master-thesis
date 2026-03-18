@@ -98,11 +98,26 @@ func reset():
 	drone.target_bike = null
 	drone.target_position = null
 	drone.total_time_since_last_scan = 10.0
-	drone.set_position(Vector3(0, drone.height_offset + 2.0, 0))
 	# Load a new random track and reset the bike
 	var world = drone.get_parent()
 	if world.is_rl:
-		world.reset_track_and_bike()
+		# Only reset the track/bike if no bike exists yet (prevents double-reset
+		# when sync.gd re-sets needs_reset after an internal reset already ran)
+		var bikes = shared.bike_lists[world.instance_id]
+		if bikes.is_empty():
+			world.reset_track_and_bike()
+			bikes = shared.bike_lists[world.instance_id]
+		# Position drone behind the bike
+		if not bikes.is_empty():
+			drone.target_bike = bikes[0]
+			drone.set_position(_get_desired_pos())
+			var bike_forward = -drone.target_bike.global_transform.basis.z
+			bike_forward.y = 0
+			drone.look_at(drone.global_position + bike_forward.normalized(), Vector3.UP)
+		else:
+			drone.set_position(Vector3(0, drone.height_offset + 2.0, 0))
+	else:
+		drone.set_position(Vector3(0, drone.height_offset + 2.0, 0))
 
 func set_action(action) -> void:
 	var thrust = action["thrust"]
