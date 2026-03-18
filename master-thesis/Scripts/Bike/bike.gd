@@ -23,6 +23,8 @@ var accelerationRate = 0.0001
 var deaccelerationRate = 0.0002
 var stamina = 100.0
 
+var is_rl: bool = false
+
 var speed = 9.0
 var acceleration = 0.0
 
@@ -53,8 +55,8 @@ func _process(delta):
 		
 	# move bike forward
 	self.progress += speed * delta
+	print("Bike: ", self.name, " Progress: ", self.progress, " Speed: ", speed, " Stamina: ", stamina, " Fatigue: ", fatigue)
 	if self.progress >= max_progress:
-		# remove bike when it reaches the end of the path
 		print("Bike: ", self.name, " Finish time: ", total_time)
 		safe_queue_free()
 	
@@ -179,7 +181,7 @@ func watt_limited_by_fatigue():
 func watt_limited_by_stamina():
 	var break_away_bonus = initial_breakout_watt-sustainable_watt
 	return break_away_bonus*exp(-1*b_stamina_degresse*break_away_bonus*total_time)
-	
+
 func set_watts(sustainable_watt_ = 355, initial_breakout_watt_ = 531):
 	sustainable_watt = sustainable_watt_
 	initial_breakout_watt = initial_breakout_watt_
@@ -189,6 +191,7 @@ func get_camera_node() -> Camera3D:
 	return $Camera3D
 	
 func safe_queue_free() -> void:
+	print("Queue freeing bike: ", self.name)
 	freeing_bike.emit(self)
 	queue_free()
 	

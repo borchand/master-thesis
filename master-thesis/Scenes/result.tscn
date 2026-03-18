@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://dugh3kvw5843t"]
+
+[ext_resource type="Script" uid="uid://c16g2vvptkvge" path="res://addons/godot_rl_agents/sync.gd" id="1_ojf0l"]
+[ext_resource type="PackedScene" uid="uid://fqaxsomnll1" path="res://Scenes/world.tscn" id="2_37uq0"]
+
+[node name="Result" type="Node" unique_id=443178183]
+
+[node name="Sync" type="Node" parent="." unique_id=295556960]
+script = ExtResource("1_ojf0l")
+control_mode = 2
+action_repeat = 4
+speed_up = 10.0
+onnx_model_path = "model.onnx"
+metadata/_custom_type_script = "uid://c16g2vvptkvge"
+
+[node name="World" parent="." unique_id=1006143094 instance=ExtResource("2_37uq0")]
+is_rl = true

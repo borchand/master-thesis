@@ -1,5 +1,7 @@
 extends RigidBody3D
 
+var is_rl: bool = false
+
 @onready var drone_detector: DroneDetection = $"Camera_detection"
 @onready var target_position = null
 @onready var target_speed = null
@@ -19,6 +21,24 @@ extends RigidBody3D
 @export var max_up_force := 8.0
 @export var torque_zone := 0.8
 
+func _physics_process(_delta):
+	if is_rl:
+		return
+
+	total_time_since_last_scan += _delta
+	
+	if drone_detector.bike_set.size() > 0 and total_time_since_last_scan >= 10:
+		total_time_since_last_scan = 0
+		#get_nearest_position(drone_detector.bike_set)
+		get_random_position(drone_detector.bike_set)
+	
+	if target_position:
+		if shared.drone_controlled:
+			move_by_keyboard()
+		else:
+			follow_target()
+	else:
+		search_spin()
 
 func follow_target():
 	if target_bike == null:
@@ -74,22 +94,6 @@ func follow_target():
 	y_force = clamp(y_force, -max_up_force, max_up_force)
 
 	apply_central_force(Vector3(0, y_force, 0))
-	
-func _physics_process(_delta):
-	total_time_since_last_scan += _delta
-	
-	if drone_detector.bike_set.size() > 0 and total_time_since_last_scan >= 10:
-		total_time_since_last_scan = 0
-		#get_nearest_position(drone_detector.bike_set)
-		get_random_position(drone_detector.bike_set)
-	
-	if target_position:
-		if shared.drone_controlled:
-			move_by_keyboard()
-		else:
-			follow_target()
-	else:
-		search_spin()
 
 func search_spin():
 	var up = global_transform.basis.y
