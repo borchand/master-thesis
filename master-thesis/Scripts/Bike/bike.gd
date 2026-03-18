@@ -28,7 +28,7 @@ var acceleration = 0.0
 
 var sustainable_force = 25 # not used  
 var sustainable_watt = null
-var initial_breakout_watt = 531
+var initial_breakout_watt = null
 var a_fatigue_resistence = 0.00003
 var fatigue_threashold = 52800.0
 var b_stamina_degresse = 0.0000002
@@ -44,7 +44,8 @@ func _ready():
 	if staminaRegen == null:
 		staminaRegen = rng.randf_range(3.0, 4.0)
 	
-	self.progress_ratio = 0.001
+	#self.progress_ratio = 0.001
+	#self.progress_ratio = 0.992
 	
 func _process(delta):
 	timer += delta
@@ -90,7 +91,7 @@ func control2(delta):
 	if len(raycast_result) != 4: 
 		print("Ray_cast length is not 3")
 		return
-	if raycast_result[0]==0 or raycast_result[2]>6: #you left the peleton or are in front
+	if raycast_result[0]==0 or raycast_result[2]>6 or progress_ratio>=0.985: #you left the peleton or are in front
 		in_peloton = false
 	else:
 		in_peloton = true
@@ -108,11 +109,10 @@ func control2(delta):
 	acceleration = acceleration_based_on_speed(speed, elevation, atcual_power, in_peloton)
 	fatigue_changes(atcual_power)
 
-	if int(total_time)%5 == 0:
-		
+	#if int(total_time)%5 == 0:
 		#print(name, "  ", atcual_power/sustainable_watt, "  ", raycast_result[0], "  ", snapped(raycast_result[1],0.01), "  " )
-		if (raycast_result[2] != null and atcual_power != null) and (raycast_result[2]>3 and atcual_power < sustainable_watt):
-			print("TO-SLOW: ", atcual_power, "  ", sustainable_watt, "   ", raycast_result[2])
+		#if (raycast_result[2] != null and atcual_power != null) and (raycast_result[2]>3 and atcual_power < sustainable_watt):
+			#print("TO-SLOW: ", atcual_power, "  ", sustainable_watt, "   ", raycast_result[2])
 	speed = max(0.5,speed+acceleration*delta)
 
 func cruise(elevation_, ray_hits):
@@ -144,26 +144,44 @@ func solo():
 	return sustainable_watt
 	
 func behaviorChange(delta, elevation_):
-	if self.progress_ratio > 0.99:
+	if self.progress_ratio > 0.985 and behavior != "attack":
 		behavior = "attack"
+		print("EndAttack ", name, "  ", total_time, "  ", fatigue)
 		return
 	
-	if behavior == "attack":
-		if elevation_<0 or rng.randi_range(0,1000) < 8*delta:
+	if behavior == "attack" and self.progress_ratio <= 0.985:
+		if elevation_<0 or rng.randi_range(0,1000) < 7*delta:
 			behavior = "cruise"
-			print("chill ", name)
+			print("chill ", name, "  ", total_time, "  ", fatigue)
 			return
 	
-	if behavior == "cruise" and elevation_>0.06: # 0.314 rad is 5%
-		if rng.randi_range(0,10000) < 8*(elevation_/0.12)*delta:
+	if behavior == "cruise" and elevation_>0.017: # 0.09 rad is 5%
+		if rng.randi_range(0,10000) < (12*(elevation_/0.034)*delta)/max(1-progress_ratio,0.15):
 			behavior = "attack"
-			print("ATTACK ",  name)
+			print("ATTACK ",  name, "  ", total_time, "  ", fatigue, "  ", elevation_)
 	
 func fatigue_changes(current_watt):
 	if current_watt == sustainable_watt:
 		return
 	fatigue = max(0, fatigue + current_watt - sustainable_watt)
 
+func max_possible_power():
+	if fatigue < fatigue_threashold:
+		return sustainable_watt + watt_limited_by_stamina()
+	else:
+		return watt_limited_by_fatigue()
+
+func watt_limited_by_fatigue():
+	return (sustainable_watt+watt_limited_by_stamina())*exp(-a_fatigue_resistence * (fatigue - fatigue_threashold))
+	
+func watt_limited_by_stamina():
+	var break_away_bonus = initial_breakout_watt-sustainable_watt
+	return break_away_bonus*exp(-1*b_stamina_degresse*break_away_bonus*total_time)
+
+#Controlter3 
+
+
+#Helper Functions
 func calc_watt_current_state(speed_ms, elevation, acceleration_mss, in_peloton_=false):
 	#see acceleration_based_on_speed for constant explain
 	var drag_modifier = 1
@@ -182,24 +200,10 @@ func acceleration_based_on_speed(speed_ms, elevation, power, in_peloton_ = false
 		drag_modifier = 0.7
 	return ((power*0.97/80.5)/speed_ms)-0.0024*drag_modifier*speed_ms**2-0.0390-9.81*sin(elevation)
 	
-func max_possible_power():
-	if fatigue < fatigue_threashold:
-		return sustainable_watt + watt_limited_by_stamina()
-	else:
-		return watt_limited_by_fatigue()
-	
-func watt_limited_by_fatigue():
-	return (sustainable_watt+watt_limited_by_stamina())*exp(-a_fatigue_resistence * (fatigue - fatigue_threashold))
-	
-func watt_limited_by_stamina():
-	var break_away_bonus = initial_breakout_watt-sustainable_watt
-	return break_away_bonus*exp(-1*b_stamina_degresse*break_away_bonus*total_time)
-	
 func set_watts(sustainable_watt_ = 355, initial_breakout_watt_ = 531):
 	sustainable_watt = sustainable_watt_
 	initial_breakout_watt = initial_breakout_watt_
-
-#Helper Functions
+	
 func get_camera_node() -> Camera3D:
 	return $Camera3D
 	

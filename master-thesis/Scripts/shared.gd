@@ -42,7 +42,8 @@ func get_camera_of_bike_in_pos(pos: int) -> Camera3D:
 	bike_progress.sort_custom(func(a, b):
 		return a.keys()[0] > b.keys()[0]
 	)
-
+	if pos>=len(bike_progress):
+		pos = len(bike_progress)-1
 	return bike_progress[pos].values()[0]
 
 func toggle_free_roam():
