@@ -9,7 +9,7 @@ var rng = RandomNumberGenerator.new()
 var max_progress: float
 
 var pr_sec_checks = 4
-var timer_threashold = 1.0/pr_sec_checks
+var timer_threashold = 1.0 / pr_sec_checks
 var timer = 0
 var total_time = 0 
 
@@ -44,9 +44,6 @@ func _ready():
 	if staminaRegen == null:
 		staminaRegen = rng.randf_range(3.0, 4.0)
 	
-	#self.progress_ratio = 0.001
-	#self.progress_ratio = 0.992
-	
 func _process(delta):
 	timer += delta
 	total_time += delta
@@ -69,29 +66,29 @@ func coltroler(delta):
 func control1(delta): #No longer used
 	#Slow down if stamina low
 	if stamina<staminaSlowdownThreashold:
-		acceleration -= deaccelerationRate*(staminaSlowdownThreashold-stamina)
-	elif stamina>staminaSpeedupThreashold and (rng.randi_range(0,100)+(staminaSpeedupThreashold-stamina)*0.3) < speedUpProbability :
+		acceleration -= deaccelerationRate * (staminaSlowdownThreashold - stamina)
+	elif stamina>staminaSpeedupThreashold and (rng.randi_range(0,100) + (staminaSpeedupThreashold - stamina) * 0.3) < speedUpProbability :
 		acceleration += accelerationRate
 	#Change in speed and stamina
-	speed = max(Minspeed, min(Maxspeed, speed+acceleration))
-	stamina = min(100.0, stamina+staminaRegen*0.25-speed*0.5)
-	if speed==Minspeed: #on min speed stamina regenerate is double
-		acceleration = max(0,acceleration)
-		stamina += staminaRegen*0.5 
+	speed = max(Minspeed, min(Maxspeed, speed + acceleration))
+	stamina = min(100.0, stamina + staminaRegen * 0.25 - speed * 0.5)
+	if speed == Minspeed: #on min speed stamina regenerate is double
+		acceleration = max(0, acceleration)
+		stamina += staminaRegen * 0.5 
 		
 func setRegen(regen: float) -> void:
 	staminaRegen = regen
 
 #Controller2
 func control2(delta):
-	var elevation = -1*bikebody.global_rotation.x #positive = going up
+	var elevation = -1 * bikebody.global_rotation.x #positive = going up
 	var wanted_power  = sustainable_watt
 	
 	var raycast_result = raycast.run_raycast()
 	if len(raycast_result) != 4: 
 		print("Ray_cast length is not 3")
 		return
-	if raycast_result[0]==0 or raycast_result[2]>6 or progress_ratio>=0.985: #you left the peleton or are in front
+	if raycast_result[0] == 0 or raycast_result[2] > 6 or progress_ratio >= 0.985: #you left the peleton or are in front
 		in_peloton = false
 	else:
 		in_peloton = true
@@ -109,11 +106,7 @@ func control2(delta):
 	acceleration = acceleration_based_on_speed(speed, elevation, atcual_power, in_peloton)
 	fatigue_changes(atcual_power)
 
-	#if int(total_time)%5 == 0:
-		#print(name, "  ", atcual_power/sustainable_watt, "  ", raycast_result[0], "  ", snapped(raycast_result[1],0.01), "  " )
-		#if (raycast_result[2] != null and atcual_power != null) and (raycast_result[2]>3 and atcual_power < sustainable_watt):
-			#print("TO-SLOW: ", atcual_power, "  ", sustainable_watt, "   ", raycast_result[2])
-	speed = max(0.5,speed+acceleration*delta)
+	speed = max(0.5, speed + acceleration * delta)
 
 func cruise(elevation_, ray_hits):
 	if not in_peloton:
@@ -124,15 +117,12 @@ func cruise(elevation_, ray_hits):
 	if dist_to_center != null:
 		var sep_mod = 0
 		if dist_to_3 != null:
-			sep_mod = 1/max(0.5,dist_to_3)#something high
+			sep_mod = 1 / max(0.5, dist_to_3)   #something high
 		elif dist_to_1 != null:
-			sep_mod = (1/(max(0.5,dist_to_1))) #something high
+			sep_mod = 1/ max(0.5, dist_to_1)  #something high
 		
-		var additional_force_amplification = dist_to_center*cohesion_c -  sep_mod*separation_c
+		var additional_force_amplification = dist_to_center * cohesion_c -  sep_mod * separation_c
 		return sustainable_watt*0.7*additional_force_amplification
-		#var wanted_additional_acceleration = dist_to_center * cohesion_c - sep_mod * separation_c
-		#print("wanted acceleration: ", wanted_additional_acceleration)
-		#return max(calc_watt_current_state(speed, elevation_ , wanted_additional_acceleration, true), sustainable_watt*0.6)
 	else: 
 		print("shouldn't happen")	
 		return 
@@ -150,13 +140,13 @@ func behaviorChange(delta, elevation_):
 		return
 	
 	if behavior == "attack" and self.progress_ratio <= 0.985:
-		if elevation_<0 or rng.randi_range(0,1000) < 7*delta:
+		if elevation_ < 0 or rng.randi_range(0, 1000) < 7 * delta:
 			behavior = "cruise"
 			print("chill ", name, "  ", total_time, "  ", fatigue)
 			return
 	
-	if behavior == "cruise" and elevation_>0.017: # 0.09 rad is 5%
-		if rng.randi_range(0,10000) < (12*(elevation_/0.034)*delta)/max(1-progress_ratio,0.15):
+	if behavior == "cruise" and elevation_ > 0.017: # 0.09 rad is 5%
+		if rng.randi_range(0,10000) < (12 * (elevation_ / 0.034) * delta) / max(1-progress_ratio, 0.15):
 			behavior = "attack"
 			print("ATTACK ",  name, "  ", total_time, "  ", fatigue, "  ", elevation_)
 	
@@ -172,11 +162,11 @@ func max_possible_power():
 		return watt_limited_by_fatigue()
 
 func watt_limited_by_fatigue():
-	return (sustainable_watt+watt_limited_by_stamina())*exp(-a_fatigue_resistence * (fatigue - fatigue_threashold))
+	return (sustainable_watt + watt_limited_by_stamina()) * exp(-a_fatigue_resistence * (fatigue - fatigue_threashold))
 	
 func watt_limited_by_stamina():
-	var break_away_bonus = initial_breakout_watt-sustainable_watt
-	return break_away_bonus*exp(-1*b_stamina_degresse*break_away_bonus*total_time)
+	var break_away_bonus = initial_breakout_watt - sustainable_watt
+	return break_away_bonus*exp(-1 * b_stamina_degresse * break_away_bonus * total_time)
 
 #Controlter3 
 
@@ -198,7 +188,7 @@ func acceleration_based_on_speed(speed_ms, elevation, power, in_peloton_ = false
 	var drag_modifier = 1
 	if in_peloton_:
 		drag_modifier = 0.7
-	return ((power*0.97/80.5)/speed_ms)-0.0024*drag_modifier*speed_ms**2-0.0390-9.81*sin(elevation)
+	return ((power * 0.97 / 80.5) / speed_ms) - 0.0024 * drag_modifier * speed_ms**2 - 0.0390 - 9.81 * sin(elevation)
 	
 func set_watts(sustainable_watt_ = 355, initial_breakout_watt_ = 531):
 	sustainable_watt = sustainable_watt_
