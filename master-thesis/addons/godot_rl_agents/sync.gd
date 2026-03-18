@@ -5,7 +5,7 @@ extends Node
 enum ControlModes { HUMAN, TRAINING, ONNX_INFERENCE }
 @export var control_mode: ControlModes = ControlModes.TRAINING
 @export_range(1, 10, 1, "or_greater") var action_repeat := 8
-@export_range(0, 10, 0.1, "or_greater") var speed_up := 1.0
+@export_range(0, 100, 0.1, "or_greater") var speed_up := 1.0
 @export var onnx_model_path := ""
 
 # Onnx model stored for each requested path

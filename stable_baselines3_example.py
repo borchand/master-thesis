@@ -193,7 +193,6 @@ if args.resume_model_path is None:
         env,
         ent_coef=0.0001,
         verbose=2,
-        n_steps=32,
         tensorboard_log=args.experiment_dir,
         learning_rate=learning_rate,
     )

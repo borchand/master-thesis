@@ -55,7 +55,6 @@ func _process(delta):
 		
 	# move bike forward
 	self.progress += speed * delta
-	print("Bike: ", self.name, " Progress: ", self.progress, " Speed: ", speed, " Stamina: ", stamina, " Fatigue: ", fatigue)
 	if self.progress >= max_progress:
 		print("Bike: ", self.name, " Finish time: ", total_time)
 		safe_queue_free()
@@ -191,7 +190,6 @@ func get_camera_node() -> Camera3D:
 	return $Camera3D
 	
 func safe_queue_free() -> void:
-	print("Queue freeing bike: ", self.name)
 	freeing_bike.emit(self)
 	queue_free()
 	

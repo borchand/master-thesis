@@ -83,6 +83,8 @@ func bike_freed(freed_bike: Node3D):
 	shared.bike_lists[instance_id].erase(freed_bike)
 
 func reset_track_and_bike() -> void:
+	for bike in shared.bike_lists[instance_id].duplicate():
+		bike.safe_queue_free()
 	randomize_track()
 
 	for i in bike_count:
