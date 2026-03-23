@@ -14,9 +14,14 @@ var _last_force: Vector3 = Vector3.ZERO
 var _last_torque: float = 0.0
 
 func _ready():
+	if not get_parent().is_rl:
+		control_mode = ControlModes.HUMAN
+		return
 	super._ready()
 
 func _physics_process(_delta):
+	if not get_parent().is_rl:
+		return
 	if needs_reset:
 		reset()
 		return
