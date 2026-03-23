@@ -4,16 +4,15 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://c0yv5xkqpjxc"
 path.s3tc="res://.godot/imported/BiciCorsa_A1_diffuse.jpeg-d0c7ef2a182b15b583ddb0fecd080a1b.s3tc.ctex"
-path.etc2="res://.godot/imported/BiciCorsa_A1_diffuse.jpeg-d0c7ef2a182b15b583ddb0fecd080a1b.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://sprites/racing_bicycle/textures/BiciCorsa_A1_diffuse.jpeg"
-dest_files=["res://.godot/imported/BiciCorsa_A1_diffuse.jpeg-d0c7ef2a182b15b583ddb0fecd080a1b.s3tc.ctex", "res://.godot/imported/BiciCorsa_A1_diffuse.jpeg-d0c7ef2a182b15b583ddb0fecd080a1b.etc2.ctex"]
+dest_files=["res://.godot/imported/BiciCorsa_A1_diffuse.jpeg-d0c7ef2a182b15b583ddb0fecd080a1b.s3tc.ctex"]
 
 [params]
 
