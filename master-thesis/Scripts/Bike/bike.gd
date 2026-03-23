@@ -166,16 +166,16 @@ func calc_watt_current_state(speed_ms, elevation, acceleration_mss, in_peloton_=
 	return 82.9897 * speed_ms * (acceleration_mss + 0.0024 * drag_modifier * speed_ms**2 + 0.0390 + 9.81 * sin(elevation))
 
 func acceleration_based_on_speed(speed_ms, elevation, power, in_peloton_ = false):
-    # Power: 1,200 W (300-1500)   -   DriveTrain efficientcy: 0.97, aka 3% loss
+	# Power: 1,200 W (300-1500)   -   DriveTrain efficientcy: 0.97, aka 3% loss
 	# Air density: $1.225 \, kg/m^3 at Sea level, 15C$   -  Drag Area: 0.32 m^2
 	# Mass: 80 kg -  Rotating mass: 0.5 kg   -   Gravity: 9.81 m/s^2
 	# Rolling Resistance: 0.004   -    Speed in meter pr sec
 	# (((1200*0.97)/speed)-(0.5*1.225*0.32*speed^2)-(80*9.81*0.004)-9.81*sin(elevation)*80.5/(80+0.5)
 	var drag_modifier = 1
 	if in_peloton_:
-	    drag_modifier = 0.7
-
-    return ((power * 0.97 / 80.5) / speed_ms) - 0.0024 * drag_modifier * speed_ms**2 - 0.0390 - 9.81 * sin(elevation)
+		drag_modifier = 0.7
+		
+	return ((power * 0.97 / 80.5) / speed_ms) - 0.0024 * drag_modifier * speed_ms**2 - 0.0390 - 9.81 * sin(elevation)
 
 func max_possible_power():
 	if fatigue < fatigue_threashold:
