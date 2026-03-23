@@ -11,6 +11,8 @@ const RL_TRACKS: Array[String] = [
 	"res://stages/rl-track-circle.json",
 	"res://stages/rl-track-circuit.json",
 	"res://stages/rl-track-hilly.json",
+	"res://stages/rl-track-straight.json",
+	"res://stages/rl-track-left-turn.json",
 ]
 
 @onready var path_instance : Path3D

@@ -8,8 +8,8 @@ var is_rl: bool = false
 @onready var target_bike = null
 @onready var total_time_since_last_scan = 10
 
-@export var max_torque := 2
-@export var max_force := 10
+@export var max_torque := 1
+@export var max_force := 15
 @export var behind_distance := 3
 @export var yaw_gain := 1.6
 @export var min_distance := 3

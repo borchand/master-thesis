@@ -76,5 +76,5 @@ is_rl = true
 [node name="Sync" type="Node" parent="." unique_id=825966693]
 script = ExtResource("1_1ydqc")
 action_repeat = 4
-speed_up = 100.0
+speed_up = 10.0
 metadata/_custom_type_script = "uid://c16g2vvptkvge"

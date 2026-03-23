@@ -1,10 +1,20 @@
 extends AIController3D
 
 @export var no_bike_reset_steps: int = 500
+@export var debug_draw: bool = true
+@export var debug_line_width: float = 0.1
 
 @onready var drone: RigidBody3D = $".."
 
 var _steps_without_bike: int = 0
+var _debug_lines: Array[MeshInstance3D] = []
+var _debug_force_line: MeshInstance3D = null
+var _debug_torque_line: MeshInstance3D = null
+var _last_force: Vector3 = Vector3.ZERO
+var _last_torque: float = 0.0
+
+func _ready():
+	super._ready()
 
 func _physics_process(_delta):
 	if needs_reset:
@@ -18,6 +28,7 @@ func _physics_process(_delta):
 		return
 
 	drone.target_bike = _get_target_bike()
+	_draw_debug_lines()
 
 	if drone.target_bike == null:
 		_steps_without_bike += 1
@@ -56,6 +67,59 @@ func _physics_process(_delta):
 		var cam_forward = -drone.target_bike.get_camera_node().global_transform.basis.z
 		var to_bike = (drone.target_bike.global_position - global_position).normalized()
 		reward += maxf(0.0, cam_forward.dot(to_bike)) * 0.2
+
+func _make_debug_line() -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(debug_line_width, debug_line_width, 1.0)
+	mi.mesh = box
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.no_depth_test = true
+	mi.material_override = mat
+	return mi
+
+func _place_debug_line(mi: MeshInstance3D, a: Vector3, b: Vector3, color: Color, up: Vector3 = Vector3.UP) -> void:
+	var dir := b - a
+	var length := dir.length()
+	if length < 0.001:
+		mi.visible = false
+		return
+	mi.global_position = (a + b) * 0.5
+	mi.global_transform.basis = Basis.looking_at(dir / length, up)
+	mi.scale = Vector3(1.0, 1.0, length)
+	(mi.material_override as StandardMaterial3D).albedo_color = color
+	mi.visible = true
+
+func _draw_debug_lines() -> void:
+	if not debug_draw:
+		return
+	var bikes = drone.drone_detector.bike_set.values()
+	# Grow bike line pool if needed
+	while _debug_lines.size() < bikes.size():
+		var mi := _make_debug_line()
+		drone.get_parent().add_child.call_deferred(mi)
+		_debug_lines.append(mi)
+	# Update bike lines
+	for i in bikes.size():
+		var bike_body: Bike_body = bikes[i]
+		var color := Color.GREEN if bike_body.get_parent() == drone.target_bike else Color.YELLOW
+		_place_debug_line(_debug_lines[i], drone.global_position, bike_body.global_position, color)
+	# Hide unused bike lines
+	for i in range(bikes.size(), _debug_lines.size()):
+		_debug_lines[i].visible = false
+	# Force vector line (red, scaled so max_force = 5 m)
+	if _debug_force_line == null:
+		_debug_force_line = _make_debug_line()
+		drone.get_parent().add_child.call_deferred(_debug_force_line)
+	_place_debug_line(_debug_force_line, drone.global_position,
+		drone.global_position + _last_force / drone.max_force * 5.0, Color.RED)
+	# Torque line (blue, along Y axis — up = positive yaw, down = negative yaw)
+	if _debug_torque_line == null:
+		_debug_torque_line = _make_debug_line()
+		drone.get_parent().add_child.call_deferred(_debug_torque_line)
+	_place_debug_line(_debug_torque_line, drone.global_position,
+		drone.global_position + Vector3.UP * _last_torque * 5.0, Color.BLUE, Vector3.FORWARD)
 
 func _get_desired_pos() -> Vector3:
 	var bike_forward = -drone.target_bike.global_transform.basis.z
@@ -142,16 +206,12 @@ func get_reward() -> float:
 
 func get_action_space() -> Dictionary:
 	return {
-		"central_force" : {
-			"size": 1,
-			"action_type": "continuous",
-		},
-		"torque" : {
-			"size": 1,
-			"action_type": "continuous",
-		},
-		"direction" : {
+		"thrust": {
 			"size": 3,
+			"action_type": "continuous",
+		},
+		"torque": {
+			"size": 1,
 			"action_type": "continuous",
 		},
 	}
@@ -183,17 +243,9 @@ func reset():
 		drone.set_position(Vector3(0, drone.height_offset + 2.0, 0))
 
 func set_action(action) -> void:
-	# central_force: map [-1,1] -> [0,1]
-	var normalized_central_force = (action["central_force"][0] + 1) / 2
-	var central_force = normalized_central_force * drone.max_force
-	# torque: full [-1,1] range so drone can rotate both ways
-	var torque = action["torque"][0] * drone.max_torque
-	# direction: interpreted as drone-local space, converted to global in drone_body
-	var direction = Vector3(
-		action["direction"][0],
-		action["direction"][1],
-		action["direction"][2]
-	)
-
-	drone.apply_central_force(global_transform.basis * direction * central_force)
-	drone.apply_torque(global_transform.basis.y * torque)
+	var thrust = action["thrust"]
+	var torque = action["torque"][0]
+	_last_force = drone.global_transform.basis * Vector3(thrust[0], thrust[1], thrust[2]) * drone.max_force
+	_last_torque = clamp(torque, -1.0, 1.0)
+	drone.apply_central_force(_last_force)
+	drone.apply_torque(drone.global_transform.basis.y * _last_torque * drone.max_torque)
