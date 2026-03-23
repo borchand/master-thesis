@@ -58,7 +58,7 @@ func _physics_process(_delta):
 
 		# Dense position reward: 1/(1+error) gives useful gradient at all distances.
 		# exp(-error/sigma) collapses to ~0 when far away, giving no signal to move.
-		var pos_error = global_position.distance_to(desired_pos)
+		var pos_error = drone.global_position.distance_to(desired_pos)
 		reward += 1.0 / (1.0 + pos_error)
 
 		# Speed-matching penalty: penalise forward speed mismatch to prevent overtaking.
@@ -70,7 +70,7 @@ func _physics_process(_delta):
 		# Camera centering bonus: smaller secondary signal so it does not dominate.
 		# Clamped to 0 so negative values (bike behind) do not subtract.
 		var cam_forward = -drone.target_bike.get_camera_node().global_transform.basis.z
-		var to_bike = (drone.target_bike.global_position - global_position).normalized()
+		var to_bike = (drone.target_bike.global_position - drone.global_position).normalized()
 		reward += maxf(0.0, cam_forward.dot(to_bike)) * 0.2
 
 func _make_debug_line() -> MeshInstance3D:
