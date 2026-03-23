@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://ck4tgouacykru"
 path.s3tc="res://.godot/imported/Cracked_Mud_001_DISP.png-3d2539d3d0b41afd2f3fb52f888cf3ca.s3tc.ctex"
+path.etc2="res://.godot/imported/Cracked_Mud_001_DISP.png-3d2539d3d0b41afd2f3fb52f888cf3ca.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://sprites/godot-material-mud-cracked/materials/mudCracked/Cracked_Mud_001_DISP.png"
-dest_files=["res://.godot/imported/Cracked_Mud_001_DISP.png-3d2539d3d0b41afd2f3fb52f888cf3ca.s3tc.ctex"]
+dest_files=["res://.godot/imported/Cracked_Mud_001_DISP.png-3d2539d3d0b41afd2f3fb52f888cf3ca.s3tc.ctex", "res://.godot/imported/Cracked_Mud_001_DISP.png-3d2539d3d0b41afd2f3fb52f888cf3ca.etc2.ctex"]
 
 [params]
 
