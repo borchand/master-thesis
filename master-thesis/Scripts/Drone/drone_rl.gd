@@ -224,7 +224,7 @@ func reset():
 	_steps_without_bike = 0
 	drone.target_bike = null
 	drone.target_position = null
-	drone.total_time_since_last_scan = 10.0
+
 	# Load a new random track and reset the bike
 	var world = drone.get_parent()
 	if world.is_rl:
