@@ -24,7 +24,7 @@ var is_rl: bool = false
 @export var max_up_force := 8.0
 
 func _physics_process(_delta):
-    if is_rl:
+	if is_rl:
 		return
 
 	get_nearest_position(drone_detector.bike_set)
