@@ -1,11 +1,18 @@
 extends Path3D
 
 @export var route_file_path : String = "res://stages/stage-1-route.json"
+@export var rl_route_file_path : String = "res://stages/rl-test-track.json"
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	self.curve.clear_points()
 	load_coords()
+
+func reload_for_rl() -> void:
+	route_file_path = rl_route_file_path                                                                                
+	self.curve = self.curve.duplicate()  # break the shared resource link                                             
+	self.curve.clear_points()                                                                                           
+	load_coords() 
 
 func load_coords():
 	var file = FileAccess.open(route_file_path, FileAccess.READ)
