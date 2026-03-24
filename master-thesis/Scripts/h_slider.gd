@@ -1,6 +1,6 @@
 extends HSlider
 
-@export var slider_multipliers: Array[float] = [.5, 1, 2, 4, 8, 16]
+@export var slider_multipliers: Array[float] = [.5, 1, 2, 4, 8, 16, 32, 64]
 
 @export var label_prefix = "Time scale: " 
 
@@ -16,8 +16,10 @@ func _ready():
 func _on_value_changed(new_value: int):
 	var new_multiplier = slider_multipliers[new_value]
 	
+	Engine.max_physics_steps_per_frame = int(new_multiplier)
 	Engine.time_scale = new_multiplier
 	Engine.physics_ticks_per_second = int(new_multiplier * 60)
+	
 	set_label(new_multiplier)
 	
 func set_label(multiplier : float):
