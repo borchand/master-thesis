@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bmlo511l3yfy2" path="res://Scripts/Drone/drone_body.gd" id="2_0xxxp"]
 [ext_resource type="Script" uid="uid://cuo14t1rph0hn" path="res://Scripts/Drone/drone_camera_detection.gd" id="3_5j1j2"]
 [ext_resource type="Script" uid="uid://b1h3vwlgsuca4" path="res://Scenes/Drone/drone_communication.gd" id="4_30xiw"]
+[ext_resource type="Script" uid="uid://gcw6nwfmc2yv" path="res://Scripts/Drone/drone_rl.gd" id="4_30xiw"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uvgqj"]
 size = Vector3(0.2685547, 0.09057617, 0.20922852)
@@ -52,3 +53,6 @@ script = ExtResource("4_30xiw")
 [node name="sensor" type="CollisionShape3D" parent="Drone_communication" unique_id=700398335]
 visible = false
 shape = SubResource("SphereShape3D_mj1ce")
+[node name="DroneRL" type="Node3D" parent="." unique_id=38669291]
+script = ExtResource("4_30xiw")
+metadata/_custom_type_script = "uid://dg8tmq3tcha7"

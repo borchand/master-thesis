@@ -2,6 +2,7 @@ extends Panel
 
 func _process(_delta):
 	set_target_bike(shared.follow_bike_in_pos)
+	set_target_drone(shared.followed_drone_index)
 
 	if !shared.drone_controlled and $ToggleContainer/DroneControl.button_pressed:
 		toggle_drone()
@@ -28,10 +29,11 @@ func _input(event):
 		get_tree().quit()
 		
 
-func set_target_bike(value:int):
-	
-	var follow_bike_in_pos = $OtherContainer/FollowBikeInPos
-	follow_bike_in_pos.value = value
+func set_target_bike(value: int):
+	$OtherContainer/FollowBikeInPos.value = value
+
+func set_target_drone(value: int):
+	$OtherContainer/FollowDroneInPos.value = value
 
 func toggle_follow_bike():
 	toggle_check_btn($ToggleContainer/FollowBike)
@@ -59,6 +61,9 @@ func _on_free_roam_toggled(_toggled_on):
 
 func _on_follow_bike_in_pos_value_changed(value):
 	shared.follow_bike_in_pos = value
+
+func _on_follow_drone_in_pos_value_changed(value):
+	shared.followed_drone_index = value
 
 func _on_drone_control_toggled(toggled_on):
 	if !toggled_on == shared.follow_drone:
