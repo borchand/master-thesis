@@ -10,17 +10,15 @@ func _ready():
 	max_value = slider_multipliers.size() - 1
 	tick_count = slider_multipliers.size()
 	value_changed.connect(_on_value_changed)
-	
+
 	set_label(current_speed)
 
 func _on_value_changed(new_value: int):
 	var new_multiplier = slider_multipliers[new_value]
 	
 	Engine.time_scale = new_multiplier
-	
+	Engine.physics_ticks_per_second = int(new_multiplier * 60)
 	set_label(new_multiplier)
 	
 func set_label(multiplier : float):
 	$Label.text = label_prefix + str(multiplier)
-	
-	

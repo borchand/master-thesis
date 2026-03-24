@@ -1,6 +1,13 @@
 extends RigidBody3D
+class_name Drone
+
+static var _next_id: int = 1
+var id: int
 
 @onready var drone_detector: DroneDetection = $"Camera_detection"
+@onready var drone_sensor: DroneCommunication = $"Drone_communication"
+
+@onready var sensor_readings = []
 @onready var target_position = null
 @onready var target_speed = null
 @onready var target_bike = null
@@ -19,9 +26,19 @@ extends RigidBody3D
 @export var y_damp := 4.0
 @export var max_up_force := 8.0
 
-func _physics_process(_delta):
-	get_nearest_position(drone_detector.bike_set)
+#For collission avoidance
+@export var avoid_radius := 10.0
+@export var avoid_strength := 8.0
+@export var max_avoid_speed := 10.0
 
+func _ready():
+	id = _next_id
+	_next_id += 1
+
+func _physics_process(_delta):
+	get_random_position(drone_detector.bike_set)
+	read_sensor(drone_sensor.drone_set)
+	
 	if is_instance_valid(target_bike):
 		follow_target()
 	else:
@@ -30,20 +47,36 @@ func _physics_process(_delta):
 #Controller for following a picked target
 func follow_target():
 	var follow_data = get_follow_data()
-	if follow_data == null:
-		#Do something here, maybe find new target
-		return
 	
 	rotate_towards_bike(follow_data.bike_forward, follow_data.drone_forward)
 
 	var desired_velocity = compute_desired_velocity(follow_data)
 	apply_horizontal_follow_force(desired_velocity, follow_data)
+	apply_collision_avoidance()
 
 	control_height(follow_data.desired_pos)
 
 func search_spin():
 	var up = global_transform.basis.y
 	apply_torque(up * max_torque)
+	apply_collision_avoidance()
+	
+func apply_collision_avoidance():
+	var avoidance_force = Vector3.ZERO
+
+	for reading in sensor_readings:
+		if reading.distance > avoid_radius:
+			continue
+
+		var away = global_position - reading.position
+		away.y = 0.0
+		away = away.normalized()
+
+		var weight = (avoid_radius - reading.distance) / avoid_radius
+
+		avoidance_force += away * weight * avoid_strength
+
+	apply_central_force(clamp_vector(avoidance_force, max_force))
 	
 func get_follow_data():
 	# Info from bike that is being followed. Flattened to reduce interference from height offset
@@ -159,6 +192,20 @@ func clamp_vector(v: Vector3, max_len: float) -> Vector3:
 func get_camera_node() -> Camera3D:
 	return $Camera3D
 
+func read_sensor(drones: Dictionary):
+	sensor_readings = []
+	
+	for drone in drones:
+		if drone.id != id:
+			sensor_readings.append(
+				{
+					"id": drone.id,
+					"position": drone.global_position,
+					"distance": global_position.distance_to(drone.global_position),
+					"direction": global_position.direction_to(drone.global_position)
+				}
+			)
+
 func get_nearest_position(bikes: Dictionary):
 	var closest = Vector3.ZERO
 	var minimum_distance = INF
@@ -187,22 +234,3 @@ func get_random_position(bikes: Dictionary):
 	target_position = bike.global_position
 	target_speed = bike.get_parent().speed
 	target_bike = bike.get_parent()
-
-func move_by_keyboard():
-	var dir = Vector3.ZERO
-
-	var forward = -global_transform.basis.z
-	var up = global_transform.basis.y
-
-	if Input.is_action_pressed("ui_up"):
-		dir += forward
-	if Input.is_action_pressed("ui_down"):
-		dir -= forward
-
-	if dir != Vector3.ZERO:
-		apply_central_force(dir.normalized() * max_force)
-
-	if Input.is_action_pressed("ui_left"):
-		apply_torque(up * max_torque)
-	if Input.is_action_pressed("ui_right"):
-		apply_torque(-up * max_torque)
