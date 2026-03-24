@@ -40,7 +40,7 @@ func _ready():
 	_next_id += 1
 
 func _physics_process(_delta):
-  if is_rl:
+	if is_rl:
 		return
 
 	get_random_position(drone_detector.bike_set)
