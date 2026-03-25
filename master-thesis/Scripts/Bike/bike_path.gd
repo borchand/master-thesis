@@ -6,21 +6,13 @@ extends Path3D
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	self.curve.clear_points()
-	height_test(true)
-	#load_coords()
+	load_coords()
 
 func reload_for_rl() -> void:
 	route_file_path = rl_route_file_path                                                                                
 	self.curve = self.curve.duplicate()  # break the shared resource link                                             
 	self.curve.clear_points()                                                                                           
 	load_coords() 
-
-func height_test(up: bool):
-	var y = 0
-	for i in range(1, 101):
-		y = y + 0.57 if up else y - 0.57
-		var vector = Vector3(i, y, 0)
-		self.curve.add_point(vector)
 	
 func load_coords():
 	var file = FileAccess.open(route_file_path, FileAccess.READ)
