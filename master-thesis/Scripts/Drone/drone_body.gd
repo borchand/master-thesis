@@ -9,7 +9,8 @@ var is_rl: bool = false
 @onready var drone_detector: DroneDetection = $"Camera_detection"
 @onready var drone_sensor: DroneCommunication = $"Drone_communication"
 
-@onready var sensor_readings = []
+@onready var sensor_readings_drones = []
+@onready var sensor_readings_bikes =[]
 @onready var target_position = null
 @onready var target_speed = null
 @onready var target_bike = null
@@ -31,9 +32,14 @@ var is_rl: bool = false
 @export var max_up_force := 8.0
 
 #For collission avoidance
-@export var avoid_radius := 10.0
+@export var avoid_radius := 3.0
 @export var avoid_strength := 8.0
 @export var max_avoid_speed := 10.0
+
+#Tuneable parameters
+@export var avoidfactor = 3
+@export var centeringfactor = 1
+@export var matchingfactor = 0.1
 
 func _ready():
 	id = _next_id
@@ -42,15 +48,87 @@ func _ready():
 func _physics_process(_delta):
 	if is_rl:
 		return
-
-	get_random_position(drone_detector.bike_set)
-	read_sensor(drone_sensor.drone_set)
 	
-	if is_instance_valid(target_bike):
-		follow_target()
-	else:
-		search_spin()
+	boids()
 
+func boids():
+	read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
+	var alignment_vector = alignment() 
+	var cohesion_vector = cohesion()
+	var separation_vector = separation()
+	var direction_vector = alignment_vector + cohesion_vector + separation_vector
+	
+	apply_central_force(clamp_vector(direction_vector, max_force))
+	rotate_towards_direction(-alignment_vector)
+
+func alignment():
+	var alignment_vector = Vector3.ZERO
+	var neighboring_bikes = 0
+	
+	for bike in sensor_readings_bikes:
+		neighboring_bikes += 1
+		alignment_vector.x += bike.velocity.x
+		alignment_vector.z += bike.velocity.z
+	
+	if neighboring_bikes > 0:
+		alignment_vector.x = alignment_vector.x / neighboring_bikes
+		alignment_vector.z = alignment_vector.z / neighboring_bikes
+	
+	alignment_vector.x += (alignment_vector.x - linear_velocity.x)*matchingfactor
+	alignment_vector.z += (alignment_vector.z - linear_velocity.z)*matchingfactor
+	
+	return alignment_vector
+	
+func cohesion():
+	var cohesion_vector = Vector3.ZERO
+	var neighboring_bikes = 0
+	
+	for bike in sensor_readings_bikes:
+		neighboring_bikes += 1
+		cohesion_vector.x += bike.position.x
+		cohesion_vector.z += bike.position.z
+	
+	if neighboring_bikes > 0:
+		cohesion_vector.x /= neighboring_bikes
+		cohesion_vector.z /= neighboring_bikes
+		
+		cohesion_vector.x -= global_position.x
+		cohesion_vector.z -= global_position.z
+		
+		cohesion_vector.x *= centeringfactor
+		cohesion_vector.z *= centeringfactor
+	
+	return cohesion_vector
+	
+func separation():
+	var separation_vector = Vector3.ZERO
+	
+	for reading in sensor_readings_drones:
+		if reading.distance > avoid_radius:
+			continue
+		
+		separation_vector.x += global_position.x - reading.position.x
+		separation_vector.z += global_position.z - reading.position.z
+	
+	separation_vector.x *= avoidfactor
+	separation_vector.z *= avoidfactor
+	
+	return separation_vector
+
+func rotate_towards_direction(direction_vector: Vector3):
+	var desired_forward = flat_dir(direction_vector)
+	
+	if desired_forward.length() < 0.01:
+		return
+	
+	var drone_forward = flat_dir(-global_transform.basis.z)
+	var up = global_transform.basis.y
+	
+	var yaw_error = atan2(drone_forward.cross(desired_forward).y, drone_forward.dot(desired_forward))
+	
+	if abs(yaw_error) > torque_zone:
+		var torque_strength = clamp(yaw_error * yaw_gain, -1.0, 1.0) * max_torque
+		apply_torque(up * torque_strength)
 
 #Controller for following a picked target
 func follow_target():
@@ -72,7 +150,7 @@ func search_spin():
 func apply_collision_avoidance():
 	var avoidance_force = Vector3.ZERO
 
-	for reading in sensor_readings:
+	for reading in sensor_readings_drones:
 		if reading.distance > avoid_radius:
 			continue
 
@@ -200,12 +278,13 @@ func clamp_vector(v: Vector3, max_len: float) -> Vector3:
 func get_camera_node() -> Camera3D:
 	return $Camera3D
 
-func read_sensor(drones: Dictionary):
-	sensor_readings = []
+func read_sensor(drones: Dictionary, bikes: Dictionary):
+	sensor_readings_drones = []
+	sensor_readings_bikes = []
 	
 	for drone in drones:
 		if drone.id != id:
-			sensor_readings.append(
+			sensor_readings_drones.append(
 				{
 					"id": drone.id,
 					"position": drone.global_position,
@@ -213,6 +292,16 @@ func read_sensor(drones: Dictionary):
 					"direction": global_position.direction_to(drone.global_position)
 				}
 			)
+	
+	for bike in bikes:
+		sensor_readings_bikes.append(
+			{
+				"position": bike.global_position,
+				"distance": global_position.distance_to(bike.global_position),
+				"direction": global_position.direction_to(bike.global_position),
+				"velocity":  flat_dir(-bike.global_transform.basis.z) * bike.get_parent().speed
+			}
+		)
 
 func get_nearest_position(bikes: Dictionary):
 	var closest = Vector3.ZERO

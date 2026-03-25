@@ -19,7 +19,7 @@ const RL_TRACKS: Array[String] = [
 var rng = RandomNumberGenerator.new()
 var instance_id: int = -1
 
-const bike_count = 60
+const bike_count = 5
 
 func _ready():
 	path_instance = $BikePath3d
