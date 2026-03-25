@@ -64,7 +64,7 @@ func coltroler(delta):
 	control2(delta)
 
 #Controller1
-func control1(delta): #No longer used
+func control1(_delta): #No longer used
 	#Slow down if stamina low
 	if stamina<staminaSlowdownThreashold:
 		acceleration -= deaccelerationRate * (staminaSlowdownThreashold - stamina)
@@ -109,7 +109,7 @@ func control2(delta):
 
 	speed = max(0.5, speed + acceleration * delta)
 
-func cruise(elevation_, ray_hits):
+func cruise(_elevation_, ray_hits):
 	if not in_peloton:
 		return solo()
 	var dist_to_center = ray_hits[1]

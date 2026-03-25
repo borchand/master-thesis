@@ -6,7 +6,8 @@ extends Path3D
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	self.curve.clear_points()
-	load_coords()
+	height_test(true)
+	#load_coords()
 
 func reload_for_rl() -> void:
 	route_file_path = rl_route_file_path                                                                                
@@ -14,6 +15,13 @@ func reload_for_rl() -> void:
 	self.curve.clear_points()                                                                                           
 	load_coords() 
 
+func height_test(up: bool):
+	var y = 0
+	for i in range(1, 101):
+		y = y + 0.57 if up else y - 0.57
+		var vector = Vector3(i, y, 0)
+		self.curve.add_point(vector)
+	
 func load_coords():
 	var file = FileAccess.open(route_file_path, FileAccess.READ)
 	if file == null:
