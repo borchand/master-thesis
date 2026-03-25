@@ -11,12 +11,12 @@ var is_rl: bool = false
 
 @onready var sensor_readings_drones = []
 @onready var sensor_readings_bikes =[]
+
 @onready var target_position = null
 @onready var target_speed = null
 @onready var target_bike = null
 
 @export var behind_distance := 4.0
-@export var height_offset := 5.0
 @export var max_torque := 2.0
 @export var yaw_gain := 2.2
 @export var torque_zone := 0.05
@@ -27,19 +27,19 @@ var is_rl: bool = false
 @export var max_force := 18.0
 @export var brake_force := 40.0
 
-@export var y_gain := 8.0
-@export var y_damp := 4.0
-@export var max_up_force := 8.0
-
 #For collission avoidance
-@export var avoid_radius := 3.0
 @export var avoid_strength := 8.0
 @export var max_avoid_speed := 10.0
 
-#Tuneable parameters
+#Boids tuneable parameters
+@export var y_gain := 20.0
+@export var y_damp := 30.0
+@export var max_up_force := 40.0
+@export var height_offset := 5.0
+@export var avoid_radius := 3.0
 @export var avoidfactor = 3
 @export var centeringfactor = 1
-@export var matchingfactor = 0.1
+@export var matchingfactor = 0.5
 
 func _ready():
 	id = _next_id
@@ -64,10 +64,13 @@ func boids():
 	var alignment_vector = alignment() 
 	var cohesion_vector = cohesion()
 	var separation_vector = separation()
+	
 	var direction_vector = alignment_vector + cohesion_vector + separation_vector
+	direction_vector.y = height_force()
 	
 	apply_central_force(clamp_vector(direction_vector, max_force))
 	rotate_towards_direction(-alignment_vector)
+
 
 func alignment():
 	var alignment_vector = Vector3.ZERO
@@ -79,11 +82,11 @@ func alignment():
 		alignment_vector.z += bike.velocity.z
 	
 	if neighboring_bikes > 0:
-		alignment_vector.x = alignment_vector.x / neighboring_bikes
-		alignment_vector.z = alignment_vector.z / neighboring_bikes
+		alignment_vector.x /= neighboring_bikes
+		alignment_vector.z /= neighboring_bikes
 	
-	alignment_vector.x += (alignment_vector.x - linear_velocity.x)*matchingfactor
-	alignment_vector.z += (alignment_vector.z - linear_velocity.z)*matchingfactor
+	alignment_vector.x = (alignment_vector.x - linear_velocity.x) * matchingfactor
+	alignment_vector.z = (alignment_vector.z - linear_velocity.z) * matchingfactor
 	
 	return alignment_vector
 	
@@ -122,6 +125,26 @@ func separation():
 	separation_vector.z *= avoidfactor
 	
 	return separation_vector
+
+func height_force():
+	if len(sensor_readings_bikes) == 0:
+		return 0
+		
+	var neighboring_bikes = 0
+	var avg_y = 0
+	
+	for bike in sensor_readings_bikes:
+		neighboring_bikes += 1
+		avg_y += bike.position.y
+	
+	avg_y /= neighboring_bikes
+	var desired_y = avg_y + height_offset
+	var y_error = desired_y - global_position.y
+	
+	if abs(y_error) < 10:
+		return clamp(y_error * y_gain - linear_velocity.y * y_damp, -max_up_force, max_up_force)
+	else:
+		return 0
 
 func rotate_towards_direction(direction_vector: Vector3):
 	var desired_forward = flat_dir(direction_vector)

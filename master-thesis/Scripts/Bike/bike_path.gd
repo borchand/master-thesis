@@ -13,7 +13,7 @@ func reload_for_rl() -> void:
 	self.curve = self.curve.duplicate()  # break the shared resource link                                             
 	self.curve.clear_points()                                                                                           
 	load_coords() 
-
+	
 func load_coords():
 	var file = FileAccess.open(route_file_path, FileAccess.READ)
 	if file == null:
