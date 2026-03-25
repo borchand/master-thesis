@@ -51,6 +51,14 @@ func _physics_process(_delta):
 	
 	boids()
 
+func set_tunable_parameters(params: Dictionary):
+	avoid_radius = params["avoid_radius"]
+	avoid_strength = params["avoid_strength"]
+	max_avoid_speed = params["max_avoid_speed"]
+	avoidfactor = params["avoid_factor"]
+	centeringfactor = params["centering_factor"]
+	matchingfactor = params["matching_factor"]
+
 func boids():
 	read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
 	var alignment_vector = alignment() 

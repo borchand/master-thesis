@@ -20,6 +20,7 @@ var rng = RandomNumberGenerator.new()
 var instance_id: int = -1
 
 const bike_count = 5
+const drone_count = 2
 
 func _ready():
 	path_instance = $BikePath3d
@@ -35,28 +36,27 @@ func _ready():
 
 	for i in range(bike_count):
 		add_bike()
-		add_drone(i)
+	for i in range(drone_count):
+		add_drone()
 
-	$Menu/OtherContainer/FollowDroneInPos.max_value = bike_count - 1
+	$Menu/OtherContainer/FollowDroneInPos.max_value = drone_count - 1
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 
-func add_drone(bike_index: int):
+func add_drone():
 	var drone_instance = drone.instantiate()
 	drone_instance.is_rl = is_rl
 	var drone_camera = drone_instance.get_node("Camera3D")
 	shared.drone_camera_lists[instance_id].append(drone_camera)
 	add_child(drone_instance)
-	if is_rl and bike_index < shared.bike_lists[instance_id].size():
-		var bike = shared.bike_lists[instance_id][bike_index]
-		var bike_forward = -bike.global_transform.basis.z
-		bike_forward.y = 0
-		bike_forward = bike_forward.normalized()
-		var desired_pos = bike.global_position - bike_forward * drone_instance.behind_distance
-		desired_pos.y = bike.global_position.y + drone_instance.height_offset
-		drone_instance.set_position(desired_pos)
-		drone_instance.look_at(desired_pos + bike_forward, Vector3.UP)
-	else:
-		drone_instance.set_position(Vector3(-bike_index, 5, 2))
+
+	var bike = shared.bike_lists[instance_id][0]
+	var bike_forward = -bike.global_transform.basis.z
+	bike_forward.y = 0
+	bike_forward = bike_forward.normalized()
+	var desired_pos = bike.global_position - bike_forward * drone_instance.behind_distance
+	desired_pos.y = bike.global_position.y + drone_instance.height_offset
+	drone_instance.set_position(desired_pos)
+	drone_instance.look_at(desired_pos + bike_forward, Vector3.UP)
 
 func add_bike():
 	# create bike instance
