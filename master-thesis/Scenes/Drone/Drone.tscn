@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://mxhdvsfjqqtv" path="res://sprites/animated_drone/scene.gltf" id="1_uvgqj"]
 [ext_resource type="Script" uid="uid://bmlo511l3yfy2" path="res://Scripts/Drone/drone_body.gd" id="2_0xxxp"]
 [ext_resource type="Script" uid="uid://cuo14t1rph0hn" path="res://Scripts/Drone/drone_camera_detection.gd" id="3_5j1j2"]
-[ext_resource type="Script" uid="uid://b1h3vwlgsuca4" path="res://Scenes/Drone/drone_communication.gd" id="4_30xiw"]
+[ext_resource type="Script" path="res://Scripts/Drone/drone_communication.gd" id="4_6hc2f"]
 [ext_resource type="Script" path="res://Scripts/Drone/drone_rl.gd" id="5_6hc2f"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uvgqj"]
@@ -22,23 +22,6 @@ gravity_scale = 0.0
 can_sleep = false
 angular_damp = 6.0
 script = ExtResource("2_0xxxp")
-behind_distance = null
-height_offset = null
-max_torque = null
-yaw_gain = null
-torque_zone = null
-min_distance = null
-max_distance = null
-catchup_gain = null
-max_catchup_speed = null
-max_force = null
-brake_force = null
-y_gain = null
-y_damp = null
-max_up_force = null
-avoid_radius = null
-avoid_strength = null
-max_avoid_speed = null
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1101559629]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00048828125, 0.03894043, 0.006225586)
@@ -65,7 +48,7 @@ depth = 0.01
 
 [node name="Drone_communication" type="Area3D" parent="." unique_id=1717689195]
 visible = false
-script = ExtResource("4_30xiw")
+script = ExtResource("4_6hc2f")
 
 [node name="sensor" type="CollisionShape3D" parent="Drone_communication" unique_id=700398335]
 visible = false
