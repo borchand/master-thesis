@@ -13,5 +13,7 @@ func _on_body_entered(bike: Node) -> void:
 
 
 func _on_body_exited(bike: Node) -> void:
+	if not is_instance_valid(bike):
+		return
 	if bike is Bike_body:
 		bike_set.erase(bike.bike_id)

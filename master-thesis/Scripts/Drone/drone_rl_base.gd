@@ -7,6 +7,10 @@ enum Version { V1, V2 }
 @export var debug_draw: bool = true
 @export var debug_line_width: float = 0.1
 
+# V2 filming reward parameters
+@export var optimal_film_dist: float = 10.0   # ideal horizontal distance to bike centroid (metres)
+@export var film_dist_tolerance: float = 5.0  # half-width of the reward tent (metres)
+
 @onready var drone: RigidBody3D = $".."
 
 var _steps_without_bike: int = 0
@@ -111,6 +115,37 @@ func _compute_reward_v2() -> void:
 	# rather than settling for a high-but-not-perfect fraction.
 	if visible_count == total_bikes:
 		reward += 0.5
+
+	# ── Filming quality rewards (camera facing + distance) ───────────────────
+	# Compute the horizontal centroid of all bikes.
+	var bike_centroid = Vector3.ZERO
+	for bike in shared.bike_lists[world.instance_id]:
+		bike_centroid += bike.global_position
+	bike_centroid /= float(total_bikes)
+
+	var to_centroid = bike_centroid - drone.global_position
+	to_centroid.y = 0.0
+
+	# Camera facing: reward the drone's forward vector pointing at the centroid.
+	# dot product ranges -1..1; scale to max ±0.3 so it is a secondary signal.
+	if to_centroid.length() > 0.1:
+		var drone_forward = -drone.global_transform.basis.z
+		drone_forward.y = 0.0
+		reward += drone_forward.normalized().dot(to_centroid.normalized()) * 0.3
+
+	# Filming distance: tent reward centred on optimal_film_dist (default 10 m).
+	# Gives +0.3 at the sweet spot, dropping linearly to 0 at ±film_dist_tolerance.
+	var horiz_dist = to_centroid.length()
+	var dist_reward = 1.0 - clamp(abs(horiz_dist - optimal_film_dist) / film_dist_tolerance, 0.0, 1.0)
+	reward += dist_reward * 0.3
+
+	# Collision penalty: penalise proximity to other drones.
+	# Uses the same sensor data as the avoidance controller (avoid_radius = 3 m).
+	# Penalty scales linearly from 0 at avoid_radius down to -2.0 at distance 0.
+	for reading in drone.sensor_readings_drones:
+		if reading.distance < drone.avoid_radius:
+			var proximity = 1.0 - (reading.distance / drone.avoid_radius)
+			reward -= proximity * 2.0
 
 # ─── Observations ─────────────────────────────────────────────────────────────
 
@@ -250,7 +285,20 @@ func reset():
 		var bikes = shared.bike_lists[world.instance_id]
 		if not bikes.is_empty():
 			drone.target_bike = bikes[0]
-			drone.set_position(_get_desired_pos())
+			var pos = _get_desired_pos()
+
+			# Spread drones laterally so they don't start on top of each other.
+			var drone_index = world.drone_list.find(drone)
+			var drone_count = world.drone_list.size()
+			var bike_forward_flat = -drone.target_bike.global_transform.basis.z
+			bike_forward_flat.y = 0
+			bike_forward_flat = bike_forward_flat.normalized()
+			var bike_right = bike_forward_flat.cross(Vector3.UP).normalized()
+			var spacing = drone.avoid_radius + 1.0
+			var offset = (drone_index - (drone_count - 1) * 0.5) * spacing
+			pos += bike_right * offset
+
+			drone.set_position(pos)
 			var bike_forward = -drone.target_bike.global_transform.basis.z
 			bike_forward.y = 0
 			drone.look_at(drone.global_position + bike_forward.normalized(), Vector3.UP)
@@ -297,6 +345,8 @@ func _make_debug_line() -> MeshInstance3D:
 	return mi
 
 func _place_debug_line(mi: MeshInstance3D, a: Vector3, b: Vector3, color: Color, up: Vector3 = Vector3.UP) -> void:
+	if not mi.is_inside_tree():
+		return
 	var dir := b - a
 	var length := dir.length()
 	if length < 0.001:
