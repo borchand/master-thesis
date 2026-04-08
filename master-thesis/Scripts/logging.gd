@@ -9,7 +9,10 @@ func start_run_file(vehicle_id: String, vehicle_type: String):
 	var err := dir.make_dir_recursive("logs/" + vehicle_type)
 	var file := FileAccess.open(file_path, FileAccess.WRITE)
 	
-	file.store_line("Timestep, Pos x, Pos y, Pos z")
+	if vehicle_type == "drone":
+		file.store_line("Timestep, Pos x, Pos y, Pos z, Collisions")
+	else:
+		file.store_line("Timestep, Pos x, Pos y, Pos z")
 	file.close()
 
 func append_line(vehicle_id: String, vehicle_type: String, data):

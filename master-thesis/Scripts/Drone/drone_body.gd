@@ -37,17 +37,20 @@ var is_rl: bool = false
 @export var max_up_force := 40.0
 @export var height_offset := 5.0
 @export var avoid_radius := 3.0
-@export var avoidfactor = 0
+@export var avoidfactor = 3
 @export var centeringfactor = 2
 @export var matchingfactor = 0.25
 
+var collision_at_time_step = 0
 var timestep = 1
 
 func _ready():
 	id = _next_id
 	_next_id += 1
 	contact_monitor = true
+	max_contacts_reported = 100
 	start_logging()
+	body_entered.connect(_on_body_entered)
 	
 func _physics_process(_delta):
 	if is_rl:
@@ -56,7 +59,7 @@ func _physics_process(_delta):
 	boids()
 	log_information(timestep)
 	timestep += 1
-	print(get_contact_count())
+	collision_at_time_step = 0
 
 func boids():
 	read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
@@ -361,6 +364,10 @@ func get_random_position(bikes: Dictionary):
 	target_speed = bike.get_parent().speed
 	target_bike = bike.get_parent()
 
+func _on_body_entered(body):
+	print("hhelo world")
+	collision_at_time_step += 1
+	
 func create_logging_message(delta):
 	var data = []
 	
@@ -368,6 +375,7 @@ func create_logging_message(delta):
 	data.append(str(global_position.x))
 	data.append(str(global_position.y))
 	data.append(str(global_position.z))
+	data.append(str(collision_at_time_step))
 
 	return data
 
