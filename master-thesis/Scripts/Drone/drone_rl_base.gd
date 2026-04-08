@@ -281,29 +281,7 @@ func reset():
 
 	var world = drone.get_parent()
 	if world.is_rl:
-		world.reset_track_and_bike()
-		var bikes = shared.bike_lists[world.instance_id]
-		if not bikes.is_empty():
-			drone.target_bike = bikes[0]
-			var pos = _get_desired_pos()
-
-			# Spread drones laterally so they don't start on top of each other.
-			var drone_index = world.drone_list.find(drone)
-			var drone_count = world.drone_list.size()
-			var bike_forward_flat = -drone.target_bike.global_transform.basis.z
-			bike_forward_flat.y = 0
-			bike_forward_flat = bike_forward_flat.normalized()
-			var bike_right = bike_forward_flat.cross(Vector3.UP).normalized()
-			var spacing = drone.avoid_radius + 1.0
-			var offset = (drone_index - (drone_count - 1) * 0.5) * spacing
-			pos += bike_right * offset
-
-			drone.set_position(pos)
-			var bike_forward = -drone.target_bike.global_transform.basis.z
-			bike_forward.y = 0
-			drone.look_at(drone.global_position + bike_forward.normalized(), Vector3.UP)
-		else:
-			drone.set_position(Vector3(0, drone.height_offset + 2.0, 0))
+		world.reset_track_and_bike_and_drone()
 	else:
 		drone.set_position(Vector3(0, drone.height_offset + 2.0, 0))
 
