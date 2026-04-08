@@ -4,6 +4,8 @@ class_name Drone
 static var _next_id: int = 1
 var id: int
 
+enum Version { Boids, BoidsRandomTargets, BoidsDynamicTargets }
+
 var is_rl: bool = false
 
 @onready var drone_detector: DroneDetection = $"Camera_detection"
@@ -38,8 +40,19 @@ var is_rl: bool = false
 @export var height_offset := 5.0
 @export var avoid_radius := 3.0
 @export var avoidfactor = 3
-@export var centeringfactor = 1
-@export var matchingfactor = 0.5
+@export var centeringfactor = 1.5
+@export var matchingfactor = 0.4
+
+@export var version: Version = Version.Boids
+@export var random_selection_rate := 0.2
+var keep_selection_for_n_frames = 100
+var sensor_selection_timer = 0.0
+var _random_target_bikes: Array = []
+
+@export var debug_draw: bool = true
+@export var debug_line_width: float = 0.1
+
+var _debug_bike_lines: Array[MeshInstance3D] = []
 
 func _ready():
 	id = _next_id
@@ -61,6 +74,7 @@ func set_tunable_parameters(params: Dictionary):
 
 func boids():
 	read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
+	_draw_bike_debug_lines()
 	var alignment_vector = alignment() 
 	var cohesion_vector = cohesion()
 	var separation_vector = separation()
@@ -70,7 +84,6 @@ func boids():
 	
 	apply_central_force(clamp_vector(direction_vector, max_force))
 	rotate_towards_direction(-alignment_vector)
-
 
 func alignment():
 	var alignment_vector = Vector3.ZERO
@@ -292,6 +305,45 @@ func control_height(desired_pos: Vector3):
 	y_force = clamp(y_force, -max_up_force, max_up_force)
 	apply_central_force(Vector3.UP * y_force)
 
+# ─── Debug ────────────────────────────────────────────────────────────────────
+
+func make_debug_line() -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(debug_line_width, debug_line_width, 1.0)
+	mi.mesh = box
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.no_depth_test = true
+	mi.material_override = mat
+	return mi
+
+func place_debug_line(mi: MeshInstance3D, a: Vector3, b: Vector3, color: Color, up: Vector3 = Vector3.UP) -> void:
+	if not mi.is_inside_tree():
+		return
+	var dir := b - a
+	var length := dir.length()
+	if length < 0.001:
+		mi.visible = false
+		return
+	mi.global_position = (a + b) * 0.5
+	mi.global_transform.basis = Basis.looking_at(dir / length, up)
+	mi.scale = Vector3(1.0, 1.0, length)
+	(mi.material_override as StandardMaterial3D).albedo_color = color
+	mi.visible = true
+
+func _draw_bike_debug_lines() -> void:
+	if not debug_draw:
+		return
+	while _debug_bike_lines.size() < sensor_readings_bikes.size():
+		var mi := make_debug_line()
+		get_parent().add_child.call_deferred(mi)
+		_debug_bike_lines.append(mi)
+	for i in sensor_readings_bikes.size():
+		place_debug_line(_debug_bike_lines[i], global_position, sensor_readings_bikes[i]["position"], Color.YELLOW)
+	for i in range(sensor_readings_bikes.size(), _debug_bike_lines.size()):
+		_debug_bike_lines[i].visible = false
+
 #Helper functions
 func flat_dir(v: Vector3) -> Vector3:
 	v.y = 0.0
@@ -312,7 +364,15 @@ func get_camera_node() -> Camera3D:
 func read_sensor(drones: Dictionary, bikes: Dictionary):
 	sensor_readings_drones = []
 	sensor_readings_bikes = []
-	
+
+	if version == Version.BoidsRandomTargets:
+		# For BoidsRandomTargets we want to keep the same bike readings for a few frames to give the drone a chance to react to them, instead of changing them every frame which would make it hard for the drone to learn anything.
+		if sensor_selection_timer < keep_selection_for_n_frames:
+			sensor_selection_timer += 1
+		else:
+			_random_target_bikes.clear()
+			sensor_selection_timer = 0
+
 	for drone in drones:
 		if drone.id != id:
 			sensor_readings_drones.append(
@@ -324,15 +384,52 @@ func read_sensor(drones: Dictionary, bikes: Dictionary):
 				}
 			)
 	
-	for bike in bikes:
-		sensor_readings_bikes.append(
-			{
-				"position": bike.global_position,
-				"distance": global_position.distance_to(bike.global_position),
-				"direction": global_position.direction_to(bike.global_position),
-				"velocity":  flat_dir(-bike.global_transform.basis.z) * bike.get_parent().speed
-			}
-		)
+	if version == Version.Boids:
+
+		# Normal boids, all bike data is used for calculations
+		for bike in bikes:
+			sensor_readings_bikes.append(get_bike_data(bike))
+
+	elif version == Version.BoidsRandomTargets:
+
+		if _random_target_bikes.is_empty():
+			# Randomly select a subset of bikes to consider for the boids calculations.
+			# The idea is that the drones will spread out more and not all cluster around the same target bike,
+			# which could help with splitting up the drones when the peloton splits.
+			for bike in bikes:
+				if randf() < random_selection_rate:
+					_random_target_bikes.append(bike)
+		else:
+			# Remove any bikes that have left the simulation (iterate backwards to avoid index shift)
+			for i in range(_random_target_bikes.size() - 1, -1, -1):
+				if not bikes.has(_random_target_bikes[i]):
+					_random_target_bikes.remove_at(i)
+
+		# Rebuild sensor readings from the current selection
+		for bike in _random_target_bikes:
+			sensor_readings_bikes.append(get_bike_data(bike))
+
+	elif version == Version.BoidsDynamicTargets:
+
+		# Like BoidsRandomTargets but the selection rate is derived from the drone/bike ratio.
+		# Each drone covers roughly (bike_count / drone_count) bikes on average, so that
+		# collectively all drones spread evenly across the peloton.
+		var drone_count = max(1, drones.size())
+		# Each drone picks 1/drone_count of all bikes on average, so across all
+		# drones each bike gets covered roughly once regardless of fleet size.
+		var dynamic_rate = clamp(1.0 / float(drone_count), 0.05, 1.0)
+
+		for bike in bikes:
+			if randf() < dynamic_rate:
+				sensor_readings_bikes.append(get_bike_data(bike))
+
+func get_bike_data(bike: Bike_body) -> Dictionary:
+	return {
+		"position": bike.global_position,
+		"distance": global_position.distance_to(bike.global_position),
+		"direction": global_position.direction_to(bike.global_position),
+		"velocity":  flat_dir(-bike.global_transform.basis.z) * bike.get_parent().speed
+	}
 
 func get_nearest_position(bikes: Dictionary):
 	var closest = Vector3.ZERO
