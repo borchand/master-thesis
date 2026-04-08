@@ -37,19 +37,26 @@ var is_rl: bool = false
 @export var max_up_force := 40.0
 @export var height_offset := 5.0
 @export var avoid_radius := 3.0
-@export var avoidfactor = 3
-@export var centeringfactor = 1
-@export var matchingfactor = 0.5
+@export var avoidfactor = 0
+@export var centeringfactor = 2
+@export var matchingfactor = 0.25
+
+var timestep = 1
 
 func _ready():
 	id = _next_id
 	_next_id += 1
-
+	contact_monitor = true
+	start_logging()
+	
 func _physics_process(_delta):
 	if is_rl:
 		return
 	
 	boids()
+	log_information(timestep)
+	timestep += 1
+	print(get_contact_count())
 
 func boids():
 	read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
@@ -63,15 +70,14 @@ func boids():
 	apply_central_force(clamp_vector(direction_vector, max_force))
 	rotate_towards_direction(-alignment_vector)
 
-
 func alignment():
 	var alignment_vector = Vector3.ZERO
 	var neighboring_bikes = 0
 	
 	for bike in sensor_readings_bikes:
 		neighboring_bikes += 1
-		alignment_vector.x += bike.velocity.x
-		alignment_vector.z += bike.velocity.z
+		alignment_vector.x += bike["velocity"].x
+		alignment_vector.z += bike["velocity"].z
 	
 	if neighboring_bikes > 0:
 		alignment_vector.x /= neighboring_bikes
@@ -88,8 +94,8 @@ func cohesion():
 	
 	for bike in sensor_readings_bikes:
 		neighboring_bikes += 1
-		cohesion_vector.x += bike.position.x
-		cohesion_vector.z += bike.position.z
+		cohesion_vector.x += bike["position"].x
+		cohesion_vector.z += bike["position"].z
 	
 	if neighboring_bikes > 0:
 		cohesion_vector.x /= neighboring_bikes
@@ -107,7 +113,7 @@ func separation():
 	var separation_vector = Vector3.ZERO
 	
 	for reading in sensor_readings_drones:
-		if reading.distance > avoid_radius:
+		if reading["distance"] > avoid_radius:
 			continue
 		
 		separation_vector.x += global_position.x - reading.position.x
@@ -354,3 +360,20 @@ func get_random_position(bikes: Dictionary):
 	target_position = bike.global_position
 	target_speed = bike.get_parent().speed
 	target_bike = bike.get_parent()
+
+func create_logging_message(delta):
+	var data = []
+	
+	data.append(str(delta))
+	data.append(str(global_position.x))
+	data.append(str(global_position.y))
+	data.append(str(global_position.z))
+
+	return data
+
+func start_logging():
+	logging.start_run_file(str(self.id), "drone")
+
+func log_information(delta):
+	var message = create_logging_message(delta)
+	logging.append_line(str(self.id), "drone", message)
