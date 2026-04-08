@@ -199,4 +199,5 @@ func get_camera_node() -> Camera3D:
 
 func safe_queue_free() -> void:
 	freeing_bike.emit(self)
+	bikebody.collision_layer = 0
 	queue_free()
