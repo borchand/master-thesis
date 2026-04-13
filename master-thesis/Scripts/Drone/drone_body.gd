@@ -4,7 +4,7 @@ class_name Drone
 static var _next_id: int = 1
 var id: int
 
-enum Version { Boids, BoidsRandomTargets, BoidsDynamicTargets }
+enum Version { Boids, BoidsRandomTargets, BoidsDynamicTargets, BoidsPriorityAttractionFields }
 
 var is_rl: bool = false
 
@@ -46,13 +46,29 @@ var is_rl: bool = false
 @export var version: Version = Version.Boids
 @export var random_selection_rate := 0.2
 var keep_selection_for_n_frames = 100
+
 var sensor_selection_timer = 0.0
 var _random_target_bikes: Array = []
+
+# BoidsPriorityAttractionFields parameters
+# Bikes closer than this (metres) are merged into the same cluster
+@export var cluster_distance_threshold := 5.0
+# Distance falloff exponent for attraction: higher = drone commits to nearest cluster sooner
+@export var attraction_falloff := 2.0
+# How many frames to keep a cluster assignment before re-evaluating
+@export var cluster_reassign_interval := 120
+
+var _cluster_assign_timer: int = 0
+var _last_cluster_count: int = 0
+var _cached_cluster_centroid: Vector3 = Vector3.INF
+
 
 @export var debug_draw: bool = true
 @export var debug_line_width: float = 0.1
 
 var _debug_bike_lines: Array[MeshInstance3D] = []
+var _debug_cluster_dots: Array[MeshInstance3D] = []
+var _debug_cluster_target_line: MeshInstance3D = null
 
 func _ready():
 	id = _next_id
@@ -74,14 +90,25 @@ func set_tunable_parameters(params: Dictionary):
 
 func boids():
 	read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
-	_draw_bike_debug_lines()
-	var alignment_vector = alignment() 
-	var cohesion_vector = cohesion()
+
+	var alignment_vector: Vector3
+	var cohesion_vector: Vector3
+
+	if version == Version.BoidsPriorityAttractionFields:
+		var clusters = _cluster_bikes(sensor_readings_bikes)
+		alignment_vector = _priority_alignment(clusters)
+		cohesion_vector = _priority_cohesion(clusters)
+		_draw_cluster_debug_lines(clusters)
+	else:
+		_draw_bike_debug_lines()
+		alignment_vector = alignment()
+		cohesion_vector = cohesion()
+
 	var separation_vector = separation()
-	
+
 	var direction_vector = alignment_vector + cohesion_vector + separation_vector
 	direction_vector.y = height_force()
-	
+
 	apply_central_force(clamp_vector(direction_vector, max_force))
 	rotate_towards_direction(-alignment_vector)
 
@@ -138,6 +165,143 @@ func separation():
 	separation_vector.z *= avoidfactor
 	
 	return separation_vector
+
+# ─── Priority-Weighted Attraction Fields ──────────────────────────────────────
+
+# Greedy single-pass clustering: bikes within cluster_distance_threshold of an
+# existing cluster centroid are merged into it. Returns an Array of Dictionaries:
+#   { centroid: Vector3, velocity: Vector3, size: int, weight: float }
+func _cluster_bikes(readings: Array) -> Array:
+	var clusters: Array = []
+
+	for bike in readings:
+		var assigned = false
+		for cluster in clusters:
+			var flat_dist = Vector2(
+				bike.position.x - cluster.centroid.x,
+				bike.position.z - cluster.centroid.z
+			).length()
+			if flat_dist < cluster_distance_threshold:
+				var n = float(cluster.size)
+				cluster.centroid = (cluster.centroid * n + bike.position) / (n + 1.0)
+				cluster.velocity = (cluster.velocity * n + bike.velocity) / (n + 1.0)
+				cluster.size += 1
+				assigned = true
+				break
+		if not assigned:
+			clusters.append({
+				"centroid": bike.position,
+				"velocity": bike.velocity,
+				"size": 1,
+				"weight": 0.0   # filled in below
+			})
+
+	# Inverse-size weighting: smaller clusters (breakaways) get higher attraction.
+	# A lone rider scores 1/1 = 1.0; a 10-rider group scores 1/10 = 0.1.
+	# Weights are normalised so they sum to 1.0 across all clusters.
+	var inv_sum = 0.0
+	for cluster in clusters:
+		inv_sum += 1.0 / float(cluster.size)
+	for cluster in clusters:
+		cluster["weight"] = (1.0 / float(cluster.size)) / inv_sum
+
+	return clusters
+
+# Return the cluster whose centroid is nearest to a given position.
+# Used to re-acquire the cached cluster as bikes (and thus the centroid) move.
+func _nearest_cluster(clusters: Array, pos: Vector3) -> Dictionary:
+	var best = clusters[0]
+	var best_dist = pos.distance_to(clusters[0].centroid)
+	for i in range(1, clusters.size()):
+		var d = pos.distance_to(clusters[i].centroid)
+		if d < best_dist:
+			best_dist = d
+			best = clusters[i]
+	return best
+
+# Compute a fresh rank-based assignment.
+func _compute_assigned_cluster(clusters: Array) -> Dictionary:
+	var all_ids: Array[int] = [id]
+	for drone in sensor_readings_drones:
+		all_ids.append(drone.id)
+	all_ids.sort()
+	var rank: int = all_ids.find(id)
+
+	# Sort largest-first so extra drones (from modulo wrap) go to the main peloton
+	var sorted_clusters = clusters.duplicate()
+	sorted_clusters.sort_custom(func(a, b): return a.size > b.size)
+	return sorted_clusters[rank % sorted_clusters.size()]
+
+# Return a stable cluster assignment.
+# Re-evaluates only when the cluster count changes (split/merge) or the timer expires.
+# Between re-evaluations, tracks the cached cluster by proximity as centroids drift.
+func _assigned_cluster(clusters: Array) -> Dictionary:
+	var cluster_count_changed = clusters.size() != _last_cluster_count
+
+	if _cached_cluster_centroid == Vector3.INF or cluster_count_changed or _cluster_assign_timer >= cluster_reassign_interval:
+		_cluster_assign_timer = 0
+		_last_cluster_count = clusters.size()
+		var assigned = _compute_assigned_cluster(clusters)
+		_cached_cluster_centroid = assigned.centroid
+		return assigned
+
+	_cluster_assign_timer += 1
+	# Track the same cluster as its centroid drifts with the bikes
+	var tracked = _nearest_cluster(clusters, _cached_cluster_centroid)
+	_cached_cluster_centroid = tracked.centroid
+	return tracked
+
+func _priority_cohesion(clusters: Array) -> Vector3:
+	if clusters.is_empty():
+		return Vector3.ZERO
+	var target = _assigned_cluster(clusters)
+	var to_centroid = target.centroid - global_position
+	to_centroid.y = 0.0
+	return to_centroid * centeringfactor
+
+func _priority_alignment(clusters: Array) -> Vector3:
+	if clusters.is_empty():
+		return Vector3.ZERO
+	var target = _assigned_cluster(clusters)
+	var vel_diff = target.velocity - flat_velocity(linear_velocity)
+	return vel_diff * matchingfactor
+
+func _make_cluster_dot() -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.5
+	sphere.height = 1.0
+	mi.mesh = sphere
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.no_depth_test = true
+	mi.material_override = mat
+	return mi
+
+func _draw_cluster_debug_lines(clusters: Array) -> void:
+	if not debug_draw or clusters.is_empty():
+		return
+
+	# Dots at each cluster centroid
+	while _debug_cluster_dots.size() < clusters.size():
+		var mi := _make_cluster_dot()
+		get_parent().add_child.call_deferred(mi)
+		_debug_cluster_dots.append(mi)
+	var assigned = _assigned_cluster(clusters)
+	for i in clusters.size():
+		var mi = _debug_cluster_dots[i]
+		var color = Color.GREEN if clusters[i].centroid == assigned.centroid else Color.ORANGE
+		(mi.material_override as StandardMaterial3D).albedo_color = color
+		mi.global_position = clusters[i].centroid
+		mi.visible = true
+	for i in range(clusters.size(), _debug_cluster_dots.size()):
+		_debug_cluster_dots[i].visible = false
+
+	# Line from this drone to its assigned cluster centroid
+	if _debug_cluster_target_line == null:
+		_debug_cluster_target_line = make_debug_line()
+		get_parent().add_child.call_deferred(_debug_cluster_target_line)
+	place_debug_line(_debug_cluster_target_line, global_position, assigned.centroid, Color.GREEN)
 
 func height_force():
 	if len(sensor_readings_bikes) == 0:
@@ -384,9 +548,9 @@ func read_sensor(drones: Dictionary, bikes: Dictionary):
 				}
 			)
 	
-	if version == Version.Boids:
+	if version == Version.Boids or version == Version.BoidsPriorityAttractionFields:
 
-		# Normal boids, all bike data is used for calculations
+		# All bike data is used; BoidsPriorityAttractionFields clusters internally
 		for bike in bikes:
 			sensor_readings_bikes.append(get_bike_data(bike))
 
