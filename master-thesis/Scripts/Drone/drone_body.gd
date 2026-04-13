@@ -365,7 +365,6 @@ func get_random_position(bikes: Dictionary):
 	target_bike = bike.get_parent()
 
 func _on_body_entered(body):
-	print("hhelo world")
 	collision_at_time_step += 1
 	
 func create_logging_message(delta):

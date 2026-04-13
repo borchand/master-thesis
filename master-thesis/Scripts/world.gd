@@ -19,10 +19,12 @@ const RL_TRACKS: Array[String] = [
 var rng = RandomNumberGenerator.new()
 var instance_id: int = -1
 
-const bike_count = 5
+const bike_count = 25
+const drone_count = 10
 
 func _ready():
 	path_instance = $BikePath3d
+	logging.add_info(bike_count, drone_count, path_instance.route_file_path)
 	instance_id = shared.register_instance()
 
 	if is_rl:
@@ -35,6 +37,8 @@ func _ready():
 
 	for i in range(bike_count):
 		add_bike()
+	
+	for i in range(drone_count):
 		add_drone(i)
 
 	$Menu/OtherContainer/FollowDroneInPos.max_value = bike_count - 1
