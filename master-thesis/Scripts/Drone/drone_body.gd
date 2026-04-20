@@ -37,7 +37,7 @@ var is_rl: bool = false
 @export var max_up_force := 40.0
 @export var height_offset := 5.0
 @export var avoid_radius := 3.0
-@export var avoidfactor = 3
+@export var avoidfactor = 5
 @export var centeringfactor = 2
 @export var matchingfactor = 0.25
 
