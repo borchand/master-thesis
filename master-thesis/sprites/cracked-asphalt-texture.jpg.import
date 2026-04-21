@@ -4,16 +4,15 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://c437wb3chaysj"
 path.s3tc="res://.godot/imported/cracked-asphalt-texture.jpg-256c17b32661dc24051db849335ada9b.s3tc.ctex"
-path.etc2="res://.godot/imported/cracked-asphalt-texture.jpg-256c17b32661dc24051db849335ada9b.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://sprites/cracked-asphalt-texture.jpg"
-dest_files=["res://.godot/imported/cracked-asphalt-texture.jpg-256c17b32661dc24051db849335ada9b.s3tc.ctex", "res://.godot/imported/cracked-asphalt-texture.jpg-256c17b32661dc24051db849335ada9b.etc2.ctex"]
+dest_files=["res://.godot/imported/cracked-asphalt-texture.jpg-256c17b32661dc24051db849335ada9b.s3tc.ctex"]
 
 [params]
 

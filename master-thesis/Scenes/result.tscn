@@ -9,7 +9,6 @@
 script = ExtResource("1_ojf0l")
 control_mode = 2
 action_repeat = 4
-speed_up = 8.0
 onnx_model_path = "model.onnx"
 metadata/_custom_type_script = "uid://c16g2vvptkvge"
 

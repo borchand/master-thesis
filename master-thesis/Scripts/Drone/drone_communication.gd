@@ -15,6 +15,8 @@ func _on_body_entered(body: Node) -> void:
 		bike_set[body] = body
 
 func _on_body_exited(body: Node) -> void:
+	if not is_instance_valid(body):
+		return
 	if body is Drone:
 		drone_set.erase(body)
 	elif body is Bike_body:

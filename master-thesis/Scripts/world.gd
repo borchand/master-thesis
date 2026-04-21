@@ -6,6 +6,10 @@ const drone = preload("res://Scenes/Drone/Drone.tscn")
 @export var is_training: bool = false
 @export var is_rl: bool = false
 
+# Bike count range used when is_rl = true. Fixed count is used otherwise.
+@export var min_bike_count: int = 2
+@export var max_bike_count: int = 8
+
 const RL_TRACKS: Array[String] = [
 	"res://stages/rl-test-track.json",
 	"res://stages/rl-track-circle.json",
@@ -13,14 +17,21 @@ const RL_TRACKS: Array[String] = [
 	"res://stages/rl-track-hilly.json",
 	"res://stages/rl-track-straight.json",
 	"res://stages/rl-track-left-turn.json",
+	"res://stages/stage-1-route.json",
+	"res://stages/stage-6-route.json",
+	"res://stages/stage-10-route.json",
+	"res://stages/stage-12-route.json",
+	"res://stages/stage-18-route.json",
+
 ]
 
 @onready var path_instance : Path3D
 var rng = RandomNumberGenerator.new()
 var instance_id: int = -1
+var drone_list: Array = []
 
-const bike_count = 25
-const drone_count = 10
+var bike_count = 10
+var drone_count = 10
 
 func _ready():
 	path_instance = $BikePath3d
@@ -29,6 +40,7 @@ func _ready():
 
 	if is_rl:
 		randomize_track()
+		bike_count = randi_range(min_bike_count, max_bike_count)
 
 	if is_training:
 		$Menu/ToggleContainer.visible = false
@@ -37,30 +49,40 @@ func _ready():
 
 	for i in range(bike_count):
 		add_bike()
-	
 	for i in range(drone_count):
-		add_drone(i)
+		add_drone()
 
-	$Menu/OtherContainer/FollowDroneInPos.max_value = bike_count - 1
+	$Menu/OtherContainer/FollowDroneInPos.max_value = drone_count - 1
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 
-func add_drone(bike_index: int):
+func add_drone():
 	var drone_instance = drone.instantiate()
 	drone_instance.is_rl = is_rl
 	var drone_camera = drone_instance.get_node("Camera3D")
 	shared.drone_camera_lists[instance_id].append(drone_camera)
 	add_child(drone_instance)
-	if is_rl and bike_index < shared.bike_lists[instance_id].size():
-		var bike = shared.bike_lists[instance_id][bike_index]
-		var bike_forward = -bike.global_transform.basis.z
-		bike_forward.y = 0
-		bike_forward = bike_forward.normalized()
-		var desired_pos = bike.global_position - bike_forward * drone_instance.behind_distance
-		desired_pos.y = bike.global_position.y + drone_instance.height_offset
-		drone_instance.set_position(desired_pos)
-		drone_instance.look_at(desired_pos + bike_forward, Vector3.UP)
-	else:
-		drone_instance.set_position(Vector3(-bike_index, 5, 2))
+	drone_list.append(drone_instance)
+
+	var bike_index = (drone_list.size() - 1) % shared.bike_lists[instance_id].size()
+	place_drone(drone_instance, bike_index)
+
+func place_drone(drone_instance: Node3D, bike_index: int):
+	var bike = shared.bike_lists[instance_id][bike_index]
+	var bike_forward = -bike.global_transform.basis.z
+	bike_forward.y = 0
+	bike_forward = bike_forward.normalized()
+	var desired_pos = bike.global_position - bike_forward * drone_instance.behind_distance
+	desired_pos.y = bike.global_position.y + drone_instance.height_offset
+
+	# Spread drones laterally so they don't start on top of each other.
+	var drone_index = drone_list.find(drone_instance)
+	var bike_right = bike_forward.cross(Vector3.UP).normalized()
+	var spacing = drone_instance.avoid_radius + 1.0
+	var offset = (drone_index - (drone_count - 1) * 0.5) * spacing
+	desired_pos += bike_right * offset
+
+	drone_instance.set_position(desired_pos)
+	drone_instance.look_at(desired_pos + bike_forward, Vector3.UP)
 
 func add_bike():
 	# create bike instance
@@ -88,13 +110,19 @@ func bike_freed(freed_bike: Node3D):
 	# remove bike camera from list when bike is freed
 	shared.bike_lists[instance_id].erase(freed_bike)
 
-func reset_track_and_bike() -> void:
+func reset_track_and_bike_and_drone() -> void:
 	for bike in shared.bike_lists[instance_id].duplicate():
 		bike.safe_queue_free()
+
 	randomize_track()
+	bike_count = randi_range(min_bike_count, max_bike_count)
 
 	for i in bike_count:
 		add_bike()
+
+	for i in range(drone_list.size()):
+		var bike_index = i % shared.bike_lists[instance_id].size()
+		place_drone(drone_list[i], bike_index)
 
 func randomize_track() -> void:
 	var track = RL_TRACKS[randi() % RL_TRACKS.size()]
