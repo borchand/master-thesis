@@ -30,8 +30,8 @@ var rng = RandomNumberGenerator.new()
 var instance_id: int = -1
 var drone_list: Array = []
 
-var bike_count: int = 5
-var drone_count: int = 2
+const bike_count = 10
+const drone_count = 10
 
 func _ready():
 	path_instance = $BikePath3d

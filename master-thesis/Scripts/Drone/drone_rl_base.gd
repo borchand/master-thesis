@@ -4,9 +4,6 @@ enum Version { V1, V2 }
 
 @export var rl_version: Version = Version.V1
 @export var no_bike_reset_steps: int = 500
-@export var debug_draw: bool = true
-@export var debug_line_width: float = 0.1
-
 # V2 filming reward parameters
 @export var optimal_film_dist: float = 10.0   # ideal horizontal distance to bike centroid (metres)
 @export var film_dist_tolerance: float = 5.0  # half-width of the reward tent (metres)
@@ -311,52 +308,27 @@ func _get_target_bike() -> Bike:
 
 # ─── Debug ────────────────────────────────────────────────────────────────────
 
-func _make_debug_line() -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = Vector3(debug_line_width, debug_line_width, 1.0)
-	mi.mesh = box
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.no_depth_test = true
-	mi.material_override = mat
-	return mi
-
-func _place_debug_line(mi: MeshInstance3D, a: Vector3, b: Vector3, color: Color, up: Vector3 = Vector3.UP) -> void:
-	if not mi.is_inside_tree():
-		return
-	var dir := b - a
-	var length := dir.length()
-	if length < 0.001:
-		mi.visible = false
-		return
-	mi.global_position = (a + b) * 0.5
-	mi.global_transform.basis = Basis.looking_at(dir / length, up)
-	mi.scale = Vector3(1.0, 1.0, length)
-	(mi.material_override as StandardMaterial3D).albedo_color = color
-	mi.visible = true
-
 func _draw_debug_lines() -> void:
-	if not debug_draw:
+	if not drone.debug_draw:
 		return
 	var bikes = drone.drone_detector.bike_set.values()
 	while _debug_lines.size() < bikes.size():
-		var mi := _make_debug_line()
+		var mi = drone.make_debug_line()
 		drone.get_parent().add_child.call_deferred(mi)
 		_debug_lines.append(mi)
 	for i in bikes.size():
 		var bike_body: Bike_body = bikes[i]
 		var color := Color.GREEN if bike_body.get_parent() == drone.target_bike else Color.YELLOW
-		_place_debug_line(_debug_lines[i], drone.global_position, bike_body.global_position, color)
+		drone.place_debug_line(_debug_lines[i], drone.global_position, bike_body.global_position, color)
 	for i in range(bikes.size(), _debug_lines.size()):
 		_debug_lines[i].visible = false
 	if _debug_force_line == null:
-		_debug_force_line = _make_debug_line()
+		_debug_force_line = drone.make_debug_line()
 		drone.get_parent().add_child.call_deferred(_debug_force_line)
-	_place_debug_line(_debug_force_line, drone.global_position,
+	drone.place_debug_line(_debug_force_line, drone.global_position,
 		drone.global_position + _last_force / drone.max_force * 5.0, Color.RED)
 	if _debug_torque_line == null:
-		_debug_torque_line = _make_debug_line()
+		_debug_torque_line = drone.make_debug_line()
 		drone.get_parent().add_child.call_deferred(_debug_torque_line)
-	_place_debug_line(_debug_torque_line, drone.global_position,
+	drone.place_debug_line(_debug_torque_line, drone.global_position,
 		drone.global_position + Vector3.UP * _last_torque * 5.0, Color.BLUE, Vector3.FORWARD)
