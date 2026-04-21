@@ -27,6 +27,7 @@ var instance_id: int = -1
 var drone_list: Array = []
 
 const bike_count = 10
+
 const drone_count = 10
 
 func _ready():

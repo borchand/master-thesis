@@ -13,7 +13,7 @@ size = Vector3(0.2685547, 0.09057617, 0.20922852)
 points = PackedVector3Array(5, -5, 0.55, -5, -5, 0.55, 27, -5, 26.5, -27, -5, 26.5, 0, 0.01, 0.05)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_mj1ce"]
-radius = 25.0
+radius = 30.0
 
 [node name="RigidBody" type="RigidBody3D" unique_id=1754414733]
 axis_lock_angular_x = true
@@ -22,7 +22,7 @@ gravity_scale = 0.0
 can_sleep = false
 angular_damp = 6.0
 script = ExtResource("2_0xxxp")
-version = 3
+version = 4
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1101559629]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00048828125, 0.03894043, 0.006225586)
