@@ -6,6 +6,10 @@ const drone = preload("res://Scenes/Drone/Drone.tscn")
 @export var is_training: bool = false
 @export var is_rl: bool = false
 
+# Bike count range used when is_rl = true. Fixed count is used otherwise.
+@export var min_bike_count: int = 2
+@export var max_bike_count: int = 8
+
 const RL_TRACKS: Array[String] = [
 	"res://stages/rl-test-track.json",
 	"res://stages/rl-track-circle.json",
@@ -27,7 +31,6 @@ var instance_id: int = -1
 var drone_list: Array = []
 
 const bike_count = 10
-
 const drone_count = 10
 
 func _ready():
@@ -36,6 +39,7 @@ func _ready():
 
 	if is_rl:
 		randomize_track()
+		bike_count = randi_range(min_bike_count, max_bike_count)
 
 	if is_training:
 		$Menu/ToggleContainer.visible = false
@@ -105,10 +109,12 @@ func bike_freed(freed_bike: Node3D):
 	# remove bike camera from list when bike is freed
 	shared.bike_lists[instance_id].erase(freed_bike)
 
-func reset_track_and_bike() -> void:
+func reset_track_and_bike_and_drone() -> void:
 	for bike in shared.bike_lists[instance_id].duplicate():
 		bike.safe_queue_free()
+
 	randomize_track()
+	bike_count = randi_range(min_bike_count, max_bike_count)
 
 	for i in bike_count:
 		add_bike()
