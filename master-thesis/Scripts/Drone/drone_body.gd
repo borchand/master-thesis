@@ -102,8 +102,8 @@ func boids():
 		
 	elif version == Version.BoidsPriorityGroups:
 
-		var clusters = _cluster_bikes_2(sensor_readings_bikes)
-		var assigned_cluster = _assigned_cluster_2(clusters)
+		var clusters = _cluster_bikes(sensor_readings_bikes)
+		var assigned_cluster = _assigned_cluster(clusters)
 
 		_draw_cluster_debug_lines(clusters)
 
@@ -132,6 +132,7 @@ func boids():
 	apply_central_force(clamp_vector(direction_vector, max_force))
 	rotate_towards_direction(-alignment_vector)
 
+# Boids algorithm implementation
 func alignment(bikes):
 	var alignment_vector = Vector3.ZERO
 	var neighboring_bikes = 0
@@ -186,298 +187,6 @@ func separation():
 	
 	return separation_vector
 
-# ─── Priority-Weighted Attraction Fields ──────────────────────────────────────
-
-# Greedy single-pass clustering: bikes within cluster_distance_threshold of an
-# existing cluster centroid are merged into it. Returns an Array of Dictionaries:
-#   { centroid: Vector3, velocity: Vector3, size: int, weight: float }
-func _cluster_bikes(readings: Array) -> Array:
-	var clusters: Array = []
-
-	for bike in readings:
-		var assigned = false
-		for cluster in clusters:
-			var flat_dist = Vector2(
-				bike.position.x - cluster.centroid.x,
-				bike.position.z - cluster.centroid.z
-			).length()
-			if flat_dist < cluster_distance_threshold:
-				var n = float(cluster.size)
-				cluster.centroid = (cluster.centroid * n + bike.position) / (n + 1.0)
-				cluster.velocity = (cluster.velocity * n + bike.velocity) / (n + 1.0)
-				cluster.size += 1
-				assigned = true
-				break
-		if not assigned:
-			clusters.append({
-				"centroid": bike.position,
-				"velocity": bike.velocity,
-				"size": 1,
-				"weight": 0.0   # filled in below
-			})
-
-	# Inverse-size weighting: smaller clusters (breakaways) get higher attraction.
-	# A lone rider scores 1/1 = 1.0; a 10-rider group scores 1/10 = 0.1.
-	# Weights are normalised so they sum to 1.0 across all clusters.
-	var inv_sum = 0.0
-	for cluster in clusters:
-		inv_sum += 1.0 / float(cluster.size)
-	for cluster in clusters:
-		cluster["weight"] = (1.0 / float(cluster.size)) / inv_sum
-
-	return clusters
-
-func _cluster_bikes_2(readings: Array) -> Array:
-	var clusters: Array = []
-
-	for bike in readings:
-		var assigned = false
-		for cluster in clusters:
-			var flat_dist = Vector2(
-				bike.position.x - cluster.centroid.x,
-				bike.position.z - cluster.centroid.z
-			).length()
-			if flat_dist < cluster_distance_threshold:
-				var n = float(cluster.size)
-				cluster.centroid = (cluster.centroid * n + bike.position) / (n + 1.0)
-				cluster.velocity = (cluster.velocity * n + bike.velocity) / (n + 1.0)
-				cluster.size += 1
-				assigned = true
-				break
-		if not assigned:
-			clusters.append({
-				"centroid": bike.position,
-				"velocity": bike.velocity,
-				"size": 1,
-			})
-
-	return clusters
-
-# Return the cluster whose centroid is nearest to a given position.
-# Used to re-acquire the cached cluster as bikes (and thus the centroid) move.
-func _nearest_cluster(clusters: Array, pos: Vector3) -> Dictionary:
-	var best = clusters[0]
-	var best_dist = pos.distance_to(clusters[0].centroid)
-	for i in range(1, clusters.size()):
-		var d = pos.distance_to(clusters[i].centroid)
-		if d < best_dist:
-			best_dist = d
-			best = clusters[i]
-	return best
-
-# Drones needed to cover a group of n_bikes: Cbreakout = log1.9(N), clamped to at least 1.
-func _drones_for_cluster(n_bikes: int) -> int:
-	if n_bikes <= 1:
-		return 1
-	return max(1, ceili(log(float(n_bikes)) / log(1.9)))
-
-func _raw_drones_for_cluster(n_bikes: int) -> float:
-	return log(float(n_bikes)) / log(1.9)
-
-# Compute a proximity-based assignment.
-# Each cluster is allocated _drones_for_cluster(cluster.size) slots.
-# Slots are filled by the nearest available drones so that a closer drone
-# is never displaced by one that is further away.
-func _compute_assigned_cluster(clusters: Array) -> Dictionary:
-	if clusters.is_empty():
-		return {}
-
-	# Build a list of all known drones (self + visible)
-	var all_drones: Array = [{"id": id, "position": global_position}]
-	for drone in sensor_readings_drones:
-		all_drones.append({"id": drone.id, "position": drone.position})
-
-	# Sort clusters largest-first so the main peloton fills first
-	var sorted_clusters = clusters.duplicate()
-	sorted_clusters.sort_custom(func(a, b): return a.size > b.size)
-
-	# Greedy assignment: for each cluster take the nearest unassigned drones
-	var unassigned: Array = all_drones.duplicate()
-	for cluster in sorted_clusters:
-		var n_slots = min(_drones_for_cluster(cluster.size), unassigned.size())
-		# Sort remaining drones by distance to this cluster's centroid
-		unassigned.sort_custom(func(a, b):
-			return a.position.distance_to(cluster.centroid) < b.position.distance_to(cluster.centroid)
-		)
-		# Check if this drone is among the closest n_slots drones
-		for i in range(n_slots):
-			if unassigned[i].id == id:
-				return cluster
-		# Remove the assigned drones and continue to next cluster
-		unassigned = unassigned.slice(n_slots)
-
-	# Fallback: all slots filled without placing this drone — go to largest cluster
-	return sorted_clusters[0]
-
-# True if another drone (not self) is within coverage_radius of the cluster centroid.
-func _is_covered_by_other(cluster: Dictionary) -> bool:
-	for drone in sensor_readings_drones:
-		if drone.position.distance_to(cluster.centroid) < coverage_radius:
-			return true
-	return false
-
-# Count how many drones (self included) are within coverage_radius of this cluster.
-func _drone_count_on_cluster(cluster: Dictionary) -> int:
-	var count = 0
-	if global_position.distance_to(cluster.centroid) < coverage_radius:
-		count += 1
-	for drone in sensor_readings_drones:
-		if drone.position.distance_to(cluster.centroid) < coverage_radius:
-			count += 1
-	return count
-
-# True if the cluster already has at least as many drones as the formula requires.
-func _cluster_is_full(cluster: Dictionary) -> bool:
-	return _drone_count_on_cluster(cluster) >= _drones_for_cluster(cluster.size)
-
-# Returns the nearest uncovered cluster to this drone, or an empty dict if all are covered.
-# A cluster counts as covered if self or another drone is within coverage_radius of it.
-func _nearest_uncovered_cluster(clusters: Array) -> Dictionary:
-	var best: Dictionary = {}
-	var best_dist := INF
-	for cluster in clusters:
-		var self_dist: float = global_position.distance_to(cluster.centroid)
-		var self_covers: bool = self_dist < coverage_radius
-		if self_covers or _is_covered_by_other(cluster):
-			continue
-		if self_dist < best_dist:
-			best_dist = self_dist
-			best = cluster
-	return best
-
-# Return a stable cluster assignment. Re-assigns in three cases:
-#   1. First call — run a fresh proximity-based assignment.
-#   2. Tracked cluster lost — drifted far, meaning it merged or disappeared.
-#   3. New split detected — only switch if the new assignment is closer.
-#   4. Coverage gap — only move to uncovered if it is closer than the current cluster.
-func _assigned_cluster(clusters: Array) -> Dictionary:
-	if clusters.is_empty():
-		_last_cluster_count = 0
-		return {}
-	var new_split = clusters.size() > _last_cluster_count
-	_last_cluster_count = clusters.size()
-
-	# First call: run a fresh proximity-based assignment
-	if _cached_cluster_centroid == Vector3.INF:
-		var assigned = _compute_assigned_cluster(clusters)
-		if assigned.is_empty():
-			return {}
-		_cached_cluster_centroid = assigned.centroid
-		return assigned
-
-	# Track the nearest cluster to the cached centroid as bikes move
-	var tracked = _nearest_cluster(clusters, _cached_cluster_centroid)
-	var drift = _cached_cluster_centroid.distance_to(tracked.centroid)
-	_cached_cluster_centroid = tracked.centroid
-
-	# Re-assign if the cluster jumped far (merged into another group)
-	if drift > cluster_distance_threshold:
-		var new_assigned = _compute_assigned_cluster(clusters)
-		if new_assigned.is_empty():
-			return tracked
-		_cached_cluster_centroid = new_assigned.centroid
-		return new_assigned
-
-	# New split: re-run assignment; only switch to a farther cluster if current is full
-	if new_split:
-		var new_assigned = _compute_assigned_cluster(clusters)
-		if not new_assigned.is_empty():
-			var dist_new = global_position.distance_to(new_assigned.centroid)
-			var dist_current = global_position.distance_to(tracked.centroid)
-			if dist_new < dist_current or _cluster_is_full(tracked):
-				_cached_cluster_centroid = new_assigned.centroid
-				return new_assigned
-		return tracked
-
-	# Coverage gap: only move to uncovered cluster if it is closer, or current cluster is full
-	if _is_covered_by_other(tracked):
-		var uncovered = _nearest_uncovered_cluster(clusters)
-		if not uncovered.is_empty():
-			var dist_uncovered = global_position.distance_to(uncovered.centroid)
-			var dist_current = global_position.distance_to(tracked.centroid)
-			if dist_uncovered < dist_current or _cluster_is_full(tracked):
-				_cached_cluster_centroid = uncovered.centroid
-				return uncovered
-
-	return tracked
-
-func _assigned_cluster_2(clusters: Array) -> Dictionary:
-	if clusters.is_empty():
-		return {}
-
-	var best: Dictionary = {}
-	var best_val = -INF
-
-	for i in range(clusters.size()):
-		var v = _raw_drones_for_cluster(clusters[i].size)
-
-		# check how many drones are already on this cluster
-		var count = 0
-		for drone in sensor_readings_drones:
-			if drone.position.distance_to(clusters[i].centroid) < coverage_radius and drone.position.distance_to(clusters[i].centroid) < global_position.distance_to(clusters[i].centroid):
-				count += 1
-
-		v = v - _raw_drones_for_cluster(count)
-
-		if v > best_val:
-			best_val = v
-			best = clusters[i]
-
-	return best
-
-func _priority_cohesion(clusters: Array) -> Vector3:
-	if clusters.is_empty():
-		return Vector3.ZERO
-	var target = _assigned_cluster(clusters)
-	var to_centroid = target.centroid - global_position
-	to_centroid.y = 0.0
-	return to_centroid * centeringfactor
-
-func _priority_alignment(clusters: Array) -> Vector3:
-	if clusters.is_empty():
-		return Vector3.ZERO
-	var target = _assigned_cluster(clusters)
-	var vel_diff = target.velocity - flat_velocity(linear_velocity)
-	return vel_diff * matchingfactor
-
-func _make_cluster_dot() -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	sphere.radius = 0.5
-	sphere.height = 1.0
-	mi.mesh = sphere
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.no_depth_test = true
-	mi.material_override = mat
-	return mi
-
-func _draw_cluster_debug_lines(clusters: Array) -> void:
-	if not debug_draw or clusters.is_empty():
-		return
-
-	# Dots at each cluster centroid
-	while _debug_cluster_dots.size() < clusters.size():
-		var mi := _make_cluster_dot()
-		get_parent().add_child.call_deferred(mi)
-		_debug_cluster_dots.append(mi)
-	var assigned = _assigned_cluster_2(clusters)
-	for i in clusters.size():
-		var mi = _debug_cluster_dots[i]
-		var color = Color.GREEN if clusters[i].centroid == assigned.centroid else Color.ORANGE
-		(mi.material_override as StandardMaterial3D).albedo_color = color
-		if mi.is_inside_tree():
-			mi.global_position = clusters[i].centroid
-		mi.visible = true
-	for i in range(clusters.size(), _debug_cluster_dots.size()):
-		_debug_cluster_dots[i].visible = false
-
-	# Line from this drone to its assigned cluster centroid
-	if _debug_cluster_target_line == null:
-		_debug_cluster_target_line = make_debug_line()
-		get_parent().add_child.call_deferred(_debug_cluster_target_line)
-	place_debug_line(_debug_cluster_target_line, global_position, assigned.centroid, Color.GREEN)
-
 func height_force():
 	if len(sensor_readings_bikes) == 0:
 		return 0
@@ -513,138 +222,114 @@ func rotate_towards_direction(direction_vector: Vector3):
 		var torque_strength = clamp(yaw_error * yaw_gain, -1.0, 1.0) * max_torque
 		apply_torque(up * torque_strength)
 
-#Controller for following a picked target
-func follow_target():
-	var follow_data = get_follow_data()
-	
-	rotate_towards_bike(follow_data.bike_forward, follow_data.drone_forward)
+# Cluster methods for BoidsPriorityAttractionFields and BoidsPriorityGroups
+func _cluster_bikes(readings: Array) -> Array:
+	var clusters: Array = []
 
-	var desired_velocity = compute_desired_velocity(follow_data)
-	apply_horizontal_follow_force(desired_velocity, follow_data)
-	apply_collision_avoidance()
+	for bike in readings:
+		var assigned = false
+		for cluster in clusters:
+			var flat_dist = Vector2(
+				bike.position.x - cluster.centroid.x,
+				bike.position.z - cluster.centroid.z
+			).length()
+			if flat_dist < cluster_distance_threshold:
+				var n = float(cluster.size)
+				cluster.centroid = (cluster.centroid * n + bike.position) / (n + 1.0)
+				cluster.velocity = (cluster.velocity * n + bike.velocity) / (n + 1.0)
+				cluster.size += 1
+				assigned = true
+				break
+		if not assigned:
+			clusters.append({
+				"centroid": bike.position,
+				"velocity": bike.velocity,
+				"size": 1,
+			})
 
-	control_height(follow_data.desired_pos)
+	return clusters
 
-func search_spin():
-	var up = global_transform.basis.y
-	apply_torque(up * max_torque)
-	apply_collision_avoidance()
-	
-func apply_collision_avoidance():
-	var avoidance_force = Vector3.ZERO
+# BoidsPriorityGroups methods
+func _assigned_cluster(clusters: Array) -> Dictionary:
+	if clusters.is_empty():
+		return {}
 
-	for reading in sensor_readings_drones:
-		if reading.distance > avoid_radius:
-			continue
+	var best: Dictionary = {}
+	var best_val = -INF
 
-		var away = global_position - reading.position
-		away.y = 0.0
-		away = away.normalized()
+	for i in range(clusters.size()):
+		var v = _coverage_score(clusters[i].size)
 
-		var weight = (avoid_radius - reading.distance) / avoid_radius
+		# check how many drones are already on this cluster
+		var count = 0
+		for drone in sensor_readings_drones:
+			if drone.position.distance_to(clusters[i].centroid) < coverage_radius and drone.position.distance_to(clusters[i].centroid) < global_position.distance_to(clusters[i].centroid):
+				count += 1
 
-		avoidance_force += away * weight * avoid_strength
+		v -= count
 
-	apply_central_force(clamp_vector(avoidance_force, max_force))
-	
-func get_follow_data():
-	# Info from bike that is being followed. Flattened to reduce interference from height offset
-	# Direction forward is -z
-	var bike_forward = flat_dir(-target_bike.global_transform.basis.z)
-	#Offset to the right (or left if negative)
-	var bike_right = flat_dir(target_bike.global_transform.basis.x)
-	#Speed taken from bike directly
-	var bike_speed = target_bike.speed
-	#Calculate velocity from direction and speed
-	var bike_velocity = bike_forward * bike_speed
+		print("Cluster ", i, ": size=", clusters[i].size, " coverage_score=", _coverage_score(clusters[i].size), " drones_assigned=", count, " final_score=", v)
 
-	#Forward direction and velocity of drone itself. Flattened to reduce interference from height offset
-	var drone_forward = flat_dir(-global_transform.basis.z)
-	var drone_velocity = flat_velocity(linear_velocity)
+		if v > best_val:
+			best_val = v
+			best = clusters[i]
 
-	#Calculate desired position from position of bike, its direction and a distance which we wish to stay behind it
-	#Behind distance can be adjusted above
-	#Again, flatten(Remove y)
-	var desired_pos = target_bike.global_position - bike_forward * behind_distance
-	desired_pos.y = target_bike.global_position.y + height_offset
+	return best
 
-	#Vector from bike to drone, flatten again
-	var bike_to_drone = global_position - target_bike.global_position
-	bike_to_drone.y = 0.0
+# BoidsPriorityAttractionFields methods
+func _priority_cohesion(clusters: Array) -> Vector3:
+	if clusters.is_empty():
+		return Vector3.ZERO
+	var target = _assigned_cluster(clusters)
+	var to_centroid = target.centroid - global_position
+	to_centroid.y = 0.0
+	return to_centroid * centeringfactor
 
-	#How far the drone is in front of (or behind) the bike
-	#Positive = drone is in front, Negative = drone is behind
-	var forward_offset = bike_to_drone.dot(bike_forward)
+func _priority_alignment(clusters: Array) -> Vector3:
+	if clusters.is_empty():
+		return Vector3.ZERO
+	var target = _assigned_cluster(clusters)
+	var vel_diff = target.velocity - flat_velocity(linear_velocity)
+	return vel_diff * matchingfactor
 
-	#How far the drone is to the right (or left) of the bike
-	#Positive = drone is to the right, Negative = drone is to the left
-	var side_offset = bike_to_drone.dot(bike_right)
-
-	#Return values for use in following logic
-	return {
-		"bike_forward": bike_forward,
-		"bike_right": bike_right,
-		"drone_forward": drone_forward,
-		"drone_velocity": drone_velocity,
-		"bike_speed": bike_speed,
-		"bike_velocity": bike_velocity,
-		"desired_pos": desired_pos,
-		"forward_offset": forward_offset,
-		"side_offset": side_offset
-	}
-
-func rotate_towards_bike(bike_forward: Vector3, drone_forward: Vector3):
-	#The axis to rotate about.
-	var up = global_transform.basis.y
-
-	#The angle the drone needs to rotate to face the bike
-	#Positive = rotate one way, negative = rotate the other way
-	var yaw_error = atan2(drone_forward.cross(bike_forward).y, drone_forward.dot(bike_forward))
-
-	#Don't rotate if angle is too small, will cause a lot of oscillation
-	#Adjust torque zone to adjust how much
-	if abs(yaw_error) > torque_zone:
-		#bigger error = stronger turning, smaller error = weeaker tuning. Adjust yaw gain
-		#Values clamped to -1 and 1 to limit strength
-		var torque_strength = clamp(yaw_error * yaw_gain, -1.0, 1.0) * max_torque
-		apply_torque(up * torque_strength)
-
-func compute_desired_velocity(data) -> Vector3:
-	var desired_velocity = data.bike_velocity
-	#How far is the drone off in terms of direction, too far behind/in front. Ideally behind
-	var direction_error = -behind_distance - data.forward_offset
-
-	#checks if the drone is too far behind bike.
-	if data.forward_offset < -max_distance:
-		#“How much behind is the drone, compared to the ideal behind distance”
-		var catchup_amount = abs(data.forward_offset + behind_distance)
-		#Set velocity accordingly
-		desired_velocity += data.bike_forward * min(catchup_amount * catchup_gain, max_catchup_speed)
-	else:
-		desired_velocity += data.bike_forward * (direction_error)
-
-	#Adjust sideways also
-	desired_velocity += data.bike_right * (-data.side_offset)
-
-	return desired_velocity
-
-func apply_horizontal_follow_force(desired_velocity: Vector3, data):
-	apply_central_force(clamp_vector(desired_velocity - data.drone_velocity, max_force))
-
-	if data.forward_offset > 0.5:
-		apply_central_force(-data.bike_forward * brake_force)
-
-func control_height(desired_pos: Vector3):
-	#How far from the target height
-	var y_error = desired_pos.y - global_position.y
-	#How fast the drone is already moving up/down
-	var y_vel = linear_velocity.y
-	#Drone far below the target = push up strongly. If drone far above = push down strongly
-	var y_force = (y_error * y_gain) - (y_vel * y_damp)
-	y_force = clamp(y_force, -max_up_force, max_up_force)
-	apply_central_force(Vector3.UP * y_force)
+func _make_cluster_dot() -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.5
+	sphere.height = 1.0
+	mi.mesh = sphere
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.no_depth_test = true
+	mi.material_override = mat
+	return mi
 
 # ─── Debug ────────────────────────────────────────────────────────────────────
+func _draw_cluster_debug_lines(clusters: Array) -> void:
+	if not debug_draw or clusters.is_empty():
+		return
+
+	# Dots at each cluster centroid
+	while _debug_cluster_dots.size() < clusters.size():
+		var mi := _make_cluster_dot()
+		get_parent().add_child.call_deferred(mi)
+		_debug_cluster_dots.append(mi)
+	var assigned = _assigned_cluster(clusters)
+	for i in clusters.size():
+		var mi = _debug_cluster_dots[i]
+		var color = Color.GREEN if clusters[i].centroid == assigned.centroid else Color.ORANGE
+		(mi.material_override as StandardMaterial3D).albedo_color = color
+		if mi.is_inside_tree():
+			mi.global_position = clusters[i].centroid
+		mi.visible = true
+	for i in range(clusters.size(), _debug_cluster_dots.size()):
+		_debug_cluster_dots[i].visible = false
+
+	# Line from this drone to its assigned cluster centroid
+	if _debug_cluster_target_line == null:
+		_debug_cluster_target_line = make_debug_line()
+		get_parent().add_child.call_deferred(_debug_cluster_target_line)
+	place_debug_line(_debug_cluster_target_line, global_position, assigned.centroid, Color.GREEN)
 
 func make_debug_line() -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
@@ -797,3 +482,14 @@ func get_random_position(bikes: Dictionary):
 	target_position = bike.global_position
 	target_speed = bike.get_parent().speed
 	target_bike = bike.get_parent()
+
+# log base 1.9 of n + 1, rounded to nearest int. 
+# n = 1 -> 1
+# n = 2 -> 2
+# n = 3 -> 3
+# n = 4 -> 3
+# n = 5 -> 4
+# n = 10 -> 5
+# n = 20 -> 6
+func _coverage_score(n_bikes: int) -> int:
+	return round(log(float(n_bikes)) / log(1.9)) + 1 
