@@ -8,6 +8,9 @@ enum Version { Boids, BoidsRandomTargets, BoidsDynamicTargets, BoidsPriorityAttr
 
 var is_rl: bool = false
 
+var collision_at_time_step = 0
+var timestep = 1
+
 @onready var drone_detector: DroneDetection = $"Camera_detection"
 @onready var drone_sensor: DroneCommunication = $"Drone_communication"
 
@@ -73,12 +76,19 @@ var _debug_cluster_target_line: MeshInstance3D = null
 func _ready():
 	id = _next_id
 	_next_id += 1
-
+	contact_monitor = true
+	max_contacts_reported = 100
+	start_logging()
+	body_entered.connect(_on_body_entered)
+	
 func _physics_process(_delta):
 	if is_rl:
 		return
 	
 	boids()
+	log_information(timestep)
+	timestep += 1
+	collision_at_time_step = 0
 
 func set_tunable_parameters(params: Dictionary):
 	avoid_radius = params["avoid_radius"]
@@ -139,8 +149,8 @@ func alignment(bikes):
 	
 	for bike in bikes:
 		neighboring_bikes += 1
-		alignment_vector.x += bike.velocity.x
-		alignment_vector.z += bike.velocity.z
+		alignment_vector.x += bike["velocity"].x
+		alignment_vector.z += bike["velocity"].z
 	
 	if neighboring_bikes > 0:
 		alignment_vector.x /= neighboring_bikes
@@ -157,8 +167,8 @@ func cohesion(bikes):
 	
 	for bike in bikes:
 		neighboring_bikes += 1
-		cohesion_vector.x += bike.position.x
-		cohesion_vector.z += bike.position.z
+		cohesion_vector.x += bike["position"].x
+		cohesion_vector.z += bike["position"].z
 	
 	if neighboring_bikes > 0:
 		cohesion_vector.x /= neighboring_bikes
@@ -176,7 +186,7 @@ func separation():
 	var separation_vector = Vector3.ZERO
 	
 	for reading in sensor_readings_drones:
-		if reading.distance > avoid_radius:
+		if reading["distance"] > avoid_radius:
 			continue
 		
 		separation_vector.x += global_position.x - reading.position.x
@@ -483,6 +493,26 @@ func get_random_position(bikes: Dictionary):
 	target_speed = bike.get_parent().speed
 	target_bike = bike.get_parent()
 
+func _on_body_entered(_body):
+	collision_at_time_step += 1
+	
+func create_logging_message(delta):
+	var data = []
+	
+	data.append(str(delta))
+	data.append(str(global_position.x))
+	data.append(str(global_position.y))
+	data.append(str(global_position.z))
+	data.append(str(collision_at_time_step))
+
+	return data
+
+func start_logging():
+	logging.start_run_file(str(self.id), "drone")
+
+func log_information(delta):
+	var message = create_logging_message(delta)
+	logging.append_line(str(self.id), "drone", message)
 # log base 1.9 of n + 1, rounded to nearest int. 
 # n = 1 -> 1
 # n = 2 -> 2

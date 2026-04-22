@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.6", "C#", "Forward Plus")
 [autoload]
 
 shared="*uid://f1b4m8xwxax"
+logging="*uid://byt6jijjfy05c"
 
 [display]
 
@@ -97,3 +98,4 @@ drone_control={
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
