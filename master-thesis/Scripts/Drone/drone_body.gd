@@ -53,15 +53,8 @@ var _random_target_bikes: Array = []
 # BoidsPriorityAttractionFields parameters
 # Bikes closer than this (metres) are merged into the same cluster
 @export var cluster_distance_threshold := 10.0
-# Distance falloff exponent for attraction: higher = drone commits to nearest cluster sooner
-@export var attraction_falloff := 2.0
-# A cluster is considered "covered" if a drone is within this distance of its centroid.
-# Should be larger than cluster_distance_threshold to account for drones in transit.
-@export var coverage_radius := 15.0
 
-var _cached_cluster_centroid: Vector3 = Vector3.INF
-var _last_cluster_count: int = 0
-
+@export var coverage_radius := 10.0
 
 @export var debug_draw: bool = true
 @export var debug_line_width: float = 0.1
@@ -107,17 +100,10 @@ func boids():
 
 		_draw_cluster_debug_lines(clusters)
 
-		var bikes_in_cluster = []
-		if not assigned_cluster.is_empty():
-			for bike in sensor_readings_bikes:
-				if bike.position.distance_to(assigned_cluster.centroid) < cluster_distance_threshold:
-					bikes_in_cluster.append(bike)
+		_draw_bike_debug_lines(assigned_cluster.bikes)
 
-		_draw_bike_debug_lines(bikes_in_cluster)
-
-		alignment_vector = alignment(bikes_in_cluster)
-		cohesion_vector = cohesion(bikes_in_cluster)
-
+		alignment_vector = alignment(assigned_cluster.bikes)
+		cohesion_vector = cohesion(assigned_cluster.bikes)
 
 	else:
 		_draw_bike_debug_lines(sensor_readings_bikes)
@@ -233,11 +219,13 @@ func _cluster_bikes(readings: Array) -> Array:
 				bike.position.x - cluster.centroid.x,
 				bike.position.z - cluster.centroid.z
 			).length()
+
 			if flat_dist < cluster_distance_threshold:
 				var n = float(cluster.size)
 				cluster.centroid = (cluster.centroid * n + bike.position) / (n + 1.0)
 				cluster.velocity = (cluster.velocity * n + bike.velocity) / (n + 1.0)
 				cluster.size += 1
+				cluster.bikes.append(bike)
 				assigned = true
 				break
 		if not assigned:
@@ -245,6 +233,7 @@ func _cluster_bikes(readings: Array) -> Array:
 				"centroid": bike.position,
 				"velocity": bike.velocity,
 				"size": 1,
+				"bikes": [bike]
 			})
 
 	return clusters
@@ -252,7 +241,12 @@ func _cluster_bikes(readings: Array) -> Array:
 # BoidsPriorityGroups methods
 func _assigned_cluster(clusters: Array) -> Dictionary:
 	if clusters.is_empty():
-		return {}
+		return {
+		"centroid": Vector3.ZERO,
+		"velocity": Vector3.ZERO,
+		"size": 0,
+		"bikes": []
+		}
 
 	var best: Dictionary = {}
 	var best_val = -INF
@@ -260,15 +254,26 @@ func _assigned_cluster(clusters: Array) -> Dictionary:
 	for i in range(clusters.size()):
 		var v = _coverage_score(clusters[i].size)
 
+		var self_dist = global_position.distance_to(clusters[i].centroid)
 		# check how many drones are already on this cluster
 		var count = 0
 		for drone in sensor_readings_drones:
-			if drone.position.distance_to(clusters[i].centroid) < coverage_radius and drone.position.distance_to(clusters[i].centroid) < global_position.distance_to(clusters[i].centroid):
+			var drone_dist = drone.position.distance_to(clusters[i].centroid)
+
+			# if drone is closer to the cluster than self, count it as a competitor for this cluster
+			# or if the drone is within the coverage radius, count it as well since it can be considered "covering" the cluster even if it's not closer than self
+			if drone_dist < self_dist or drone_dist < coverage_radius:
 				count += 1
 
-		v -= count
+		# add small penalty for clusters behind the drone
+		var to_cluster = clusters[i].centroid - global_position
+		to_cluster.y = 0
+		var forward = -global_transform.basis.z
+		var angle = forward.angle_to(to_cluster)
+		if abs(angle) > PI / 2:
+			v *= 0.8
 
-		print("Cluster ", i, ": size=", clusters[i].size, " coverage_score=", _coverage_score(clusters[i].size), " drones_assigned=", count, " final_score=", v)
+		v -= count
 
 		if v > best_val:
 			best_val = v
@@ -491,5 +496,5 @@ func get_random_position(bikes: Dictionary):
 # n = 5 -> 4
 # n = 10 -> 5
 # n = 20 -> 6
-func _coverage_score(n_bikes: int) -> int:
-	return round(log(float(n_bikes)) / log(1.9)) + 1 
+func _coverage_score(n: int) -> int:
+	return round(log(float(n)) / log(1.9)) + 1 
