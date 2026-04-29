@@ -24,6 +24,7 @@ var deaccelerationRate = 0.0002
 var stamina = 100.0
 
 var is_rl: bool = false
+var is_training: bool = false
 
 var speed = 9.0
 var acceleration = 0.0
@@ -56,7 +57,8 @@ func _process(delta):
 	# move bike forward
 	self.progress += speed * delta
 	if self.progress >= max_progress:
-		print("Bike: ", self.name, " Finish time: ", total_time)
+		if not is_rl:
+			print("Bike: ", self.name, " Finish time: ", total_time)
 		safe_queue_free()
 
 func coltroler(delta):
@@ -137,19 +139,22 @@ func solo():
 func behaviorChange(delta, elevation_):
 	if self.progress_ratio > 0.985 and behavior != "attack":
 		behavior = "attack"
-		print("EndAttack ", name, "  ", total_time, "  ", fatigue)
+		if not is_rl:
+			print("EndAttack ", name, "  ", total_time, "  ", fatigue)
 		return
 
 	if behavior == "attack" and self.progress_ratio <= 0.985:
 		if elevation_ < 0 or rng.randi_range(0, 1000) < 7 * delta:
 			behavior = "cruise"
-			print("chill ", name, "  ", total_time, "  ", fatigue)
+			if not is_rl:
+				print("chill ", name, "  ", total_time, "  ", fatigue)
 			return
 
 	if behavior == "cruise" and elevation_ > 0.017: # 0.09 rad is 5%
 		if rng.randi_range(0,10000) < (12 * (elevation_ / 0.034) * delta) / max(1-progress_ratio, 0.15):
 			behavior = "attack"
-			print("ATTACK ",  name, "  ", total_time, "  ", fatigue, "  ", elevation_)
+			if not is_rl:
+				print("ATTACK ",  name, "  ", total_time, "  ", fatigue, "  ", elevation_)
 
 func fatigue_changes(current_watt):
 	if current_watt == sustainable_watt:

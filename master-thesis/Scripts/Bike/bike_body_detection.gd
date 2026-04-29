@@ -10,10 +10,12 @@ func _ready():
 	bike_id = _next_id
 	_next_id += 1
 	add_to_group("bikes")
-	start_logging()
+	if not get_parent().is_training:
+		start_logging()
 
 func _physics_process(_delta):
-	log_information(timestep)
+	if not get_parent().is_training:
+		log_information(timestep)
 	timestep += 1
 
 func create_logging_message(delta):
