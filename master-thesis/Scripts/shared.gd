@@ -11,6 +11,8 @@ var follow_bike_in_pos : int = 0
 var bike_lists: Array[Array] = []
 var drone_camera_lists: Array[Array] = []
 
+var drone_communication_size = 60
+
 func register_instance() -> int:
 	bike_lists.append([])
 	drone_camera_lists.append([])

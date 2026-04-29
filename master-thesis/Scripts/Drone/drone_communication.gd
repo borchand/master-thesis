@@ -5,6 +5,8 @@ var drone_set := {}
 var bike_set := {}
 
 func _ready():
+	var sensor = $sensor
+	sensor.shape.radius = shared.drone_communication_size
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 
@@ -15,8 +17,6 @@ func _on_body_entered(body: Node) -> void:
 		bike_set[body] = body
 
 func _on_body_exited(body: Node) -> void:
-	if not is_instance_valid(body):
-		return
 	if body is Drone:
 		drone_set.erase(body)
 	elif body is Bike_body:
