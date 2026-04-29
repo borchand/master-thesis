@@ -6,11 +6,13 @@ var current_run_folders := {}
 var bikes = ""
 var drones = ""
 var track = ""
+var size = ""
 
-func add_info(bikes_, drones_, track_: String):
+func add_info(bikes_, drones_, track_, size_):
 	bikes = str(bikes_)
 	drones = str(drones_)
 	track = track_.replace("res://stages/", "").replace("-route.json", "")
+	size = size_
 	
 func _get_logs_base_path():
 	var base_path := ProjectSettings.globalize_path("res://").get_base_dir().get_base_dir()
@@ -44,11 +46,11 @@ func start_run_file(vehicle_id: String, vehicle_type: String):
 	var file_path = run_folder.path_join("%s_%s.csv" % [vehicle_type, vehicle_id])
 	var file = FileAccess.open(file_path, FileAccess.WRITE)
 	
-	file.store_line("# bikes: %s, # drones: %s, stage: %s" % [bikes, drones, track])
+	file.store_line("Bikes: %s, Drones: %s, Stage: %s, Size: %s" % [bikes, drones, track, size])
 	if vehicle_type == "drone":
-		file.store_line("Timestep, Pos x, Pos y, Pos z, Collisions")
+		file.store_line("Timestep, Pos x, Pos y, Pos z, Collisions, Bikes-ID")
 	else:
-		file.store_line("Timestep,Pos x, Pos y, Pos z")
+		file.store_line("Timestep, Pos x, Pos y, Pos z")
 
 	file.close()
 

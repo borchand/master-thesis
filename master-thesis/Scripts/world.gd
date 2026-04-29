@@ -35,7 +35,7 @@ var drone_count:int = 10
 
 func _ready():
 	path_instance = $BikePath3d
-	logging.add_info(bike_count, drone_count, path_instance.route_file_path)
+	logging.add_info(bike_count, drone_count, path_instance.route_file_path, shared.drone_communication_size)
 	instance_id = shared.register_instance()
 
 	if is_rl:
