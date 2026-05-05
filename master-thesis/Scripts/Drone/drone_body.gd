@@ -500,6 +500,12 @@ func create_logging_message(delta):
 	data.append(str(global_position.z))
 	data.append(str(collision_at_time_step))
 
+	var bikes_id = '['
+	for bike in drone_detector.bike_set:
+		bikes_id += ' '+str(bike)
+	
+	data.append(bikes_id+' ]')
+	
 	return data
 
 func start_logging():
