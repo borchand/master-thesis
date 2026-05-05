@@ -28,13 +28,13 @@ var timestep = 1
 @export var max_force := 18.0
 
 #Boids tuneable parameters
-@export var y_gain := 20.0
-@export var y_damp := 30.0
-@export var max_up_force := 40.0
+@export var max_up_force := 120.0
+@export var y_gain := 35.0
+@export var y_damp := 18.0
 @export var height_offset := 5.0
 @export var avoid_radius := 3.0
 @export var avoidfactor = 10
-@export var centeringfactor = 1.5
+@export var centeringfactor = 2
 @export var matchingfactor = 0.4
 
 @export var version: Version = Version.Boids
@@ -86,9 +86,12 @@ func boids():
 
 	var alignment_vector: Vector3
 	var cohesion_vector: Vector3
-
+	
+	var bikes_for_height = sensor_readings_bikes
+	
 	if version == Version.BoidsPriorityAttractionFields:
 		var clusters = _cluster_bikes(sensor_readings_bikes)
+		bikes_for_height = clusters.bikes
 		alignment_vector = _priority_alignment(clusters)
 		cohesion_vector = _priority_cohesion(clusters)
 		_draw_cluster_debug_lines(clusters)
@@ -97,7 +100,8 @@ func boids():
 
 		var clusters = _cluster_bikes(sensor_readings_bikes)
 		var assigned_cluster = _assigned_cluster(clusters)
-
+		bikes_for_height = assigned_cluster.bikes
+		
 		_draw_cluster_debug_lines(clusters)
 
 		_draw_bike_debug_lines(assigned_cluster.bikes)
@@ -113,7 +117,7 @@ func boids():
 	var separation_vector = separation()
 
 	var direction_vector = alignment_vector + cohesion_vector + separation_vector
-	direction_vector.y = height_force()
+	direction_vector.y = height_force(bikes_for_height)
 
 	apply_central_force(clamp_vector(direction_vector, max_force))
 	rotate_towards_direction(-alignment_vector)
@@ -172,26 +176,19 @@ func separation():
 	separation_vector.z *= avoidfactor
 	
 	return separation_vector
-
-func height_force():
-	if len(sensor_readings_bikes) == 0:
-		return 0
 		
-	var neighboring_bikes = 0
-	var avg_y = 0
-	
-	for bike in sensor_readings_bikes:
-		neighboring_bikes += 1
-		avg_y += bike.position.y
-	
-	avg_y /= neighboring_bikes
-	var desired_y = avg_y + height_offset
+func height_force(bikes):
+	if bikes.is_empty():
+		return 0.0
+
+	var highest_y = -INF
+	for bike in bikes:
+		highest_y = max(highest_y, bike.position.y)
+
+	var desired_y = highest_y + height_offset
 	var y_error = desired_y - global_position.y
-	
-	if abs(y_error) < 10:
-		return clamp(y_error * y_gain - linear_velocity.y * y_damp, -max_up_force, max_up_force)
-	else:
-		return 0
+
+	return clamp(y_error * y_gain - linear_velocity.y * y_damp, -max_up_force, max_up_force)
 
 func rotate_towards_direction(direction_vector: Vector3):
 	var desired_forward = flat_dir(direction_vector)
