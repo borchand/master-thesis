@@ -474,15 +474,7 @@ func handle_message() -> bool:
 		_reset_agents()
 		just_reset = true
 		get_tree().set_pause(false)
-		#print("resetting forcing draw")
-#        RenderingServer.force_draw()
-#        var obs = _get_obs_from_agents()
-#        print("obs ", obs)
-#        var reply = {
-#            "type": "reset",
-#            "obs": obs
-#        }
-#        _send_dict_as_json_message(reply)
+		print("reset complete")
 		return true
 
 	if message["type"] == "call":

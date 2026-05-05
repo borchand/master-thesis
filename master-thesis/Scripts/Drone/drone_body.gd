@@ -7,6 +7,7 @@ var id: int
 enum Version { Boids, BoidsRandomTargets, BoidsDynamicTargets, BoidsPriorityAttractionFields, BoidsPriorityGroups }
 
 var is_rl: bool = false
+var is_training: bool = false
 
 var collision_at_time_step = 0
 var timestep = 1
@@ -20,21 +21,11 @@ var timestep = 1
 @onready var target_position = null
 @onready var target_speed = null
 @onready var target_bike = null
-
 @export var behind_distance := 4.0
 @export var max_torque := 2.0
 @export var yaw_gain := 2.2
 @export var torque_zone := 0.05
-@export var min_distance := 3.5
-@export var max_distance := 4.5
-@export var catchup_gain := 3.5
-@export var max_catchup_speed := 14.0
 @export var max_force := 18.0
-@export var brake_force := 40.0
-
-#For collission avoidance
-@export var avoid_strength := 8.0
-@export var max_avoid_speed := 10.0
 
 #Boids tuneable parameters
 @export var y_gain := 20.0
@@ -42,7 +33,7 @@ var timestep = 1
 @export var max_up_force := 40.0
 @export var height_offset := 5.0
 @export var avoid_radius := 3.0
-@export var avoidfactor = 3
+@export var avoidfactor = 10
 @export var centeringfactor = 1.5
 @export var matchingfactor = 0.4
 
@@ -71,7 +62,8 @@ func _ready():
 	_next_id += 1
 	contact_monitor = true
 	max_contacts_reported = 100
-	start_logging()
+	if not is_training:
+		start_logging()
 	body_entered.connect(_on_body_entered)
 	
 func _physics_process(_delta):
@@ -85,8 +77,6 @@ func _physics_process(_delta):
 
 func set_tunable_parameters(params: Dictionary):
 	avoid_radius = params["avoid_radius"]
-	avoid_strength = params["avoid_strength"]
-	max_avoid_speed = params["max_avoid_speed"]
 	avoidfactor = params["avoid_factor"]
 	centeringfactor = params["centering_factor"]
 	matchingfactor = params["matching_factor"]

@@ -3,8 +3,12 @@ import os
 import pathlib
 from typing import Callable
 
+import numpy as np
+import gymnasium as gym
+import torch
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.vec_env import VecEnvWrapper
 from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
 
 from godot_rl.core.utils import can_import
@@ -101,12 +105,42 @@ parser.add_argument(
 )
 parser.add_argument("--speedup", default=1, type=int, help="Whether to speed up the physics in the env")
 parser.add_argument(
+    "--n_steps",
+    default=512,
+    type=int,
+    help=(
+        "Number of environment steps collected per agent per PPO update. "
+        "Smaller values mean more frequent (but shorter) gradient updates, "
+        "which reduces the Godot freeze between rollouts. Default: 512."
+    ),
+)
+parser.add_argument(
     "--n_parallel",
     default=1,
     type=int,
     help="How many instances of the environment executable to " "launch - requires --env_path to be set if > 1.",
 )
+parser.add_argument(
+    "--device",
+    default="auto",
+    type=str,
+    help="Device for neural network training: auto (default), cpu, cuda, or mps (Apple Silicon).",
+)
 args, extras = parser.parse_known_args()
+
+
+def resolve_device(requested: str) -> str:
+    if requested != "auto":
+        return requested
+    if torch.cuda.is_available():
+        return "cuda"
+    if torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
+
+device = resolve_device(args.device)
+print(f"Training device: {device}")
 
 
 def handle_onnx_export():
@@ -157,9 +191,41 @@ if args.inference and args.resume_model_path is None:
 if args.env_path is None and args.viz:
     print("Info: Using --viz without --env_path set has no effect, in-editor training will always render.")
 
+class CastFloat32(VecEnvWrapper):
+    """Re-declare box observation spaces as float32 and cast observations.
+    Required for MPS (Apple Metal) which does not support float64 tensors."""
+
+    def __init__(self, venv):
+        obs_space = venv.observation_space
+        if isinstance(obs_space, gym.spaces.Dict):
+            new_spaces = {
+                k: gym.spaces.Box(low=v.low.astype(np.float32), high=v.high.astype(np.float32), dtype=np.float32)
+                if isinstance(v, gym.spaces.Box) else v
+                for k, v in obs_space.spaces.items()
+            }
+            new_obs_space = gym.spaces.Dict(new_spaces)
+        else:
+            new_obs_space = obs_space
+        super().__init__(venv, observation_space=new_obs_space)
+
+    def reset(self):
+        return self._cast(self.venv.reset())
+
+    def step_wait(self):
+        obs, reward, done, info = self.venv.step_wait()
+        return self._cast(obs), reward, done, info
+
+    def _cast(self, obs):
+        if isinstance(obs, dict):
+            return {k: v.astype(np.float32) for k, v in obs.items()}
+        return obs.astype(np.float32)
+
+
 env = StableBaselinesGodotEnv(
     env_path=args.env_path, show_window=args.viz, seed=args.seed, n_parallel=args.n_parallel, speedup=args.speedup
 )
+if device != "cpu":
+    env = CastFloat32(env)
 env = VecMonitor(env)
 
 
@@ -195,11 +261,13 @@ if args.resume_model_path is None:
         verbose=2,
         tensorboard_log=args.experiment_dir,
         learning_rate=learning_rate,
+        device=device,
+        n_steps=args.n_steps,
     )
 else:
     path_zip = pathlib.Path(args.resume_model_path)
     print("Loading model: " + os.path.abspath(path_zip))
-    model = PPO.load(path_zip, env=env, tensorboard_log=args.experiment_dir)
+    model = PPO.load(path_zip, env=env, tensorboard_log=args.experiment_dir, device=device, n_steps=args.n_steps)
 
 if args.inference:
     obs = env.reset()
