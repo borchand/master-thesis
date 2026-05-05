@@ -176,21 +176,6 @@ func separation():
 	separation_vector.z *= avoidfactor
 	
 	return separation_vector
-
-#func height_force():
-	#if sensor_readings_bikes.is_empty():
-		#return 0.0
-#
-	#var avg_y := 0.0
-	#for bike in sensor_readings_bikes:
-		#avg_y += bike.position.y
-#
-	#avg_y /= sensor_readings_bikes.size()
-#
-	#var desired_y = avg_y + height_offset
-	#var y_error = desired_y - global_position.y
-#
-	#return clamp(y_error * y_gain - linear_velocity.y * y_damp, -max_up_force, max_up_force)
 		
 func height_force(bikes):
 	if bikes.is_empty():
