@@ -39,7 +39,7 @@ func _ready():
 		logging.add_info(bike_count, drone_count, path_instance.route_file_path)
 	instance_id = shared.register_instance()
 
-	if is_rl:
+	if is_rl and is_training:
 		# Pre-build and cache all RL track curves before training begins,
 		# so that each reset is a fast duplicate() rather than a slow add_point() loop.
 		path_instance.call("preload_tracks", RL_TRACKS)
@@ -72,27 +72,27 @@ func add_drone():
 	place_drone(drone_instance, bike_index)
 
 func place_drone(drone_instance: Node3D, bike_index: int):
-	var bike = shared.bike_lists[instance_id][bike_index]
-	var bike_forward = -bike.global_transform.basis.z
+	var _bike = shared.bike_lists[instance_id][bike_index]
+	var bike_forward = -_bike.global_transform.basis.z
 	bike_forward.y = 0
 	bike_forward = bike_forward.normalized()
-	var desired_pos = bike.global_position - bike_forward * drone_instance.behind_distance
-	desired_pos.y = bike.global_position.y + drone_instance.height_offset
+	var desired_pos = _bike.global_position - bike_forward * drone_instance.behind_distance
+	desired_pos.y = _bike.global_position.y + drone_instance.height_offset
 
 	# Spread only drones that share the same assigned bike so the lateral
 	# offset stays small enough for the bike to remain in the camera frame.
 	var drone_index = drone_list.find(drone_instance)
 	var bike_count_cur = shared.bike_lists[instance_id].size()
+	@warning_ignore("integer_division")   
 	var same_bike_rank: int = drone_index / bike_count_cur
-	var same_bike_total: int = (drone_count + bike_count_cur - 1 - bike_index) / bike_count_cur
+	@warning_ignore("integer_division")   
+	var same_bike_total: int = int(drone_count + bike_count_cur - 1 - bike_index) / bike_count_cur
 	var bike_right = bike_forward.cross(Vector3.UP).normalized()
 	var spacing = drone_instance.avoid_radius + 1.0
 	var offset = (same_bike_rank - (same_bike_total - 1) * 0.5) * spacing
 	desired_pos += bike_right * offset
 
 	drone_instance.set_position(desired_pos)
-	# Point directly at the bike so it is always in the camera frame on spawn.
-	drone_instance.look_at(bike.global_position, Vector3.UP)
 
 func add_bike():
 	# create bike instance
@@ -122,8 +122,8 @@ func bike_freed(freed_bike: Node3D):
 	shared.bike_lists[instance_id].erase(freed_bike)
 
 func reset_track_and_bike_and_drone() -> void:
-	for bike in shared.bike_lists[instance_id].duplicate():
-		bike.safe_queue_free()
+	for _bike in shared.bike_lists[instance_id].duplicate():
+		_bike.safe_queue_free()
 
 	# time randomize_track 
 	var time = Time.get_ticks_msec()

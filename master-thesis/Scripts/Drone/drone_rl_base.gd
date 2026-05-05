@@ -47,7 +47,7 @@ func _physics_process(_delta):
 		return
 
 	if rl_version == Version.GroupingRl:
-		_physics_process_grouping_rl()
+		_physics_process_grouping_rl(world)
 		return
 
 	drone.target_bike = _get_target_bike()
@@ -56,7 +56,7 @@ func _physics_process(_delta):
 	if drone.target_bike == null:
 		_steps_without_bike += 1
 		reward -= 0.5
-		if _steps_without_bike >= no_bike_reset_steps:
+		if _steps_without_bike >= no_bike_reset_steps and world.is_training:
 			done = true
 			needs_reset = true
 		return
@@ -106,6 +106,13 @@ func reset():
 		if shared.bike_lists[world.instance_id].is_empty() or not world.is_training:
 			# All bikes finished the course — full world reset.
 			world.reset_track_and_bike_and_drone()
+
+			if world.is_training:
+				# randommize bikes to create different grouping scenarios for the agent to learn from.
+				var random_bike_values = Bike.get_randomize_for_rl()
+				for bike in shared.bike_lists[world.instance_id]:
+					bike.set_randomize_for_rl(random_bike_values)
+
 		else:
 			# This drone lost sight of bikes — respawn it near a random bike
 			# without disturbing the track, bikes, or other drones.
@@ -202,22 +209,18 @@ func _set_action_v1(action) -> void:
 # ─── Boids RL ────────────────────────────────────────────────────────────────────
 
 func _compute_reward_boids_rl() -> void:
-	var world = drone.get_parent()
-	var total_bikes = shared.bike_lists[world.instance_id].size()
-	if total_bikes == 0:
+	var nearby_count = drone.sensor_readings_bikes.size()
+	if nearby_count == 0:
 		return
 
 	var bikes_in_camera = drone.drone_detector.bike_set
 	var visible_count = bikes_in_camera.size()
 
-	# Primary: what fraction of all bikes are currently in frame.
-	# Ranges 0–1 and provides a gradient even when no bikes are visible.
-	var coverage = float(visible_count) / float(total_bikes)
+	# Primary: fraction of locally sensed bikes that are in frame.
+	var coverage = float(visible_count) / float(nearby_count)
 	reward += coverage
 
 	if visible_count > 0:
-		# Centroid centering: compute where the center-of-mass of visible bikes
-		# falls in camera space and reward keeping it near the cross-hair.
 		var camera = drone.get_camera_node()
 		var cam_inv = camera.global_transform.basis.inverse()
 		var centroid_cam = Vector2.ZERO
@@ -230,64 +233,53 @@ func _compute_reward_boids_rl() -> void:
 				centroid_cam.y += clamp(to_bike.y / fwd, -1.0, 1.0)
 
 		centroid_cam /= float(visible_count)
-		# centroid_cam.length() is 0 when perfectly centered, up to ~1.4 at corners.
-		# Scale to max 0.3 so centering is a secondary signal, not dominant.
 		reward += (1.0 - clamp(centroid_cam.length(), 0.0, 1.0)) * 0.3
 
-	# Flat bonus when every bike is in frame — encourages full-group coverage
-	# rather than settling for a high-but-not-perfect fraction.
-	if visible_count == total_bikes:
+	# Bonus when all locally sensed bikes are in frame.
+	if visible_count == nearby_count:
 		reward += 0.5
 
-	# ── Filming quality rewards (camera facing + distance) ───────────────────
-	# Compute the horizontal centroid of all bikes.
+	# Centroid of locally sensed bikes (sensor sphere, not global list).
 	var bike_centroid = Vector3.ZERO
-	for bike in shared.bike_lists[world.instance_id]:
-		bike_centroid += bike.global_position
-	bike_centroid /= float(total_bikes)
+	for reading in drone.sensor_readings_bikes:
+		bike_centroid += reading.position
+	bike_centroid /= float(nearby_count)
 
 	var to_centroid = bike_centroid - drone.global_position
 	to_centroid.y = 0.0
 
-	# Camera facing: reward the drone's forward vector pointing at the centroid.
-	# dot product ranges -1..1; scale to max ±0.3 so it is a secondary signal.
 	if to_centroid.length() > 0.1:
 		var drone_forward = -drone.global_transform.basis.z
 		drone_forward.y = 0.0
 		reward += drone_forward.normalized().dot(to_centroid.normalized()) * 0.3
 
-	# Filming distance: tent reward centred on optimal_film_dist (default 10 m).
-	# Gives +0.3 at the sweet spot, dropping linearly to 0 at ±film_dist_tolerance.
 	var horiz_dist = to_centroid.length()
 	var dist_reward = 1.0 - clamp(abs(horiz_dist - optimal_film_dist) / film_dist_tolerance, 0.0, 1.0)
 	reward += dist_reward * 0.3
 
-	# Collision penalty: penalise proximity to other drones.
-	# Uses the same sensor data as the avoidance controller (avoid_radius = 3 m).
-	# Penalty scales linearly from 0 at avoid_radius down to -2.0 at distance 0.
 	for reading in drone.sensor_readings_drones:
 		if reading.distance < drone.avoid_radius:
 			var proximity = 1.0 - (reading.distance / drone.avoid_radius)
 			reward -= proximity * 2.0
 
-# 11 observations for V2 (camera-coverage / boids parameter tuning):
+# 16 observations for boids rl (camera-coverage / boids parameter tuning):
 #   coverage (1), centroid_cam xy (2), full_coverage flag (1),
 #   dist_error (1), camera_facing (1),
-#   nearest_drone (1), drones_in_sep_zone (1), own velocity xyz (3)
+#   avg_bike_vel xz in drone-local frame (2), bike_spread (1), bike_count_norm (1),
+#   nearest_drone (1), drones_in_sep_zone (1), own velocity xyz (3), drone_count_norm (1)
 func _get_obs_boids_rl() -> Dictionary:
-	var world = drone.get_parent()
-	var total_bikes = shared.bike_lists[world.instance_id].size()
+	var nearby_count = drone.sensor_readings_bikes.size()
 	var obs: Array = []
 
-	if total_bikes == 0:
-		for _i in 11:
+	if nearby_count == 0:
+		for _i in 16:
 			obs.append(0.0)
 		return {"obs": obs}
 
 	# --- Camera coverage ---
 	var bikes_in_camera = drone.drone_detector.bike_set
 	var visible_count = bikes_in_camera.size()
-	obs.append(float(visible_count) / float(total_bikes))
+	obs.append(float(visible_count) / float(nearby_count))
 
 	var camera = drone.get_camera_node()
 	var cam_inv = camera.global_transform.basis.inverse()
@@ -302,28 +294,49 @@ func _get_obs_boids_rl() -> Dictionary:
 		centroid_cam /= float(visible_count)
 	obs.append(centroid_cam.x)
 	obs.append(centroid_cam.y)
-	obs.append(1.0 if visible_count == total_bikes else 0.0)
+	obs.append(1.0 if visible_count == nearby_count else 0.0)
 
-	# --- Spatial relationship to bike centroid ---
+	# --- Spatial relationship to centroid of locally sensed bikes ---
 	var bike_centroid = Vector3.ZERO
-	for bike in shared.bike_lists[world.instance_id]:
-		bike_centroid += bike.global_position
-	bike_centroid /= float(total_bikes)
+	for reading in drone.sensor_readings_bikes:
+		bike_centroid += reading.position
+	bike_centroid /= float(nearby_count)
 
 	var to_centroid = bike_centroid - drone.global_position
 	to_centroid.y = 0.0
 	var horiz_dist = to_centroid.length()
 
-	# Distance error: 0 at sweet spot, ±1 at tolerance boundary
 	obs.append(clamp((horiz_dist - optimal_film_dist) / film_dist_tolerance, -1.0, 1.0))
 
-	# Camera facing: +1 when pointing directly at centroid
 	var drone_forward = -drone.global_transform.basis.z
 	drone_forward.y = 0.0
 	obs.append(drone_forward.normalized().dot(to_centroid.normalized()) if horiz_dist > 0.1 else 0.0)
 
-	# --- Drone separation (populated by previous step's boids() call) ---
-	var nearest_dist_norm = 1.0  # 1.0 = at 2× avoid_radius or no drones nearby
+	# --- Bike group dynamics ---
+	# Average bike velocity in drone-local XZ frame: tells the agent how fast
+	# and in which direction the group is moving (key for matching_factor tuning).
+	var avg_vel := Vector3.ZERO
+	for reading in drone.sensor_readings_bikes:
+		avg_vel += reading.velocity
+	avg_vel /= float(nearby_count)
+	var local_avg_vel = drone.global_transform.basis.inverse() * avg_vel
+	obs.append(clamp(local_avg_vel.x / 22.0, -1.0, 1.0))
+	obs.append(clamp(local_avg_vel.z / 22.0, -1.0, 1.0))
+
+	# Bike spread: average distance from group centroid, normalised by sensor radius.
+	# High spread → centering_factor should increase to pull drones toward the group.
+	var spread := 0.0
+	for reading in drone.sensor_readings_bikes:
+		var flat := Vector2(reading.position.x - bike_centroid.x, reading.position.z - bike_centroid.z)
+		spread += flat.length()
+	spread /= float(nearby_count)
+	obs.append(clamp(spread / 30.0, 0.0, 1.0))
+
+	# How many bikes are nearby, normalised by sensor capacity (max_bike_count = 8).
+	obs.append(clamp(float(nearby_count) / 8.0, 0.0, 1.0))
+
+	# --- Drone separation ---
+	var nearest_dist_norm = 1.0
 	var in_zone = 0
 	for reading in drone.sensor_readings_drones:
 		var d_norm = reading.distance / (drone.avoid_radius * 2.0)
@@ -340,6 +353,9 @@ func _get_obs_boids_rl() -> Dictionary:
 	obs.append(clamp(local_vel.y / 15.0, -1.0, 1.0))
 	obs.append(clamp(local_vel.z / 15.0, -1.0, 1.0))
 
+	# How many other drones are nearby, normalised by drone_count export.
+	obs.append(clamp(float(drone.sensor_readings_drones.size()) / 10.0, 0.0, 1.0))
+
 	return {"obs": obs}
 
 func _get_action_space_boids_rl() -> Dictionary:
@@ -353,8 +369,8 @@ func _get_action_space_boids_rl() -> Dictionary:
 
 func _set_action_boids_rl(action) -> void:
 	drone.set_tunable_parameters({
-		"avoid_radius":     _remap_action(action["avoid_radius"][0],     0.5, 10.0),
-		"avoid_factor":     _remap_action(action["avoid_factor"][0],     0.1, 10.0),
+		"avoid_radius":     _remap_action(action["avoid_radius"][0],     1.0, 8.0),
+		"avoid_factor":     _remap_action(action["avoid_factor"][0],     1.0, 20.0),
 		"centering_factor": _remap_action(action["centering_factor"][0], 0.1,  5.0),
 		"matching_factor":  _remap_action(action["matching_factor"][0],  0.01, 1.0),
 	})
@@ -363,14 +379,14 @@ func _set_action_boids_rl(action) -> void:
 
 # ─── Grouping RL ────────────────────────────────────────────────────────────────────
 
-func _physics_process_grouping_rl() -> void:
+func _physics_process_grouping_rl(world) -> void:
 	drone.read_sensor(drone.drone_sensor.drone_set, drone.drone_sensor.bike_set)
 	_grouping_rl_clusters = drone._cluster_bikes(drone.sensor_readings_bikes)
 
 	if _grouping_rl_clusters.is_empty():
 		_steps_without_bike += 1
 		reward -= 0.5
-		if _steps_without_bike >= no_bike_reset_steps:
+		if _steps_without_bike >= no_bike_reset_steps and world.is_training:
 			done = true
 			needs_reset = true
 		return
@@ -411,7 +427,7 @@ func _compute_reward_grouping_rl() -> void:
 	if max_coverable > 0.0:
 		reward += total_covered / max_coverable
 
-# 20 observations for V4 (local allocation state):
+# 20 observations for grouping rl (local allocation state):
 #   4 clusters × 5 features (exists, coverage_score, drones_on, deficit, distance)
 #
 # All features are derived from this drone's own sensor sphere (30 m radius) —

@@ -199,6 +199,34 @@ func set_watts(sustainable_watt_ = 355, initial_breakout_watt_ = 531):
 	sustainable_watt = sustainable_watt_
 	initial_breakout_watt = initial_breakout_watt_
 
+static func get_randomize_for_rl():
+	var _rng = RandomNumberGenerator.new()
+	
+	var _speed = _rng.randf_range(6.0, 18.0)
+	var _maxspeed = _rng.randf_range(16.0, 26.0)
+	var _minspeed = _rng.randf_range(3.0, 7.0)
+	var _speedUpProbability = _rng.randi_range(1, 6)
+	var _cohesion_c = _rng.randf_range(0.1, 0.8)
+	var _separation_c = _rng.randf_range(0.01, 1)
+
+	return {
+		"speed": _speed,
+		"maxspeed": _maxspeed,
+		"minspeed": _minspeed,
+		"speedUpProbability": _speedUpProbability,
+		"cohesion_c": _cohesion_c,
+		"separation_c": _separation_c,
+	}
+
+func set_randomize_for_rl(dict) -> void:
+	speed = dict["speed"]
+	Maxspeed = dict["maxspeed"]
+	Minspeed = dict["minspeed"]
+	speedUpProbability = dict["speedUpProbability"]
+	cohesion_c = dict["cohesion_c"]
+	separation_c = dict["separation_c"]
+
+
 func get_camera_node() -> Camera3D:
 	return $Camera3D
 
