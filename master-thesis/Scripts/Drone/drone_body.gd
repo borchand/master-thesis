@@ -32,8 +32,8 @@ var timestep = 1
 @export var y_gain := 35.0
 @export var y_damp := 18.0
 @export var height_offset := 5.0
-@export var avoid_radius := 3.0
-@export var avoidfactor = 10
+@export var avoid_radius := 2.0
+@export var avoidfactor = 60
 @export var centeringfactor = 2
 @export var matchingfactor = 0.4
 

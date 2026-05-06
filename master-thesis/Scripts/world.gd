@@ -31,7 +31,11 @@ var instance_id: int = -1
 var drone_list: Array = []
 
 var bike_count:int = 10
-var drone_count:int = 10
+var drone_count:int = 50
+
+# Spacing used only at spawn time. Smaller than avoid_radius so large fleets
+# fit within the camera frustum; boids separation takes over once running.
+@export var drone_spawn_spacing: float = 1.5
 
 func _ready():
 	path_instance = $BikePath3d
@@ -55,12 +59,15 @@ func _ready():
 	for i in range(bike_count):
 		add_bike()
 	for i in range(drone_count):
-		add_drone()
+		add_drone(false)
+	for i in range(drone_list.size()):
+		var bike_index = i % shared.bike_lists[instance_id].size()
+		place_drone(drone_list[i], bike_index)
 
 	$Menu/OtherContainer/FollowDroneInPos.max_value = drone_count - 1
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 
-func add_drone():
+func add_drone(auto_place: bool = true):
 	var drone_instance = drone.instantiate()
 	drone_instance.is_rl = is_rl
 	drone_instance.is_training = is_training
@@ -69,8 +76,9 @@ func add_drone():
 	add_child(drone_instance)
 	drone_list.append(drone_instance)
 
-	var bike_index = (drone_list.size() - 1) % shared.bike_lists[instance_id].size()
-	place_drone(drone_instance, bike_index)
+	if auto_place:
+		var bike_index = (drone_list.size() - 1) % shared.bike_lists[instance_id].size()
+		place_drone(drone_instance, bike_index)
 
 func place_drone(drone_instance: Node3D, bike_index: int):
 	var _bike = shared.bike_lists[instance_id][bike_index]
@@ -80,18 +88,18 @@ func place_drone(drone_instance: Node3D, bike_index: int):
 	var desired_pos = _bike.global_position - bike_forward * drone_instance.behind_distance
 	desired_pos.y = _bike.global_position.y + drone_instance.height_offset
 
-	# Spread only drones that share the same assigned bike so the lateral
-	# offset stays small enough for the bike to remain in the camera frame.
+	# Place drones in a 2D grid (columns = lateral, rows = depth) so lateral
+	# spread stays small even with many drones — all drones remain near the bike.
 	var drone_index = drone_list.find(drone_instance)
-	var bike_count_cur = shared.bike_lists[instance_id].size()
-	@warning_ignore("integer_division")   
-	var same_bike_rank: int = drone_index / bike_count_cur
-	@warning_ignore("integer_division")   
-	var same_bike_total: int = int(drone_count + bike_count_cur - 1 - bike_index) / bike_count_cur
+	var total = drone_list.size()
+	var spacing = drone_spawn_spacing
+	var cols = max(1, ceili(sqrt(float(total))))
+	var row = drone_index / cols
+	var col = drone_index % cols
+	var cols_in_row = min(cols, total - row * cols)
 	var bike_right = bike_forward.cross(Vector3.UP).normalized()
-	var spacing = drone_instance.avoid_radius + 1.0
-	var offset = (same_bike_rank - (same_bike_total - 1) * 0.5) * spacing
-	desired_pos += bike_right * offset
+	desired_pos += bike_right * (col - (cols_in_row - 1) * 0.5) * spacing
+	desired_pos -= bike_forward * row * spacing
 
 	drone_instance.set_position(desired_pos)
 
