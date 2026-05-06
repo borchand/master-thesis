@@ -1,16 +1,19 @@
 extends AIController3D
 
-enum Version { V1, BoidsRl, GroupingRl }
+enum Version { V1, BoidsRl, GroupingRl, GroupingBoidsRl }
 
 @export var rl_version: Version = Version.V1
 @export var no_bike_reset_steps: int = 500
 # Boids RL filming reward parameters
 @export var optimal_film_dist: float = 10.0   # ideal horizontal distance to bike centroid (metres)
 @export var film_dist_tolerance: float = 5.0  # half-width of the reward tent (metres)
+# GroupingBoidsRl: path to a trained BoidsRl ONNX model used for low-level movement
+@export var boids_rl_model_path: String = ""
 
 @onready var drone: RigidBody3D = $".."
 
 var _steps_without_bike: int = 0
+var _boids_rl_model: ONNXModel = null
 var _debug_lines: Array[MeshInstance3D] = []
 var _debug_force_line: MeshInstance3D = null
 var _debug_torque_line: MeshInstance3D = null
@@ -33,6 +36,9 @@ func _ready():
 	super._ready()
 	print("RL drone ready with version ", rl_version)
 
+	if rl_version == Version.GroupingBoidsRl and boids_rl_model_path != "":
+		_boids_rl_model = ONNXModel.new(boids_rl_model_path, 1)
+
 func _physics_process(_delta):
 	if not get_parent().is_rl:
 		return
@@ -46,7 +52,7 @@ func _physics_process(_delta):
 		needs_reset = true
 		return
 
-	if rl_version == Version.GroupingRl:
+	if rl_version == Version.GroupingRl or rl_version == Version.GroupingBoidsRl:
 		_physics_process_grouping_rl(world)
 		return
 
@@ -72,6 +78,7 @@ func get_obs() -> Dictionary:
 		Version.V1: return _get_obs_v1()
 		Version.BoidsRl: return _get_obs_boids_rl()
 		Version.GroupingRl: return _get_obs_grouping_rl()
+		Version.GroupingBoidsRl: return _get_obs_grouping_rl()
 	return {}
 
 func get_action_space() -> Dictionary:
@@ -79,13 +86,15 @@ func get_action_space() -> Dictionary:
 		Version.V1: return _get_action_space_v1()
 		Version.BoidsRl: return _get_action_space_boids_rl()
 		Version.GroupingRl: return _get_action_space_grouping_rl()
+		Version.GroupingBoidsRl: return _get_action_space_grouping_rl()
 	return {}
-	
+
 func set_action(action) -> void:
 	match rl_version:
 		Version.V1: _set_action_v1(action)
 		Version.BoidsRl: _set_action_boids_rl(action)
 		Version.GroupingRl: _set_action_grouping_rl(action)
+		Version.GroupingBoidsRl: _set_action_grouping_boids_rl(action)
 
 
 func get_reward() -> float:
@@ -375,7 +384,7 @@ func _set_action_boids_rl(action) -> void:
 		"matching_factor":  _remap_action(action["matching_factor"][0],  0.01, 1.0),
 	})
 
-	drone.boids()
+	drone.boids_bikes(drone.sensor_readings_bikes)
 
 # ─── Grouping RL ────────────────────────────────────────────────────────────────────
 
@@ -493,26 +502,37 @@ func _set_action_grouping_rl(action) -> void:
 
 	_grouping_rl_selected_cluster = _grouping_rl_clusters[best_idx]
 
-	# Navigate to the selected cluster using boids forces.
-	var alignment_vector = drone.alignment(_grouping_rl_selected_cluster.bikes)
-	var cohesion_vector = drone.cohesion(_grouping_rl_selected_cluster.bikes)
-	var separation_vector = drone.separation()
+	drone.boids_bikes(_grouping_rl_selected_cluster.bikes)
 
-	var direction_vector = alignment_vector + cohesion_vector + separation_vector
+# ─── Grouping + BoidsRl ──────────────────────────────────────────────────────────────────
 
-	# Height towards selected cluster centroid + offset.
-	var desired_y = _grouping_rl_selected_cluster.centroid.y + drone.height_offset
-	var y_error = desired_y - drone.global_position.y
-	if abs(y_error) < 10.0:
-		direction_vector.y = clamp(
-			y_error * drone.y_gain - drone.linear_velocity.y * drone.y_damp,
-			-drone.max_up_force, drone.max_up_force
-		)
-	else:
-		direction_vector.y = 0.0
+func _set_action_grouping_boids_rl(action) -> void:
+	if _grouping_rl_clusters.is_empty():
+		return
 
-	drone.apply_central_force(drone.clamp_vector(direction_vector, drone.max_force))
-	drone.rotate_towards_direction(-alignment_vector)
+	# Same cluster selection as GroupingRl.
+	var scores = action["cluster_scores"]
+	var best_idx = 0
+	var best_score = -INF
+	for i in min(scores.size(), _grouping_rl_clusters.size()):
+		if scores[i] > best_score:
+			best_score = scores[i]
+			best_idx = i
+	_grouping_rl_selected_cluster = _grouping_rl_clusters[best_idx]
+
+	assert(_boids_rl_model != null, "GroupingBoidsRl requires a BoidsRl ONNX model — set boids_rl_model_path")
+
+	var boids_obs = _get_obs_boids_rl()
+	var result = _boids_rl_model.run_inference(boids_obs["obs"], 1.0)
+	var output = result["output"]
+	drone.set_tunable_parameters({
+		"avoid_radius":     _remap_action(output[0], 1.0, 8.0),
+		"avoid_factor":     _remap_action(output[1], 1.0, 20.0),
+		"centering_factor": _remap_action(output[2], 0.1,  5.0),
+		"matching_factor":  _remap_action(output[3], 0.01, 1.0),
+	})
+
+	drone.boids_bikes(_grouping_rl_selected_cluster.bikes)
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
