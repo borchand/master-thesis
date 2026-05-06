@@ -88,36 +88,49 @@ func boids():
 	var cohesion_vector: Vector3
 	
 	var bikes_for_height = sensor_readings_bikes
+	var bikes_for_boids: Array
+
+
 	
 	if version == Version.BoidsPriorityAttractionFields:
 		var clusters = _cluster_bikes(sensor_readings_bikes)
-		bikes_for_height = clusters.bikes
+
 		alignment_vector = _priority_alignment(clusters)
 		cohesion_vector = _priority_cohesion(clusters)
 		_draw_cluster_debug_lines(clusters)
-		
+
+		_boids_apply(clusters.bikes, alignment_vector, cohesion_vector)
+		return
+
 	elif version == Version.BoidsPriorityGroups:
 
 		var clusters = _cluster_bikes(sensor_readings_bikes)
 		var assigned_cluster = _assigned_cluster(clusters)
 		bikes_for_height = assigned_cluster.bikes
-		
-		_draw_cluster_debug_lines(clusters)
 
+		_draw_cluster_debug_lines(clusters)
 		_draw_bike_debug_lines(assigned_cluster.bikes)
 
-		alignment_vector = alignment(assigned_cluster.bikes)
-		cohesion_vector = cohesion(assigned_cluster.bikes)
+		bikes_for_boids = assigned_cluster.bikes
 
 	else:
 		_draw_bike_debug_lines(sensor_readings_bikes)
-		alignment_vector = alignment(sensor_readings_bikes)
-		cohesion_vector = cohesion(sensor_readings_bikes)
+		bikes_for_boids = sensor_readings_bikes
+
+	boids_bikes(bikes_for_boids)
+
+func boids_bikes(bikes):
+	var alignment_vector = alignment(bikes)
+	var cohesion_vector = cohesion(bikes)
+
+	_boids_apply(bikes, alignment_vector, cohesion_vector)
+
+func _boids_apply(bikes, alignment_vector, cohesion_vector):
 
 	var separation_vector = separation()
 
 	var direction_vector = alignment_vector + cohesion_vector + separation_vector
-	direction_vector.y = height_force(bikes_for_height)
+	direction_vector.y = height_force(bikes)
 
 	apply_central_force(clamp_vector(direction_vector, max_force))
 	rotate_towards_direction(-alignment_vector)
