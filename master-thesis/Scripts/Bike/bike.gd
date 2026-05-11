@@ -39,8 +39,8 @@ var fatigue = 0
 var in_peloton = false
 var behavior = "cruise"  #cruise, attack
 
-var cohesion_c =  0.55     #Set by trial and error
-var separation_c = 0.05   #Set by trial and error
+var cohesion_c =  0.05     #Set by trial and error
+var separation_c = 0.55   #Set by trial and error
 
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()

@@ -57,6 +57,10 @@ var _debug_bike_lines: Array[MeshInstance3D] = []
 var _debug_cluster_dots: Array[MeshInstance3D] = []
 var _debug_cluster_target_line: MeshInstance3D = null
 
+#Idle status 
+@export var idle_until_needed := false
+@export var has_activated := true
+
 func _ready():
 	id = _next_id
 	_next_id += 1
@@ -69,6 +73,16 @@ func _ready():
 func _physics_process(_delta):
 	if is_rl:
 		return
+	
+	if idle_until_needed and not has_activated:
+		read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
+
+		if not _should_activate_from_coverage():
+			linear_velocity = Vector3.ZERO
+			angular_velocity = Vector3.ZERO
+			return
+
+		has_activated = true
 	
 	boids()
 	log_information(timestep)
@@ -90,8 +104,6 @@ func boids():
 	var bikes_for_height = sensor_readings_bikes
 	var bikes_for_boids: Array
 
-
-	
 	if version == Version.BoidsPriorityAttractionFields:
 		var clusters = _cluster_bikes(sensor_readings_bikes)
 
@@ -518,12 +530,33 @@ func create_logging_message(delta):
 	
 	return data
 
+func _should_activate_from_coverage():
+	if sensor_readings_bikes.is_empty():
+		return false
+
+	var nearby_bike_count := 0
+
+	for bike in sensor_readings_bikes:
+		if bike["distance"] < 10.0:
+			nearby_bike_count += 1
+
+	if nearby_bike_count == 0:
+		return false
+
+	var required_coverage := _coverage_score(nearby_bike_count)
+
+	if sensor_readings_drones.size() >= required_coverage:
+		return false
+
+	return true
+	
 func start_logging():
 	logging.start_run_file(str(self.id), "drone")
 
 func log_information(delta):
 	var message = create_logging_message(delta)
 	logging.append_line(str(self.id), "drone", message)
+
 # log base 1.9 of n + 1, rounded to nearest int. 
 # n = 1 -> 1
 # n = 2 -> 2
