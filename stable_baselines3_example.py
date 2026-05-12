@@ -7,7 +7,8 @@ import numpy as np
 import gymnasium as gym
 import torch
 from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback
+from tqdm import tqdm
 from stable_baselines3.common.vec_env import VecEnvWrapper
 from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
 
@@ -75,7 +76,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--timesteps",
-    default=10_000_000,
+    default=2_000_000,
     type=int,
     help="The number of environment steps to train for, default is 1_000_000. If resuming from a saved model, "
     "it will continue training for this amount of steps from the saved state without counting previously trained "
@@ -173,6 +174,19 @@ def cleanup():
     close_env()
 
 
+class TqdmCallback(BaseCallback):
+    def __init__(self, total_timesteps: int):
+        super().__init__()
+        self._bar = tqdm(total=total_timesteps, unit="step", dynamic_ncols=True)
+
+    def _on_step(self) -> bool:
+        self._bar.update(self.training_env.num_envs)
+        return True
+
+    def _on_training_end(self) -> None:
+        self._bar.close()
+
+
 path_checkpoint = os.path.join(args.experiment_dir, args.experiment_name + "_checkpoints")
 abs_path_checkpoint = os.path.abspath(path_checkpoint)
 
@@ -258,7 +272,7 @@ if args.resume_model_path is None:
         "MultiInputPolicy",
         env,
         ent_coef=0.0001,
-        verbose=2,
+        verbose=0,
         tensorboard_log=args.experiment_dir,
         learning_rate=learning_rate,
         device=device,
@@ -267,7 +281,7 @@ if args.resume_model_path is None:
 else:
     path_zip = pathlib.Path(args.resume_model_path)
     print("Loading model: " + os.path.abspath(path_zip))
-    model = PPO.load(path_zip, env=env, tensorboard_log=args.experiment_dir, device=device, n_steps=args.n_steps)
+    model = PPO.load(path_zip, env=env, tensorboard_log=args.experiment_dir, device=device, n_steps=args.n_steps, verbose=0)
 
 if args.inference:
     obs = env.reset()
@@ -275,15 +289,15 @@ if args.inference:
         action, _state = model.predict(obs, deterministic=True)
         obs, reward, done, info = env.step(action)
 else:
-    learn_arguments = dict(total_timesteps=args.timesteps, tb_log_name=args.experiment_name)
+    callbacks = [TqdmCallback(args.timesteps)]
     if args.save_checkpoint_frequency:
         print("Checkpoint saving enabled. Checkpoints will be saved to: " + abs_path_checkpoint)
-        checkpoint_callback = CheckpointCallback(
+        callbacks.append(CheckpointCallback(
             save_freq=(args.save_checkpoint_frequency // env.num_envs),
             save_path=path_checkpoint,
             name_prefix=args.experiment_name,
-        )
-        learn_arguments["callback"] = checkpoint_callback
+        ))
+    learn_arguments = dict(total_timesteps=args.timesteps, tb_log_name=args.experiment_name, callback=callbacks)
     try:
         model.learn(**learn_arguments)
     except (KeyboardInterrupt, ConnectionError, ConnectionResetError):

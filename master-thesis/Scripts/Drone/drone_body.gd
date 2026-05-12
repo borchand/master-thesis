@@ -67,10 +67,12 @@ func _ready():
 	body_entered.connect(_on_body_entered)
 	
 func _physics_process(_delta):
-	if is_rl:
-		return
+	if not is_rl:
+		boids()
 	
-	boids()
+	if is_training:
+		return
+
 	log_information(timestep)
 	timestep += 1
 	collision_at_time_step = 0

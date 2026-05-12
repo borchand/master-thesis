@@ -9,7 +9,8 @@
 script = ExtResource("1_ojf0l")
 control_mode = 2
 action_repeat = 4
-onnx_model_path = "model.onnx"
+speed_up = 10.0
+onnx_model_path = "grouping_10_000_000.onnx"
 metadata/_custom_type_script = "uid://c16g2vvptkvge"
 
 [node name="World" parent="." unique_id=1006143094 instance=ExtResource("2_37uq0")]

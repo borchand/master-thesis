@@ -7,22 +7,27 @@ const drone = preload("res://Scenes/Drone/Drone.tscn")
 @export var is_rl: bool = false
 
 # Bike count range used when is_rl = true. Fixed count is used otherwise.
-@export var min_bike_count: int = 2
-@export var max_bike_count: int = 8
+@export var min_bike_count: int = 1
+@export var max_bike_count: int = 20
+
+# One drone count per training instance (indexed by instance_id). Used when is_rl = true.
+@export var drone_counts_per_instance: Array[int] = [1, 2, 8, 15]
 
 const RL_TRACKS: Array[String] = [
-	"res://stages/rl-test-track.json",
-	"res://stages/rl-track-circle.json",
-	"res://stages/rl-track-circuit.json",
-	"res://stages/rl-track-hilly.json",
-	"res://stages/rl-track-straight.json",
-	"res://stages/rl-track-left-turn.json",
-	"res://stages/stage-1-route.json",
-	"res://stages/stage-6-route.json",
-	"res://stages/stage-10-route.json",
-	"res://stages/stage-12-route.json",
-	"res://stages/stage-18-route.json",
-
+	"res://stages/rl-5k-straight-flat.json",
+	"res://stages/rl-5k-straight-uphill.json",
+	"res://stages/rl-5k-straight-downhill.json",
+	"res://stages/rl-5k-rolling-hills.json",
+	"res://stages/rl-5k-valley.json",
+	"res://stages/rl-5k-mountain.json",
+	"res://stages/rl-5k-left-arc.json",
+	"res://stages/rl-5k-right-arc.json",
+	"res://stages/rl-5k-s-curve.json",
+	"res://stages/rl-5k-zigzag.json",
+	"res://stages/rl-5k-left-arc-uphill.json",
+	"res://stages/rl-5k-right-arc-downhill.json",
+	"res://stages/rl-5k-s-curve-uphill.json",
+	"res://stages/rl-5k-rolling-left-arc.json",
 ]
 
 @onready var path_instance : Path3D
@@ -31,7 +36,7 @@ var instance_id: int = -1
 var drone_list: Array = []
 
 var bike_count:int = 10
-var drone_count:int = 50
+var drone_count:int = 5
 
 # Spacing used only at spawn time. Smaller than avoid_radius so large fleets
 # fit within the camera frustum; boids separation takes over once running.
@@ -50,6 +55,8 @@ func _ready():
 		path_instance.call("preload_tracks", RL_TRACKS)
 		randomize_track()
 		bike_count = randi_range(min_bike_count, max_bike_count)
+		if instance_id < drone_counts_per_instance.size():
+			drone_count = drone_counts_per_instance[instance_id]
 
 	if is_training:
 		$Menu/ToggleContainer.visible = false
