@@ -13,20 +13,12 @@ var timer_threashold = 1.0 / pr_sec_checks
 var timer = 0
 var total_time = 0
 
-var Maxspeed = 22
-var Minspeed = 4.5
-var staminaSpeedupThreashold = 85
-var staminaSlowdownThreashold = 40
-var staminaRegen: float
-var speedUpProbability = 2
-var accelerationRate = 0.0001
-var deaccelerationRate = 0.0002
-var stamina = 100.0
-
 var is_rl: bool = false
 var is_training: bool = false
 
 var speed = 9.0
+var speedUpProbability = 12
+var speedDownProbability = 7
 var acceleration = 0.0
 
 var sustainable_force = 25 # not used
@@ -44,8 +36,6 @@ var separation_c = 0.05  #0.05   #Set by trial and error
 
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
-	if staminaRegen == null:
-		staminaRegen = rng.randf_range(3.0, 4.0)
 
 func _process(delta):
 	timer += delta
@@ -63,27 +53,10 @@ func _process(delta):
 
 func coltroler(delta):
 	#control1(delta)
-	control2(delta)
+	control1(delta)
 
 #Controller1
-func control1(_delta): #No longer used
-	#Slow down if stamina low
-	if stamina<staminaSlowdownThreashold:
-		acceleration -= deaccelerationRate * (staminaSlowdownThreashold - stamina)
-	elif stamina>staminaSpeedupThreashold and (rng.randi_range(0,100) + (staminaSpeedupThreashold - stamina) * 0.3) < speedUpProbability :
-		acceleration += accelerationRate
-	#Change in speed and stamina
-	speed = max(Minspeed, min(Maxspeed, speed + acceleration))
-	stamina = min(100.0, stamina + staminaRegen * 0.25 - speed * 0.5)
-	if speed == Minspeed: #on min speed stamina regenerate is double
-		acceleration = max(0, acceleration)
-		stamina += staminaRegen * 0.5
-
-func setRegen(regen: float) -> void:
-	staminaRegen = regen
-
-#Controller2
-func control2(delta):
+func control1(delta):
 	var elevation = -1 * bikebody.global_rotation.x #positive = going up
 	var wanted_power  = sustainable_watt
 
@@ -142,12 +115,12 @@ func behaviorChange(delta, elevation_):
 		return
 
 	if behavior == "attack" and self.progress_ratio <= 0.985:
-		if elevation_ < 0 or rng.randi_range(0, 1000) < 7 * delta:
+		if elevation_ < 0 or rng.randi_range(0, 1000) < speedDownProbability * delta:
 			behavior = "cruise"
 			return
 
 	if behavior == "cruise" and elevation_ > 0.017: # 0.09 rad is 5%
-		if rng.randi_range(0,10000) < (12 * (elevation_ / 0.034) * delta) / max(1-progress_ratio, 0.15): # max(1-progress_ratio, 0.15):
+		if rng.randi_range(0,10000) < (speedUpProbability * (elevation_ / 0.034) * delta) / max(1-progress_ratio, 0.15): # max(1-progress_ratio, 0.15):
 			behavior = "attack"
 	
 func fatigue_changes(current_watt):
@@ -197,16 +170,12 @@ static func get_randomize_for_rl():
 	var _rng = RandomNumberGenerator.new()
 	
 	var _speed = _rng.randf_range(6.0, 18.0)
-	var _maxspeed = _rng.randf_range(16.0, 26.0)
-	var _minspeed = _rng.randf_range(3.0, 7.0)
-	var _speedUpProbability = _rng.randi_range(1, 6)
-	var _cohesion_c = _rng.randf_range(0.1, 0.8)
+	var _speedUpProbability = _rng.randi_range(4, 16)
+	var _cohesion_c = _rng.randf_range(0.1, 1.0)
 	var _separation_c = _rng.randf_range(0.01, 1)
 
 	return {
 		"speed": _speed,
-		"maxspeed": _maxspeed,
-		"minspeed": _minspeed,
 		"speedUpProbability": _speedUpProbability,
 		"cohesion_c": _cohesion_c,
 		"separation_c": _separation_c,
@@ -214,8 +183,6 @@ static func get_randomize_for_rl():
 
 func set_randomize_for_rl(dict) -> void:
 	speed = dict["speed"]
-	Maxspeed = dict["maxspeed"]
-	Minspeed = dict["minspeed"]
 	speedUpProbability = dict["speedUpProbability"]
 	cohesion_c = dict["cohesion_c"]
 	separation_c = dict["separation_c"]
