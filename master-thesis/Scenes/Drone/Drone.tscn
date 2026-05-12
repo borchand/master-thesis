@@ -3,12 +3,17 @@
 [ext_resource type="PackedScene" uid="uid://mxhdvsfjqqtv" path="res://sprites/animated_drone/scene.gltf" id="1_uvgqj"]
 [ext_resource type="Script" uid="uid://bmlo511l3yfy2" path="res://Scripts/Drone/drone_body.gd" id="2_0xxxp"]
 [ext_resource type="Script" uid="uid://cuo14t1rph0hn" path="res://Scripts/Drone/drone_camera_detection.gd" id="3_5j1j2"]
+[ext_resource type="Script" uid="uid://b1h3vwlgsuca4" path="res://Scripts/Drone/drone_communication.gd" id="4_6hc2f"]
+[ext_resource type="Script" path="res://Scripts/Drone/drone_rl_base.gd" id="5_6hc2f"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uvgqj"]
 size = Vector3(0.2685547, 0.09057617, 0.20922852)
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_3rlx3"]
 points = PackedVector3Array(5, -5, 0.55, -5, -5, 0.55, 27, -5, 26.5, -27, -5, 26.5, 0, 0.01, 0.05)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_mj1ce"]
+radius = 30.0
 
 [node name="RigidBody" type="RigidBody3D" unique_id=1754414733]
 axis_lock_angular_x = true
@@ -17,6 +22,7 @@ gravity_scale = 0.0
 can_sleep = false
 angular_damp = 6.0
 script = ExtResource("2_0xxxp")
+version = 4
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1101559629]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00048828125, 0.03894043, 0.006225586)
@@ -40,3 +46,14 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, -
 visible = false
 polygon = PackedVector2Array(-5, 0.55, -27, 26.5, 27, 26.5, 5, 0.55)
 depth = 0.01
+
+[node name="Drone_communication" type="Area3D" parent="." unique_id=1717689195]
+script = ExtResource("4_6hc2f")
+
+[node name="sensor" type="CollisionShape3D" parent="Drone_communication" unique_id=700398335]
+shape = SubResource("SphereShape3D_mj1ce")
+
+[node name="DroneRL" type="Node3D" parent="." unique_id=210817093]
+script = ExtResource("5_6hc2f")
+rl_version = 2
+metadata/_custom_type_script = "uid://dg8tmq3tcha7"

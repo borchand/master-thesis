@@ -12,19 +12,24 @@ config_version=5
 
 config/name="master-thesis"
 run/main_scene="uid://fqaxsomnll1"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.6", "C#", "Forward Plus")
 
 [autoload]
 
 shared="*uid://f1b4m8xwxax"
+logging="*uid://c275mq46hf0j6"
 
 [display]
 
 window/size/mode=3
 
+[dotnet]
+
+project/assembly_name="master-thesis"
+
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/cmd_console/plugin.cfg")
+enabled=PackedStringArray("res://addons/cmd_console/plugin.cfg", "res://addons/godot_rl_agents/plugin.cfg")
 
 [input]
 
@@ -91,5 +96,4 @@ drone_control={
 [rendering]
 
 rendering_device/driver.windows="d3d12"
-renderer/rendering_method="gl_compatibility"
-renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
