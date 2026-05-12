@@ -111,13 +111,7 @@ func add_bike():
 	bike_instance.is_training = is_training
 
 	# Add variation in bike preformance
-	var rnW = rng.randi_range(0,3)
-	rnW = -9+9*rnW 
-	
-	if rnW < min_rng:
-		min_rng = rnW
-	if rnW > max_rng:
-		max_rng = rnW
+	var rnW =  -9+9*rng.randi_range(0,3)
 
 	bike_instance.set_watts(373+rnW,573+rnW)
 
