@@ -93,7 +93,7 @@ func place_all_drones():
 	for i in range(total):
 		if i >= normal_drone_count:
 			var route_index = i - normal_drone_count
-			place_drone_along_last_two_thirds(drone_list[i], route_index, route_drone_count)
+			place_drone_along_middle_section(drone_list[i], route_index, route_drone_count)
 		else:
 			var bike_index = i % shared.bike_lists[instance_id].size()
 			place_drone(drone_list[i], bike_index)
@@ -119,26 +119,45 @@ func place_drone(drone_instance: Node3D, bike_index: int):
 
 	drone_instance.set_position(desired_pos)
 
-func place_drone_along_last_two_thirds(drone_instance, route_index, route_drone_count):
+func place_drone_along_middle_section(drone_instance, route_index, route_drone_count):
 	var curve := path_instance.curve
 	var length := curve.get_baked_length()
 
-	var start_offset := length / 3.0
-	var end_offset := length
+	var start_offset := length / 4.0
+	var end_offset := length * 3.0 / 4.0
 
 	var t := 0.5
 	if route_drone_count > 1:
 		t = float(route_index) / float(route_drone_count - 1)
 
 	var offset = lerp(start_offset, end_offset, t)
-	var local_pos := curve.sample_baked(offset)
-	var world_pos := path_instance.to_global(local_pos)
 
-	world_pos.y += drone_instance.height_offset
-	drone_instance.global_position = world_pos
+	var local_road_pos := curve.sample_baked(offset)
+	var road_world_pos := path_instance.to_global(local_road_pos)
+
+	var ahead_offset = min(offset + 5.0, length)
+	var ahead_local_pos := curve.sample_baked(ahead_offset)
+	var ahead_world_pos := path_instance.to_global(ahead_local_pos)
+
+	var road_direction := ahead_world_pos - road_world_pos
+	road_direction.y = 0
+	road_direction = road_direction.normalized()
+
+	var side_direction := Vector3(-road_direction.z, 0, road_direction.x).normalized()
+
+	var drone_world_pos := road_world_pos + side_direction * 25
+	drone_world_pos.y += drone_instance.height_offset
+
+	drone_instance.global_position = drone_world_pos
+
+	var look_target := road_world_pos
+	look_target.y = drone_world_pos.y
+
+	drone_instance.look_at(look_target, Vector3.UP)
+
 	drone_instance.idle_until_needed = true
 	drone_instance.has_activated = false
-
+	
 func add_bike():
 	# create bike instance
 	var bike_instance = bike.instantiate()

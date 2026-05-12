@@ -15,8 +15,9 @@ var timestep = 1
 @onready var drone_detector: DroneDetection = $"Camera_detection"
 @onready var drone_sensor: DroneCommunication = $"Drone_communication"
 
+@onready var camera_readings = []
 @onready var sensor_readings_drones = []
-@onready var sensor_readings_bikes =[]
+@onready var sensor_readings_bikes = []
 
 @onready var target_position = null
 @onready var target_speed = null
@@ -80,6 +81,7 @@ func _physics_process(_delta):
 		if not _should_activate_from_coverage():
 			linear_velocity = Vector3.ZERO
 			angular_velocity = Vector3.ZERO
+			timestep += 1
 			return
 
 		has_activated = true
@@ -413,6 +415,7 @@ func get_camera_node() -> Camera3D:
 	return $Camera3D
 
 func read_sensor(drones: Dictionary, bikes: Dictionary):
+	camera_readings = []
 	sensor_readings_drones = []
 	sensor_readings_bikes = []
 
@@ -472,6 +475,9 @@ func read_sensor(drones: Dictionary, bikes: Dictionary):
 		for bike in bikes:
 			if randf() < dynamic_rate:
 				sensor_readings_bikes.append(get_bike_data(bike))
+	
+	for bike in drone_detector.bike_set.values():
+		camera_readings.append(get_bike_data(bike))
 
 func get_bike_data(bike: Bike_body) -> Dictionary:
 	return {
@@ -530,25 +536,61 @@ func create_logging_message(delta):
 	
 	return data
 
+#func _should_activate_from_coverage():
+	#var visible_bikes = camera_readings
+#
+	#if visible_bikes.is_empty():
+		#return false
+#
+	#for bike in visible_bikes:
+		#var covering_drones = _count_drones_covering_bike(bike)
+#
+		#if covering_drones < 1:
+			#return true
+#
+	#return false
+#
+#func _count_drones_covering_bike(bike):
+	#var count = 0
+	#var bike_pos: Vector3 = bike["position"]
+#
+	#for drone in sensor_readings_drones:
+		#var drone_pos: Vector3 = drone["position"]
+		#var distance_to_bike := drone_pos.distance_to(bike_pos)
+#
+		#if distance_to_bike <= coverage_radius:
+			#count += 1
+#
+	#return count
+	
 func _should_activate_from_coverage():
-	if sensor_readings_bikes.is_empty():
+	var visible_bikes = camera_readings
+
+	if visible_bikes.is_empty():
 		return false
 
-	var nearby_bike_count := 0
+	var clusters = _cluster_bikes(visible_bikes)
 
-	for bike in sensor_readings_bikes:
-		if bike["distance"] < 10.0:
-			nearby_bike_count += 1
+	for cluster in clusters:
+		var required_coverage = _coverage_score(cluster.size)
+		var covering_drones = _count_drones_covering_cluster(cluster)
 
-	if nearby_bike_count == 0:
-		return false
+		if covering_drones < required_coverage:
+			return true
 
-	var required_coverage := _coverage_score(nearby_bike_count)
+	return false
 
-	if sensor_readings_drones.size() >= required_coverage:
-		return false
+func _count_drones_covering_cluster(cluster):
+	var count = 0
+	var centroid: Vector3 = cluster["centroid"]
 
-	return true
+	for drone in sensor_readings_drones:
+		var drone_pos: Vector3 = drone["position"]
+
+		if drone_pos.distance_to(centroid) <= coverage_radius:
+			count += 1
+
+	return count
 	
 func start_logging():
 	logging.start_run_file(str(self.id), "drone")
