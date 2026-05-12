@@ -54,9 +54,6 @@ func _process(delta):
 		timer = timer-timer_threashold
 		coltroler(delta)
 
-	# move bike forward
-	if speed>max_speed:
-		max_speed = speed
 		
 	self.progress += speed * delta
 	if self.progress >= max_progress:
