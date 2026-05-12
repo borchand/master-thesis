@@ -23,7 +23,7 @@ var accelerationRate = 0.0001
 var deaccelerationRate = 0.0002
 var stamina = 100.0
 
-var speed = 9.0
+var speed = 10.0
 var acceleration = 0.0
 
 var sustainable_force = 25 # not used  
@@ -36,8 +36,10 @@ var fatigue = 0
 var in_peloton = false
 var behavior = "cruise"  #cruise, attack
 
-var cohesion_c =  0.55     #Set by trial and error
-var separation_c = 0.05   #Set by trial and error 
+var cohesion_c =  0.8    #Set by trial and error
+var separation_c = 0.05  #0.05   #Set by trial and error 
+
+var max_speed = 0
 
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
@@ -52,10 +54,14 @@ func _process(delta):
 		coltroler(delta)
 		
 	# move bike forward
+	if speed>max_speed:
+		max_speed = speed
+		
 	self.progress += speed * delta
 	if self.progress >= max_progress:
 		# remove bike when it reaches the end of the path
-		print("Bike: ", self.name, " Finish time: ", total_time)
+		print("Bike: ", self.name, " Finish time: ", total_time, " Watt: ", sustainable_watt)
+		print("Max_speed: ", max_speed)
 		safe_queue_free()
 	
 func coltroler(delta):
@@ -134,21 +140,23 @@ func solo():
 	return sustainable_watt
 	
 func behaviorChange(delta, elevation_):
-	if self.progress_ratio > 0.985 and behavior != "attack":
+	if self.sustainable_watt>390 and self.progress_ratio > 0.985 and behavior != "attack":
 		behavior = "attack"
-		print("EndAttack ", name, "  ", total_time, "  ", fatigue)
+		#print("EndAttack ", name, "  ", total_time, "  ", fatigue)
 		return
 	
 	if behavior == "attack" and self.progress_ratio <= 0.985:
 		if elevation_ < 0 or rng.randi_range(0, 1000) < 7 * delta:
 			behavior = "cruise"
-			print("chill ", name, "  ", total_time, "  ", fatigue)
+			#print("chill ", name, "  ", total_time, "  ", fatigue)
 			return
 	
 	if behavior == "cruise" and elevation_ > 0.017: # 0.09 rad is 5%
-		if rng.randi_range(0,10000) < (12 * (elevation_ / 0.034) * delta) / max(1-progress_ratio, 0.15):
+		if rng.randi_range(0,10000) < (12 * (elevation_ / 0.034) * delta) / max(1-progress_ratio, 0.15): # max(1-progress_ratio, 0.15):
 			behavior = "attack"
-			print("ATTACK ",  name, "  ", total_time, "  ", fatigue, "  ", elevation_)
+			#print("ATTACK ",  name, "  ", total_time, "  ", fatigue, "  ", elevation_)
+		#if self.fatigue>self.fatigue_threashold*1.05:
+			#print(self.fatigue)
 	
 func fatigue_changes(current_watt):
 	if current_watt == sustainable_watt:

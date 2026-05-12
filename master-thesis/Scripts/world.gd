@@ -6,7 +6,10 @@ const drone = preload("res://Scenes/Drone/Drone.tscn")
 @onready var path_instance : Path3D
 var rng = RandomNumberGenerator.new()
 
-const bike_count = 60
+var min_rng= 24
+var max_rng= 0
+
+const bike_count = 180
 
 func _ready():
 	path_instance = $BikePath3d
@@ -14,7 +17,9 @@ func _ready():
 	# load bike scene
 	for i in range(bike_count):
 		add_bike()
-		add_drone(Vector3(-i, 5, 2))
+		#add_drone(Vector3(-i, 5, 2))
+		
+	print("Min: ", min_rng, " Max: ", max_rng)
 	
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 
@@ -32,17 +37,21 @@ func add_bike():
 
 	#Add variation in bike preformance
 	var rn = rng.randfn(23, 1.15)
-	var rnW = rng.randfn(6, 3)
-
-	#if we want more grouped bikes.
-	#if (rn>value1 and rn<valu2) or (rn>value3 and rn<value4):
-		#rn = rng.randfn(23, 1.15)
+	var rnW = rng.randi_range(0,3)#rng.randi_range(-8,18)#rng.randfn(12, 14)
+	rnW = -9+9*rnW 
+	
+	if rnW < min_rng:
+		min_rng = rnW
+	if rnW > max_rng:
+		max_rng = rnW
+	#rnW = min(1000, max(-1000, rnW))
 
 	bike_instance.setRegen(rn)
-	bike_instance.set_watts(393+rnW,592+rnW)
+	bike_instance.set_watts(373+rnW,573+rnW)
 
 	# add bike to scene
 	path_instance.add_child(bike_instance)
+	bike_instance.progress = 20+rnW+rng.randf_range(0.0,1.0)
 
 	shared.bikes.append(bike_instance)
 
