@@ -4,7 +4,7 @@ class_name Drone
 static var _next_id: int = 1
 var id: int
 
-enum Version { Boids, BoidsRandomTargets, BoidsDynamicTargets, BoidsPriorityAttractionFields, BoidsPriorityGroups }
+enum Version { Boids, BoidsPriorityAttractionFields, BoidsPriorityGroups }
 
 var is_rl: bool = false
 var is_training: bool = false
@@ -33,17 +33,14 @@ var timestep = 1
 @export var y_gain := 35.0
 @export var y_damp := 18.0
 @export var height_offset := 5.0
-@export var avoid_radius := 2.0
-@export var avoidfactor = 60
+@export var avoid_radius := 10.0
+@export var avoidfactor = 5
 @export var centeringfactor = 2
 @export var matchingfactor = 0.4
 
 @export var version: Version = Version.Boids
 @export var random_selection_rate := 0.2
 var keep_selection_for_n_frames = 100
-
-var sensor_selection_timer = 0.0
-var _random_target_bikes: Array = []
 
 # BoidsPriorityAttractionFields parameters
 # Bikes closer than this (metres) are merged into the same cluster
@@ -103,7 +100,6 @@ func boids():
 	var alignment_vector: Vector3
 	var cohesion_vector: Vector3
 	
-	var bikes_for_height = sensor_readings_bikes
 	var bikes_for_boids: Array
 
 	if version == Version.BoidsPriorityAttractionFields:
@@ -120,7 +116,6 @@ func boids():
 
 		var clusters = _cluster_bikes(sensor_readings_bikes)
 		var assigned_cluster = _assigned_cluster(clusters)
-		bikes_for_height = assigned_cluster.bikes
 
 		_draw_cluster_debug_lines(clusters)
 		_draw_bike_debug_lines(assigned_cluster.bikes)
@@ -421,14 +416,6 @@ func read_sensor(drones: Dictionary, bikes: Dictionary):
 	sensor_readings_drones = []
 	sensor_readings_bikes = []
 
-	if version == Version.BoidsRandomTargets:
-		# For BoidsRandomTargets we want to keep the same bike readings for a few frames to give the drone a chance to react to them, instead of changing them every frame which would make it hard for the drone to learn anything.
-		if sensor_selection_timer < keep_selection_for_n_frames:
-			sensor_selection_timer += 1
-		else:
-			_random_target_bikes.clear()
-			sensor_selection_timer = 0
-
 	for drone in drones:
 		if drone.id != id:
 			sensor_readings_drones.append(
@@ -440,47 +427,11 @@ func read_sensor(drones: Dictionary, bikes: Dictionary):
 				}
 			)
 	
-	if not version == Version.BoidsRandomTargets and not version == Version.BoidsDynamicTargets:
-		# All bike data is used; BoidsPriorityAttractionFields clusters internally
-		for bike in bikes:
-			sensor_readings_bikes.append(get_bike_data(bike))
-
-	elif version == Version.BoidsRandomTargets:
-
-		if _random_target_bikes.is_empty():
-			# Randomly select a subset of bikes to consider for the boids calculations.
-			# The idea is that the drones will spread out more and not all cluster around the same target bike,
-			# which could help with splitting up the drones when the peloton splits.
-			for bike in bikes:
-				if randf() < random_selection_rate:
-					_random_target_bikes.append(bike)
-		else:
-			# Remove any bikes that have left the simulation (iterate backwards to avoid index shift)
-			for i in range(_random_target_bikes.size() - 1, -1, -1):
-				if not bikes.has(_random_target_bikes[i]):
-					_random_target_bikes.remove_at(i)
-
-		# Rebuild sensor readings from the current selection
-		for bike in _random_target_bikes:
-			sensor_readings_bikes.append(get_bike_data(bike))
-
-	elif version == Version.BoidsDynamicTargets:
-
-		# Like BoidsRandomTargets but the selection rate is derived from the drone/bike ratio.
-		# Each drone covers roughly (bike_count / drone_count) bikes on average, so that
-		# collectively all drones spread evenly across the peloton.
-		var drone_count = max(1, drones.size())
-		# Each drone picks 1/drone_count of all bikes on average, so across all
-		# drones each bike gets covered roughly once regardless of fleet size.
-		var dynamic_rate = clamp(1.0 / float(drone_count), 0.05, 1.0)
-
-		for bike in bikes:
-			if randf() < dynamic_rate:
-				sensor_readings_bikes.append(get_bike_data(bike))
-	
 	for bike in bikes:
+		var data = get_bike_data(bike)
 		if camera.is_position_in_frustum(bike.global_position):
-			camera_readings.append(get_bike_data(bike))
+			camera_readings.append(data)
+		sensor_readings_bikes.append(data)
 
 func get_bike_data(bike: Bike_body) -> Dictionary:
 	return {
