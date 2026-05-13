@@ -330,6 +330,36 @@ func _make_cluster_dot() -> MeshInstance3D:
 	mi.material_override = mat
 	return mi
 
+#Drones along road functions
+func _should_activate_from_coverage():
+	var visible_bikes = camera_readings
+
+	if visible_bikes.is_empty():
+		return false
+
+	var clusters = _cluster_bikes(visible_bikes)
+
+	for cluster in clusters:
+		var required_coverage = _coverage_score(cluster.size)
+		var covering_drones = _count_drones_covering_cluster(cluster)
+
+		if covering_drones < required_coverage:
+			return true
+
+	return false
+
+func _count_drones_covering_cluster(cluster):
+	var count = 0
+	var centroid: Vector3 = cluster["centroid"]
+
+	for drone in sensor_readings_drones:
+		var drone_pos: Vector3 = drone["position"]
+
+		if drone_pos.distance_to(centroid) <= coverage_radius:
+			count += 1
+
+	return count
+
 # ─── Debug ────────────────────────────────────────────────────────────────────
 func _draw_cluster_debug_lines(clusters: Array) -> void:
 	if not debug_draw or clusters.is_empty():
@@ -394,7 +424,7 @@ func _draw_bike_debug_lines(bikes) -> void:
 	for i in range(bikes.size(), _debug_bike_lines.size()):
 		_debug_bike_lines[i].visible = false
 
-#Helper functions
+# ─── Helper functions ────────────────────────────────────────────────────────────────────
 func flat_dir(v: Vector3) -> Vector3:
 	v.y = 0.0
 	return v.normalized()
@@ -442,34 +472,18 @@ func get_bike_data(bike: Bike_body) -> Dictionary:
 		"id": bike.bike_id
 	}
 
-func get_nearest_position(bikes: Dictionary):
-	var closest = Vector3.ZERO
-	var minimum_distance = INF
-	var speed = 0.0
+# log base 1.9 of n + 1, rounded to nearest int. 
+# n = 1 -> 1
+# n = 2 -> 2
+# n = 3 -> 3
+# n = 4 -> 3
+# n = 5 -> 4
+# n = 10 -> 5
+# n = 20 -> 6
+func _coverage_score(n: int) -> int:
+	return round(log(float(n)) / log(1.9)) + 1 
 
-	for bike_id in bikes:
-		var pos = bikes[bike_id].global_position
-		var dist = global_position.distance_to(pos)
-		if dist < minimum_distance:
-			minimum_distance = dist
-			closest = pos
-			speed = bikes[bike_id].get_parent().speed
-			target_bike = bikes[bike_id].get_parent()
-
-	target_position = closest
-	target_speed = speed
-
-func get_random_position(bikes: Dictionary):
-	if bikes.is_empty():
-		return
-
-	var keys = bikes.keys()
-	var random_key = keys[randi() % keys.size()]
-	var bike = bikes[random_key]
-
-	target_position = bike.global_position
-	target_speed = bike.get_parent().speed
-	target_bike = bike.get_parent()
+# ─── Logging ────────────────────────────────────────────────────────────────────
 
 func _on_body_entered(_body):
 	collision_at_time_step += 1
@@ -490,62 +504,6 @@ func create_logging_message(delta):
 	data.append(bikes_id+' ]')
 	
 	return data
-
-#func _should_activate_from_coverage():
-	#var visible_bikes = camera_readings
-#
-	#if visible_bikes.is_empty():
-		#return false
-#
-	#for bike in visible_bikes:
-		#var covering_drones = _count_drones_covering_bike(bike)
-#
-		#if covering_drones < 1:
-			#return true
-#
-	#return false
-#
-#func _count_drones_covering_bike(bike):
-	#var count = 0
-	#var bike_pos: Vector3 = bike["position"]
-#
-	#for drone in sensor_readings_drones:
-		#var drone_pos: Vector3 = drone["position"]
-		#var distance_to_bike := drone_pos.distance_to(bike_pos)
-#
-		#if distance_to_bike <= coverage_radius:
-			#count += 1
-#
-	#return count
-	
-func _should_activate_from_coverage():
-	var visible_bikes = camera_readings
-
-	if visible_bikes.is_empty():
-		return false
-
-	var clusters = _cluster_bikes(visible_bikes)
-
-	for cluster in clusters:
-		var required_coverage = _coverage_score(cluster.size)
-		var covering_drones = _count_drones_covering_cluster(cluster)
-
-		if covering_drones < required_coverage:
-			return true
-
-	return false
-
-func _count_drones_covering_cluster(cluster):
-	var count = 0
-	var centroid: Vector3 = cluster["centroid"]
-
-	for drone in sensor_readings_drones:
-		var drone_pos: Vector3 = drone["position"]
-
-		if drone_pos.distance_to(centroid) <= coverage_radius:
-			count += 1
-
-	return count
 	
 func start_logging():
 	logging.start_run_file(str(self.id), "drone")
@@ -553,14 +511,3 @@ func start_logging():
 func log_information(delta):
 	var message = create_logging_message(delta)
 	logging.append_line(str(self.id), "drone", message)
-
-# log base 1.9 of n + 1, rounded to nearest int. 
-# n = 1 -> 1
-# n = 2 -> 2
-# n = 3 -> 3
-# n = 4 -> 3
-# n = 5 -> 4
-# n = 10 -> 5
-# n = 20 -> 6
-func _coverage_score(n: int) -> int:
-	return round(log(float(n)) / log(1.9)) + 1 
