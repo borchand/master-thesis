@@ -15,7 +15,7 @@ var timestep = 1
 @onready var camera: Camera3D = $"Camera3D"
 @onready var drone_sensor: DroneCommunication = $"Drone_communication"
 
-@onready var camera_readings = []
+@onready var camera_readings: Array[Bike_body] = []
 @onready var sensor_readings_drones = []
 @onready var sensor_readings_bikes = []
 

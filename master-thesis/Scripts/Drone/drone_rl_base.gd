@@ -248,7 +248,7 @@ func _compute_reward_boids_rl() -> void:
 	if nearby_count == 0:
 		return
 
-	var bikes_in_camera = drone.drone_detector.bike_set
+	var bikes_in_camera = drone.camera_readings
 	var visible_count = bikes_in_camera.size()
 
 	# Primary: fraction of locally sensed bikes that are in frame.
@@ -307,7 +307,7 @@ func _get_obs_boids_rl() -> Dictionary:
 		return {"obs": obs}
 
 	# --- Camera coverage ---
-	var bikes_in_camera = drone.drone_detector.bike_set
+	var bikes_in_camera = drone.camera_readings
 	var visible_count = bikes_in_camera.size()
 	obs.append(float(visible_count) / float(nearby_count))
 
@@ -567,7 +567,7 @@ func _get_target_bike() -> Bike:
 	var world = drone.get_parent()
 	var closest_bike: Bike = null
 	var min_dist := INF
-	for bike_body: Bike_body in drone.drone_detector.bike_set.values():
+	for bike_body: Bike_body in drone.camera_readings:
 		var bike: Bike = bike_body.get_parent()
 		if bike.get_parent().get_parent() != world:
 			continue
@@ -617,7 +617,7 @@ func _draw_debug_grouping_rl() -> void:
 func _draw_debug_lines() -> void:
 	if not drone.debug_draw:
 		return
-	var bikes = drone.drone_detector.bike_set.values()
+	var bikes = drone.camera_readings
 	while _debug_lines.size() < bikes.size():
 		var mi = drone.make_debug_line()
 		drone.get_parent().add_child.call_deferred(mi)
