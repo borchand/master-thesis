@@ -2,15 +2,11 @@
 
 [ext_resource type="PackedScene" uid="uid://mxhdvsfjqqtv" path="res://sprites/animated_drone/scene.gltf" id="1_uvgqj"]
 [ext_resource type="Script" uid="uid://bmlo511l3yfy2" path="res://Scripts/Drone/drone_body.gd" id="2_0xxxp"]
-[ext_resource type="Script" uid="uid://cuo14t1rph0hn" path="res://Scripts/Drone/drone_camera_detection.gd" id="3_5j1j2"]
 [ext_resource type="Script" uid="uid://b1h3vwlgsuca4" path="res://Scripts/Drone/drone_communication.gd" id="4_6hc2f"]
 [ext_resource type="Script" uid="uid://bvvitlfs8wu3l" path="res://Scripts/Drone/drone_rl_base.gd" id="5_6hc2f"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uvgqj"]
 size = Vector3(0.2685547, 0.09057617, 0.20922852)
-
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_3rlx3"]
-points = PackedVector3Array(5, -5, 0.55, -5, -5, 0.55, 27, -5, 26.5, -27, -5, 26.5, 0, 0.01, 0.05)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_mj1ce"]
 radius = 30.0
@@ -30,13 +26,6 @@ shape = SubResource("BoxShape3D_uvgqj")
 
 [node name="Drone_body" parent="." unique_id=1967317189 instance=ExtResource("1_uvgqj")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
-
-[node name="Camera_detection" type="Area3D" parent="." unique_id=303911449]
-script = ExtResource("3_5j1j2")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Camera_detection" unique_id=1133267120]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
-shape = SubResource("ConvexPolygonShape3D_3rlx3")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=435078670]
 transform = Transform3D(1, 0, 0, 0, 0.67944133, 0.73372984, 0, -0.73372984, 0.67944133, 0, 0.011, -0.051)

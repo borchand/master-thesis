@@ -12,7 +12,7 @@ var is_training: bool = false
 var collision_at_time_step = 0
 var timestep = 1
 
-@onready var drone_detector: DroneDetection = $"Camera_detection"
+@onready var camera: Camera3D = $"Camera3D"
 @onready var drone_sensor: DroneCommunication = $"Drone_communication"
 
 @onready var camera_readings = []
@@ -203,7 +203,7 @@ func separation():
 		)
 		var dist = max(diff.length(), 0.01) 
 		separation_vector += diff / (dist * dist)  
-    
+	
 	return separation_vector * avoidfactor
 		
 func height_force(bikes):
@@ -478,15 +478,17 @@ func read_sensor(drones: Dictionary, bikes: Dictionary):
 			if randf() < dynamic_rate:
 				sensor_readings_bikes.append(get_bike_data(bike))
 	
-	for bike in drone_detector.bike_set.values():
-		camera_readings.append(get_bike_data(bike))
+	for bike in bikes:
+		if camera.is_position_in_frustum(bike.global_position):
+			camera_readings.append(get_bike_data(bike))
 
 func get_bike_data(bike: Bike_body) -> Dictionary:
 	return {
 		"position": bike.global_position,
 		"distance": global_position.distance_to(bike.global_position),
 		"direction": global_position.direction_to(bike.global_position),
-		"velocity":  flat_dir(-bike.global_transform.basis.z) * bike.get_parent().speed
+		"velocity":  flat_dir(-bike.global_transform.basis.z) * bike.get_parent().speed,
+		"id": bike.bike_id
 	}
 
 func get_nearest_position(bikes: Dictionary):
@@ -531,8 +533,8 @@ func create_logging_message(delta):
 	data.append(str(collision_at_time_step))
 
 	var bikes_id = '['
-	for bike in drone_detector.bike_set:
-		bikes_id += ' '+str(bike)
+	for bike in camera_readings:
+		bikes_id += ' '+str(bike['id'])
 	
 	data.append(bikes_id+' ]')
 	
