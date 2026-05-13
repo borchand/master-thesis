@@ -28,6 +28,8 @@ const RL_TRACKS: Array[String] = [
 	"res://stages/rl-5k-right-arc-downhill.json",
 	"res://stages/rl-5k-s-curve-uphill.json",
 	"res://stages/rl-5k-rolling-left-arc.json",
+	"res://stages/rl-5k-hairpin.json",
+	"res://stages/rl-5k-hairpin-uphill.json",
 ]
 
 @onready var path_instance : Path3D

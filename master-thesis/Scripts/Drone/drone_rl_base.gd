@@ -234,11 +234,16 @@ func _physics_process_boids_rl(world) -> void:
 
 	if drone.target_bike == null:
 		reward -= 0.5
-		return
 
 	_compute_reward_boids_rl()
 
 func _compute_reward_boids_rl() -> void:
+
+	for reading in drone.sensor_readings_drones:
+		if reading.distance < drone.avoid_radius:
+			var proximity = 1.0 - (reading.distance / drone.avoid_radius)
+			reward -= proximity * 2.0
+
 	var nearby_count = drone.sensor_readings_bikes.size()
 	if nearby_count == 0:
 		return
@@ -286,11 +291,6 @@ func _compute_reward_boids_rl() -> void:
 	var horiz_dist = to_centroid.length()
 	var dist_reward = 1.0 - clamp(abs(horiz_dist - optimal_film_dist) / film_dist_tolerance, 0.0, 1.0)
 	reward += dist_reward * 0.3
-
-	for reading in drone.sensor_readings_drones:
-		if reading.distance < drone.avoid_radius:
-			var proximity = 1.0 - (reading.distance / drone.avoid_radius)
-			reward -= proximity * 2.0
 
 # 16 observations for boids rl (camera-coverage / boids parameter tuning):
 #   coverage (1), centroid_cam xy (2), full_coverage flag (1),

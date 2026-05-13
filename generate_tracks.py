@@ -6,14 +6,14 @@ Coordinate system (metres):
   lat  = lateral direction (positive = left)
   elevation = vertical
 
-Each track is 200 segments × 25 m = 5 000 m total.
+Each track is 100 segments × 25 m = 2 500 m total.
 """
 
 import json, math, os
 
 OUT_DIR = "master-thesis/stages"
 STEP    = 25.0   # metres between waypoints
-STEPS   = 200    # number of segments → 201 points, 5 000 m total
+STEPS   = 100    # number of segments → 201 points, 5 000 m total
 
 
 def build_track(heading_fn, elevation_fn):
@@ -42,6 +42,76 @@ def save(name, pts):
         json.dump(pts, f, indent=2)
     total = STEPS * STEP
     print(f"  {name:45s}  {len(pts)} pts  {total:.0f} m")
+
+
+def build_hairpin_track(step=10.0, hairpin_radius=40.0, elevation_fn=None):
+    """
+    5 km track with two tight hairpin U-turns.
+    Layout: long straight → hairpin right → long straight back →
+            hairpin right (from rider's perspective) → long straight forward.
+    step          : metres between waypoints (smaller = smoother turn)
+    hairpin_radius: turning radius in metres (40 m ≈ tight mountain hairpin)
+    """
+    if elevation_fn is None:
+        elevation_fn = lambda d: 0.0
+
+    arc_len    = math.pi * hairpin_radius          # 180° arc length
+    turn_steps = max(2, round(arc_len / step))     # waypoints for the U-turn
+    total_m    = 2500.0
+    arc_total  = 2 * turn_steps * step
+    straight_m = (total_m - arc_total) / 3.0       # three straight segments
+    str_steps  = round(straight_m / step)
+
+    headings = []
+
+    # Segment 1: straight forward (heading = 0)
+    headings += [0.0] * str_steps
+
+    # Hairpin 1: (right U-turn)
+    for i in range(1, turn_steps + 1):
+        headings.append(-math.pi * i / turn_steps)
+
+
+    # Hairpin 2: (left U-turn)
+    for i in range(1, turn_steps + 1):
+        headings.append(-math.pi + math.pi * i / turn_steps)
+
+    # Segment 2: straight forward (heading ≈ -2π ≡ 0)
+    headings += [0.0] * str_steps
+
+    # Hairpin 3: (left U-turn)
+    for i in range(1, turn_steps + 1):
+        headings.append(math.pi * i / turn_steps)
+
+    # Hairpin 4: (right U-turn)
+    for i in range(1, turn_steps + 1):
+        headings.append(-math.pi - math.pi * i / turn_steps)
+
+
+   
+    # Segment 3: straight (heading = 0)
+    headings += [0.0] * str_steps
+
+    # Trace path
+    lat = lon = 0.0
+    dist = 0.0
+    pts = [{"lat": 0.0, "lon": 0.0, "elevation": round(elevation_fn(0.0), 4)}]
+    for h in headings:
+        lat  += step * math.sin(h)
+        lon  += step * math.cos(h)
+        dist += step
+        pts.append({"lat": round(lat, 4), "lon": round(lon, 4),
+                    "elevation": round(elevation_fn(dist), 4)})
+
+    actual_m = len(headings) * step
+    print(f"  {'rl-5k-hairpin':45s}  {len(pts)} pts  {actual_m:.0f} m")
+    return pts
+
+
+def save_hairpin(name, pts):
+    path = os.path.join(OUT_DIR, name)
+    with open(path, "w") as f:
+        json.dump(pts, f, indent=2)
 
 
 def const_h(angle):
@@ -119,5 +189,17 @@ save("rl-5k-s-curve-uphill.json",          # S-curve + climbs 150 m
 
 save("rl-5k-rolling-left-arc.json",        # rolling hills + 60° left arc
      build_track(lin_h(0, math.pi / 3), sine_e(60, 3)))
+
+print("Done.")
+
+# ── Hairpin tracks ────────────────────────────────────────────────────────────
+print("\nGenerating hairpin tracks:")
+
+save_hairpin("rl-5k-hairpin.json",
+             build_hairpin_track(step=10.0, hairpin_radius=40.0))
+
+save_hairpin("rl-5k-hairpin-uphill.json",
+             build_hairpin_track(step=10.0, hairpin_radius=40.0,
+                                 elevation_fn=lambda d: d * 200.0 / 5000.0))
 
 print("Done.")
