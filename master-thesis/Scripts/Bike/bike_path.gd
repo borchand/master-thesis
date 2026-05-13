@@ -1,7 +1,7 @@
 extends Path3D
 
-@export var route_file_path : String = "res://stages/stage-18-route.json"
-@export var rl_route_file_path : String = "res://stages/rl-test-track.json"
+@export var route_file_path : String = "res://stages/rl-5k-hairpin.json"
+@export var rl_route_file_path : String = "res://stages/rl-5k-straight-flat.json"
 
 # Fully-built Curve3D objects cached across all instances.
 # Building from add_point() in GDScript is slow (~5 s for large tracks);
@@ -52,6 +52,7 @@ func _parse_track_points(path: String) -> Array:
 				var dir1 = (points[n - 1] - points[n - 2]).normalized()
 				var dir2 = (v - points[n - 1]).normalized()
 				if dir1.dot(dir2) > 0.99:
+					points[n - 1] = v
 					continue
 		points.append(v)
 	return points
@@ -79,12 +80,13 @@ func load_coords():
 			if vectorPoint.distance_to(prev_point) < 0.1:
 				continue
 
-			# check if points are collinear, if so skip it
+			# check if points are collinear — replace last point to keep the endpoint correct
 			if i > 1:
 				var prev_prev_point = self.curve.get_point_position(i - 2)
 				var dir1 = (prev_point - prev_prev_point).normalized()
 				var dir2 = (vectorPoint - prev_point).normalized()
 				if dir1.dot(dir2) > 0.99:
+					self.curve.set_point_position(i - 1, vectorPoint)
 					continue
 
 		self.curve.add_point(vectorPoint)

@@ -56,6 +56,10 @@ func _physics_process(_delta):
 		_physics_process_grouping_rl(world)
 		return
 
+	if rl_version == Version.BoidsRl:
+		_physics_process_boids_rl(world)
+		return
+
 	drone.target_bike = _get_target_bike()
 	_draw_debug_lines()
 
@@ -69,9 +73,7 @@ func _physics_process(_delta):
 
 	_steps_without_bike = 0
 
-	match rl_version:
-		Version.V1: _compute_reward_v1()
-		Version.BoidsRl: _compute_reward_boids_rl()
+	_compute_reward_v1()
 
 func get_obs() -> Dictionary:
 	match rl_version:
@@ -105,29 +107,22 @@ func reset():
 	super.reset()
 	drone.linear_velocity = Vector3.ZERO
 	drone.angular_velocity = Vector3.ZERO
-	_steps_without_bike = 0
 	drone.target_bike = null
 	drone.target_position = null
 	_grouping_rl_selected_cluster = {}
 
 	var world = drone.get_parent()
-	if world.is_rl:
-		if shared.bike_lists[world.instance_id].is_empty() or not world.is_training:
-			# All bikes finished the course — full world reset.
-			world.reset_track_and_bike_and_drone()
+	if world.is_training:
+		# All bikes finished the course — full world reset.
+		world.reset_track_and_bike_and_drone()
 
-			if world.is_training:
-				# randommize bikes to create different grouping scenarios for the agent to learn from.
-				var random_bike_values = Bike.get_randomize_for_rl()
-				for bike in shared.bike_lists[world.instance_id]:
-					bike.set_randomize_for_rl(random_bike_values)
-
-		else:
-			# This drone lost sight of bikes — respawn it near a random bike
-			# without disturbing the track, bikes, or other drones.
-			world.respawn_drone(drone)
+		# Randomize bikes to create different grouping scenarios for the agent to learn from.
+		var random_bike_values = Bike.get_randomize_for_rl()
+		for bike in shared.bike_lists[world.instance_id]:
+			bike.set_randomize_for_rl(random_bike_values)
 	else:
-		drone.set_position(Vector3(0, drone.height_offset + 2.0, 0))
+		# close the program
+		get_tree().quit()
 
 # ─── V1 ────────────────────────────────────────────────────────────────────
 
@@ -217,12 +212,43 @@ func _set_action_v1(action) -> void:
 
 # ─── Boids RL ────────────────────────────────────────────────────────────────────
 
+func _physics_process_boids_rl(world) -> void:
+	drone.read_sensor(drone.drone_sensor.drone_set, drone.drone_sensor.bike_set)
+
+	if drone.sensor_readings_bikes.is_empty():
+		reward -= 0.5
+		# Only the first drone checks the collective condition to avoid multiple resets.
+		if world.is_training and drone == world.drone_list[0]:
+			var any_has_bikes := false
+			for d in world.drone_list:
+				if not d.sensor_readings_bikes.is_empty():
+					any_has_bikes = true
+					break
+			if not any_has_bikes:
+				done = true
+				needs_reset = true
+		return
+
+	drone.target_bike = _get_target_bike()
+	_draw_debug_lines()
+
+	if drone.target_bike == null:
+		reward -= 0.5
+
+	_compute_reward_boids_rl()
+
 func _compute_reward_boids_rl() -> void:
+
+	for reading in drone.sensor_readings_drones:
+		if reading.distance < drone.avoid_radius:
+			var proximity = 1.0 - (reading.distance / drone.avoid_radius)
+			reward -= proximity * 2.0
+
 	var nearby_count = drone.sensor_readings_bikes.size()
 	if nearby_count == 0:
 		return
 
-	var bikes_in_camera = drone.drone_detector.bike_set
+	var bikes_in_camera = drone.camera_readings
 	var visible_count = bikes_in_camera.size()
 
 	# Primary: fraction of locally sensed bikes that are in frame.
@@ -266,11 +292,6 @@ func _compute_reward_boids_rl() -> void:
 	var dist_reward = 1.0 - clamp(abs(horiz_dist - optimal_film_dist) / film_dist_tolerance, 0.0, 1.0)
 	reward += dist_reward * 0.3
 
-	for reading in drone.sensor_readings_drones:
-		if reading.distance < drone.avoid_radius:
-			var proximity = 1.0 - (reading.distance / drone.avoid_radius)
-			reward -= proximity * 2.0
-
 # 16 observations for boids rl (camera-coverage / boids parameter tuning):
 #   coverage (1), centroid_cam xy (2), full_coverage flag (1),
 #   dist_error (1), camera_facing (1),
@@ -286,7 +307,7 @@ func _get_obs_boids_rl() -> Dictionary:
 		return {"obs": obs}
 
 	# --- Camera coverage ---
-	var bikes_in_camera = drone.drone_detector.bike_set
+	var bikes_in_camera = drone.camera_readings
 	var visible_count = bikes_in_camera.size()
 	obs.append(float(visible_count) / float(nearby_count))
 
@@ -393,14 +414,8 @@ func _physics_process_grouping_rl(world) -> void:
 	_grouping_rl_clusters = drone._cluster_bikes(drone.sensor_readings_bikes)
 
 	if _grouping_rl_clusters.is_empty():
-		_steps_without_bike += 1
 		reward -= 0.5
-		if _steps_without_bike >= no_bike_reset_steps and world.is_training:
-			done = true
-			needs_reset = true
 		return
-
-	_steps_without_bike = 0
 
 	_draw_debug_grouping_rl()
 	if not _grouping_rl_selected_cluster.is_empty():
@@ -552,7 +567,7 @@ func _get_target_bike() -> Bike:
 	var world = drone.get_parent()
 	var closest_bike: Bike = null
 	var min_dist := INF
-	for bike_body: Bike_body in drone.drone_detector.bike_set.values():
+	for bike_body: Bike_body in drone.camera_readings:
 		var bike: Bike = bike_body.get_parent()
 		if bike.get_parent().get_parent() != world:
 			continue
@@ -602,7 +617,7 @@ func _draw_debug_grouping_rl() -> void:
 func _draw_debug_lines() -> void:
 	if not drone.debug_draw:
 		return
-	var bikes = drone.drone_detector.bike_set.values()
+	var bikes = drone.camera_readings
 	while _debug_lines.size() < bikes.size():
 		var mi = drone.make_debug_line()
 		drone.get_parent().add_child.call_deferred(mi)

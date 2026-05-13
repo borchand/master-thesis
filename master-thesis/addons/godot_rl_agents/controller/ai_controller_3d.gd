@@ -4,7 +4,7 @@ class_name AIController3D
 enum ControlModes { INHERIT_FROM_SYNC, HUMAN, TRAINING, ONNX_INFERENCE, RECORD_EXPERT_DEMOS }
 @export var control_mode: ControlModes = ControlModes.INHERIT_FROM_SYNC
 @export var onnx_model_path := ""
-@export var reset_after := 1000
+@export var reset_after := 100_000
 
 @export_group("Record expert demos mode options")
 ## Path where the demos will be saved. The file can later be used for imitation learning.

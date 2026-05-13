@@ -7,22 +7,29 @@ const drone = preload("res://Scenes/Drone/Drone.tscn")
 @export var is_rl: bool = false
 
 # Bike count range used when is_rl = true. Fixed count is used otherwise.
-@export var min_bike_count: int = 2
-@export var max_bike_count: int = 8
+@export var min_bike_count: int = 1
+@export var max_bike_count: int = 20
+
+# One drone count per training instance (indexed by instance_id). Used when is_rl = true.
+@export var drone_counts_per_instance: Array[int] = [1, 2, 8, 15]
 
 const RL_TRACKS: Array[String] = [
-	"res://stages/rl-test-track.json",
-	"res://stages/rl-track-circle.json",
-	"res://stages/rl-track-circuit.json",
-	"res://stages/rl-track-hilly.json",
-	"res://stages/rl-track-straight.json",
-	"res://stages/rl-track-left-turn.json",
-	"res://stages/stage-1-route.json",
-	"res://stages/stage-6-route.json",
-	"res://stages/stage-10-route.json",
-	"res://stages/stage-12-route.json",
-	"res://stages/stage-18-route.json",
-
+	"res://stages/rl-5k-straight-flat.json",
+	"res://stages/rl-5k-straight-uphill.json",
+	"res://stages/rl-5k-straight-downhill.json",
+	"res://stages/rl-5k-rolling-hills.json",
+	"res://stages/rl-5k-valley.json",
+	"res://stages/rl-5k-mountain.json",
+	"res://stages/rl-5k-left-arc.json",
+	"res://stages/rl-5k-right-arc.json",
+	"res://stages/rl-5k-s-curve.json",
+	"res://stages/rl-5k-zigzag.json",
+	"res://stages/rl-5k-left-arc-uphill.json",
+	"res://stages/rl-5k-right-arc-downhill.json",
+	"res://stages/rl-5k-s-curve-uphill.json",
+	"res://stages/rl-5k-rolling-left-arc.json",
+	"res://stages/rl-5k-hairpin.json",
+	"res://stages/rl-5k-hairpin-uphill.json",
 ]
 
 @onready var path_instance : Path3D
@@ -30,8 +37,8 @@ var rng = RandomNumberGenerator.new()
 var instance_id: int = -1
 var drone_list: Array = []
 
-var bike_count:int = 50
-var drone_count:int = 30
+var bike_count:int = 10
+var drone_count:int = 5
 
 # Spacing used only at spawn time. Smaller than avoid_radius so large fleets
 # fit within the camera frustum; boids separation takes over once running.
@@ -51,6 +58,8 @@ func _ready():
 		path_instance.call("preload_tracks", RL_TRACKS)
 		randomize_track()
 		bike_count = randi_range(min_bike_count, max_bike_count)
+		if instance_id < drone_counts_per_instance.size():
+			drone_count = drone_counts_per_instance[instance_id]
 
 	if is_training:
 		$Menu/ToggleContainer.visible = false
@@ -61,7 +70,7 @@ func _ready():
 		add_bike()
 	for i in range(drone_count):
 		add_drone(false)
-	
+
 	if place_drone_along_road:
 		place_all_drones()
 	else:
@@ -157,7 +166,7 @@ func place_drone_along_middle_section(drone_instance, route_index, route_drone_c
 
 	drone_instance.idle_until_needed = true
 	drone_instance.has_activated = false
-	
+
 func add_bike():
 	# create bike instance
 	var watt_spread = 9
@@ -187,9 +196,9 @@ func reset_track_and_bike_and_drone() -> void:
 	for _bike in shared.bike_lists[instance_id].duplicate():
 		_bike.safe_queue_free()
 
-	# time randomize_track 
+	# time randomize_track
 	var time = Time.get_ticks_msec()
-	
+
 	randomize_track()
 	print("Track randomization took ", Time.get_ticks_msec() - time, " ms")
 	bike_count = randi_range(min_bike_count, max_bike_count)

@@ -15,7 +15,7 @@ var timestep = 1
 @onready var camera: Camera3D = $"Camera3D"
 @onready var drone_sensor: DroneCommunication = $"Drone_communication"
 
-@onready var camera_readings = []
+@onready var camera_readings: Array[Bike_body] = []
 @onready var sensor_readings_drones = []
 @onready var sensor_readings_bikes = []
 
@@ -55,7 +55,7 @@ var _debug_bike_lines: Array[MeshInstance3D] = []
 var _debug_cluster_dots: Array[MeshInstance3D] = []
 var _debug_cluster_target_line: MeshInstance3D = null
 
-#Idle status 
+#Idle status
 @export var idle_until_needed := false
 @export var has_activated := true
 
@@ -67,11 +67,12 @@ func _ready():
 	if not is_training:
 		start_logging()
 	body_entered.connect(_on_body_entered)
-	
+
 func _physics_process(_delta):
-	if is_rl:
-		return
-	
+	if not is_rl:
+		boids()
+
+
 	if idle_until_needed and not has_activated:
 		read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
 
@@ -82,7 +83,10 @@ func _physics_process(_delta):
 			return
 
 		has_activated = true
-	
+
+	if is_training:
+		return
+
 	boids()
 	log_information(timestep)
 	timestep += 1
@@ -99,7 +103,7 @@ func boids():
 
 	var alignment_vector: Vector3
 	var cohesion_vector: Vector3
-	
+
 	var bikes_for_boids: Array
 
 	if version == Version.BoidsPriorityAttractionFields:
@@ -148,59 +152,59 @@ func _boids_apply(bikes, alignment_vector, cohesion_vector):
 func alignment(bikes):
 	var alignment_vector = Vector3.ZERO
 	var neighboring_bikes = 0
-	
+
 	for bike in bikes:
 		neighboring_bikes += 1
 		alignment_vector.x += bike["velocity"].x
 		alignment_vector.z += bike["velocity"].z
-	
+
 	if neighboring_bikes > 0:
 		alignment_vector.x /= neighboring_bikes
 		alignment_vector.z /= neighboring_bikes
-	
+
 	alignment_vector.x = (alignment_vector.x - linear_velocity.x) * matchingfactor
 	alignment_vector.z = (alignment_vector.z - linear_velocity.z) * matchingfactor
-	
+
 	return alignment_vector
-	
+
 func cohesion(bikes):
 	var cohesion_vector = Vector3.ZERO
 	var neighboring_bikes = 0
-	
+
 	for bike in bikes:
 		neighboring_bikes += 1
 		cohesion_vector.x += bike["position"].x
 		cohesion_vector.z += bike["position"].z
-	
+
 	if neighboring_bikes > 0:
 		cohesion_vector.x /= neighboring_bikes
 		cohesion_vector.z /= neighboring_bikes
-		
+
 		cohesion_vector.x -= global_position.x
 		cohesion_vector.z -= global_position.z
-		
+
 		cohesion_vector.x *= centeringfactor
 		cohesion_vector.z *= centeringfactor
-	
+
 	return cohesion_vector
-	
+
 func separation():
 	var separation_vector = Vector3.ZERO
 
 	for reading in sensor_readings_drones:
 		if reading["distance"] > avoid_radius:
 			continue
-		
+
 		var diff = Vector3(
 			global_position.x - reading.position.x,
 			0,
 			global_position.z - reading.position.z
 		)
-		var dist = max(diff.length(), 0.01) 
-		separation_vector += diff / (dist * dist)  
-	
+		var dist = max(diff.length(), 0.01)
+		separation_vector += diff / (dist * dist)
+
 	return separation_vector * avoidfactor
-		
+
 func height_force(bikes):
 	if bikes.is_empty():
 		return 0.0
@@ -216,15 +220,15 @@ func height_force(bikes):
 
 func rotate_towards_direction(direction_vector: Vector3):
 	var desired_forward = flat_dir(direction_vector)
-	
+
 	if desired_forward.length() < 0.01:
 		return
-	
+
 	var drone_forward = flat_dir(-global_transform.basis.z)
 	var up = global_transform.basis.y
-	
+
 	var yaw_error = atan2(drone_forward.cross(desired_forward).y, drone_forward.dot(desired_forward))
-	
+
 	if abs(yaw_error) > torque_zone:
 		var torque_strength = clamp(yaw_error * yaw_gain, -1.0, 1.0) * max_torque
 		apply_torque(up * torque_strength)
@@ -456,7 +460,7 @@ func read_sensor(drones: Dictionary, bikes: Dictionary):
 					"direction": global_position.direction_to(drone.global_position)
 				}
 			)
-	
+
 	for bike in bikes:
 		var data = get_bike_data(bike)
 		if camera.is_position_in_frustum(bike.global_position):
@@ -472,7 +476,7 @@ func get_bike_data(bike: Bike_body) -> Dictionary:
 		"id": bike.bike_id
 	}
 
-# log base 1.9 of n + 1, rounded to nearest int. 
+# log base 1.9 of n + 1, rounded to nearest int.
 # n = 1 -> 1
 # n = 2 -> 2
 # n = 3 -> 3
@@ -481,16 +485,16 @@ func get_bike_data(bike: Bike_body) -> Dictionary:
 # n = 10 -> 5
 # n = 20 -> 6
 func _coverage_score(n: int) -> int:
-	return round(log(float(n)) / log(1.9)) + 1 
+	return round(log(float(n)) / log(1.9)) + 1
 
 # ─── Logging ────────────────────────────────────────────────────────────────────
 
 func _on_body_entered(_body):
 	collision_at_time_step += 1
-	
+
 func create_logging_message(delta):
 	var data = []
-	
+
 	data.append(str(delta))
 	data.append(str(global_position.x))
 	data.append(str(global_position.y))
@@ -500,11 +504,11 @@ func create_logging_message(delta):
 	var bikes_id = '['
 	for bike in camera_readings:
 		bikes_id += ' '+str(bike['id'])
-	
+
 	data.append(bikes_id+' ]')
-	
+
 	return data
-	
+
 func start_logging():
 	logging.start_run_file(str(self.id), "drone")
 
