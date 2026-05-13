@@ -44,5 +44,4 @@ shape = SubResource("SphereShape3D_mj1ce")
 
 [node name="DroneRL" type="Node3D" parent="." unique_id=210817093]
 script = ExtResource("5_6hc2f")
-rl_version = 1
 metadata/_custom_type_script = "uid://dg8tmq3tcha7"
