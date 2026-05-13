@@ -37,7 +37,7 @@ var separation_c = 0.05  #0.05   #Set by trial and error
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
 
-func _process(delta):
+func _physics_process(delta):
 	timer += delta
 	total_time += delta
 	if timer >= timer_threashold:
