@@ -14,8 +14,8 @@ func _input(event):
 	if event.is_action_released("pause", true):
 		toggle_pause()
 
-	if event.is_action_released("drone_control", true):
-		toggle_drone()
+	#if event.is_action_released("drone_control", true):
+		#toggle_drone()
 
 	if event.is_action_released("free_roam", true):
 		if shared.follow_drone:
