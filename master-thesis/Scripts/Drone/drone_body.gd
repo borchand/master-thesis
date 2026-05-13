@@ -191,18 +191,20 @@ func cohesion(bikes):
 	
 func separation():
 	var separation_vector = Vector3.ZERO
-	
+
 	for reading in sensor_readings_drones:
 		if reading["distance"] > avoid_radius:
 			continue
 		
-		separation_vector.x += global_position.x - reading.position.x
-		separation_vector.z += global_position.z - reading.position.z
-	
-	separation_vector.x *= avoidfactor
-	separation_vector.z *= avoidfactor
-	
-	return separation_vector
+		var diff = Vector3(
+			global_position.x - reading.position.x,
+			0,
+			global_position.z - reading.position.z
+		)
+		var dist = max(diff.length(), 0.01) 
+		separation_vector += diff / (dist * dist)  
+    
+	return separation_vector * avoidfactor
 		
 func height_force(bikes):
 	if bikes.is_empty():
