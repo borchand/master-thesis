@@ -36,7 +36,7 @@ var drone_count:int = 30
 # Spacing used only at spawn time. Smaller than avoid_radius so large fleets
 # fit within the camera frustum; boids separation takes over once running.
 @export var drone_spawn_spacing: float = 1.5
-@export var place_drone_along_road = true
+@export var place_drone_along_road = false
 
 func _ready():
 	path_instance = $BikePath3d
