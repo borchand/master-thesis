@@ -160,19 +160,20 @@ func place_drone_along_middle_section(drone_instance, route_index, route_drone_c
 	
 func add_bike():
 	# create bike instance
+	var watt_spread = 9
 	var bike_instance = bike.instantiate()
 	bike_instance.connect("freeing_bike", bike_freed)
 	bike_instance.is_rl = is_rl
 	bike_instance.is_training = is_training
 
 	# Add variation in bike preformance
-	var rnW =  -9+9*rng.randi_range(0,3)
+	var randowm_watt_variant =  watt_spread*rng.randi_range(-1,2)
 
-	bike_instance.set_watts(373+rnW,573+rnW)
+	bike_instance.set_watts(373+randowm_watt_variant,573+randowm_watt_variant)
 
 	# add bike to scene
 	path_instance.add_child(bike_instance)
-	bike_instance.progress = 20+rnW+rng.randf_range(0.0,1.0)
+	bike_instance.progress = (randowm_watt_variant/2)+rng.randf_range(0.0,2.0)
 
 	shared.bike_lists[instance_id].append(bike_instance)
 
