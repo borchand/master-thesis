@@ -4,7 +4,7 @@ class_name Drone
 static var _next_id: int = 1
 var id: int
 
-enum Version { Boids, BoidsRandomTargets, BoidsDynamicTargets, BoidsPriorityAttractionFields, BoidsPriorityGroups }
+enum Version { Boids, BoidsPriorityAttractionFields, BoidsPriorityGroups }
 
 var is_rl: bool = false
 var is_training: bool = false
@@ -12,11 +12,12 @@ var is_training: bool = false
 var collision_at_time_step = 0
 var timestep = 1
 
-@onready var drone_detector: DroneDetection = $"Camera_detection"
+@onready var camera: Camera3D = $"Camera3D"
 @onready var drone_sensor: DroneCommunication = $"Drone_communication"
 
+@onready var camera_readings = []
 @onready var sensor_readings_drones = []
-@onready var sensor_readings_bikes =[]
+@onready var sensor_readings_bikes = []
 
 @onready var target_position = null
 @onready var target_speed = null
@@ -32,17 +33,14 @@ var timestep = 1
 @export var y_gain := 35.0
 @export var y_damp := 18.0
 @export var height_offset := 5.0
-@export var avoid_radius := 2.0
-@export var avoidfactor = 60
+@export var avoid_radius := 10.0
+@export var avoidfactor = 5
 @export var centeringfactor = 2
 @export var matchingfactor = 0.4
 
 @export var version: Version = Version.Boids
 @export var random_selection_rate := 0.2
 var keep_selection_for_n_frames = 100
-
-var sensor_selection_timer = 0.0
-var _random_target_bikes: Array = []
 
 # BoidsPriorityAttractionFields parameters
 # Bikes closer than this (metres) are merged into the same cluster
@@ -57,6 +55,10 @@ var _debug_bike_lines: Array[MeshInstance3D] = []
 var _debug_cluster_dots: Array[MeshInstance3D] = []
 var _debug_cluster_target_line: MeshInstance3D = null
 
+#Idle status 
+@export var idle_until_needed := false
+@export var has_activated := true
+
 func _ready():
 	id = _next_id
 	_next_id += 1
@@ -69,6 +71,17 @@ func _ready():
 func _physics_process(_delta):
 	if is_rl:
 		return
+	
+	if idle_until_needed and not has_activated:
+		read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
+
+		if not _should_activate_from_coverage():
+			linear_velocity = Vector3.ZERO
+			angular_velocity = Vector3.ZERO
+			timestep += 1
+			return
+
+		has_activated = true
 	
 	boids()
 	log_information(timestep)
@@ -87,11 +100,8 @@ func boids():
 	var alignment_vector: Vector3
 	var cohesion_vector: Vector3
 	
-	var bikes_for_height = sensor_readings_bikes
 	var bikes_for_boids: Array
 
-
-	
 	if version == Version.BoidsPriorityAttractionFields:
 		var clusters = _cluster_bikes(sensor_readings_bikes)
 
@@ -106,7 +116,6 @@ func boids():
 
 		var clusters = _cluster_bikes(sensor_readings_bikes)
 		var assigned_cluster = _assigned_cluster(clusters)
-		bikes_for_height = assigned_cluster.bikes
 
 		_draw_cluster_debug_lines(clusters)
 		_draw_bike_debug_lines(assigned_cluster.bikes)
@@ -177,18 +186,20 @@ func cohesion(bikes):
 	
 func separation():
 	var separation_vector = Vector3.ZERO
-	
+
 	for reading in sensor_readings_drones:
 		if reading["distance"] > avoid_radius:
 			continue
 		
-		separation_vector.x += global_position.x - reading.position.x
-		separation_vector.z += global_position.z - reading.position.z
+		var diff = Vector3(
+			global_position.x - reading.position.x,
+			0,
+			global_position.z - reading.position.z
+		)
+		var dist = max(diff.length(), 0.01) 
+		separation_vector += diff / (dist * dist)  
 	
-	separation_vector.x *= avoidfactor
-	separation_vector.z *= avoidfactor
-	
-	return separation_vector
+	return separation_vector * avoidfactor
 		
 func height_force(bikes):
 	if bikes.is_empty():
@@ -319,6 +330,36 @@ func _make_cluster_dot() -> MeshInstance3D:
 	mi.material_override = mat
 	return mi
 
+#Drones along road functions
+func _should_activate_from_coverage():
+	var visible_bikes = camera_readings
+
+	if visible_bikes.is_empty():
+		return false
+
+	var clusters = _cluster_bikes(visible_bikes)
+
+	for cluster in clusters:
+		var required_coverage = _coverage_score(cluster.size)
+		var covering_drones = _count_drones_covering_cluster(cluster)
+
+		if covering_drones < required_coverage:
+			return true
+
+	return false
+
+func _count_drones_covering_cluster(cluster):
+	var count = 0
+	var centroid: Vector3 = cluster["centroid"]
+
+	for drone in sensor_readings_drones:
+		var drone_pos: Vector3 = drone["position"]
+
+		if drone_pos.distance_to(centroid) <= coverage_radius:
+			count += 1
+
+	return count
+
 # ─── Debug ────────────────────────────────────────────────────────────────────
 func _draw_cluster_debug_lines(clusters: Array) -> void:
 	if not debug_draw or clusters.is_empty():
@@ -383,7 +424,7 @@ func _draw_bike_debug_lines(bikes) -> void:
 	for i in range(bikes.size(), _debug_bike_lines.size()):
 		_debug_bike_lines[i].visible = false
 
-#Helper functions
+# ─── Helper functions ────────────────────────────────────────────────────────────────────
 func flat_dir(v: Vector3) -> Vector3:
 	v.y = 0.0
 	return v.normalized()
@@ -401,16 +442,9 @@ func get_camera_node() -> Camera3D:
 	return $Camera3D
 
 func read_sensor(drones: Dictionary, bikes: Dictionary):
+	camera_readings = []
 	sensor_readings_drones = []
 	sensor_readings_bikes = []
-
-	if version == Version.BoidsRandomTargets:
-		# For BoidsRandomTargets we want to keep the same bike readings for a few frames to give the drone a chance to react to them, instead of changing them every frame which would make it hard for the drone to learn anything.
-		if sensor_selection_timer < keep_selection_for_n_frames:
-			sensor_selection_timer += 1
-		else:
-			_random_target_bikes.clear()
-			sensor_selection_timer = 0
 
 	for drone in drones:
 		if drone.id != id:
@@ -423,80 +457,33 @@ func read_sensor(drones: Dictionary, bikes: Dictionary):
 				}
 			)
 	
-	if not version == Version.BoidsRandomTargets and not version == Version.BoidsDynamicTargets:
-		# All bike data is used; BoidsPriorityAttractionFields clusters internally
-		for bike in bikes:
-			sensor_readings_bikes.append(get_bike_data(bike))
-
-	elif version == Version.BoidsRandomTargets:
-
-		if _random_target_bikes.is_empty():
-			# Randomly select a subset of bikes to consider for the boids calculations.
-			# The idea is that the drones will spread out more and not all cluster around the same target bike,
-			# which could help with splitting up the drones when the peloton splits.
-			for bike in bikes:
-				if randf() < random_selection_rate:
-					_random_target_bikes.append(bike)
-		else:
-			# Remove any bikes that have left the simulation (iterate backwards to avoid index shift)
-			for i in range(_random_target_bikes.size() - 1, -1, -1):
-				if not bikes.has(_random_target_bikes[i]):
-					_random_target_bikes.remove_at(i)
-
-		# Rebuild sensor readings from the current selection
-		for bike in _random_target_bikes:
-			sensor_readings_bikes.append(get_bike_data(bike))
-
-	elif version == Version.BoidsDynamicTargets:
-
-		# Like BoidsRandomTargets but the selection rate is derived from the drone/bike ratio.
-		# Each drone covers roughly (bike_count / drone_count) bikes on average, so that
-		# collectively all drones spread evenly across the peloton.
-		var drone_count = max(1, drones.size())
-		# Each drone picks 1/drone_count of all bikes on average, so across all
-		# drones each bike gets covered roughly once regardless of fleet size.
-		var dynamic_rate = clamp(1.0 / float(drone_count), 0.05, 1.0)
-
-		for bike in bikes:
-			if randf() < dynamic_rate:
-				sensor_readings_bikes.append(get_bike_data(bike))
+	for bike in bikes:
+		var data = get_bike_data(bike)
+		if camera.is_position_in_frustum(bike.global_position):
+			camera_readings.append(data)
+		sensor_readings_bikes.append(data)
 
 func get_bike_data(bike: Bike_body) -> Dictionary:
 	return {
 		"position": bike.global_position,
 		"distance": global_position.distance_to(bike.global_position),
 		"direction": global_position.direction_to(bike.global_position),
-		"velocity":  flat_dir(-bike.global_transform.basis.z) * bike.get_parent().speed
+		"velocity":  flat_dir(-bike.global_transform.basis.z) * bike.get_parent().speed,
+		"id": bike.bike_id
 	}
 
-func get_nearest_position(bikes: Dictionary):
-	var closest = Vector3.ZERO
-	var minimum_distance = INF
-	var speed = 0.0
+# log base 1.9 of n + 1, rounded to nearest int. 
+# n = 1 -> 1
+# n = 2 -> 2
+# n = 3 -> 3
+# n = 4 -> 3
+# n = 5 -> 4
+# n = 10 -> 5
+# n = 20 -> 6
+func _coverage_score(n: int) -> int:
+	return round(log(float(n)) / log(1.9)) + 1 
 
-	for bike_id in bikes:
-		var pos = bikes[bike_id].global_position
-		var dist = global_position.distance_to(pos)
-		if dist < minimum_distance:
-			minimum_distance = dist
-			closest = pos
-			speed = bikes[bike_id].get_parent().speed
-			target_bike = bikes[bike_id].get_parent()
-
-	target_position = closest
-	target_speed = speed
-
-func get_random_position(bikes: Dictionary):
-	if bikes.is_empty():
-		return
-
-	var keys = bikes.keys()
-	var random_key = keys[randi() % keys.size()]
-	var bike = bikes[random_key]
-
-	target_position = bike.global_position
-	target_speed = bike.get_parent().speed
-	target_bike = bike.get_parent()
+# ─── Logging ────────────────────────────────────────────────────────────────────
 
 func _on_body_entered(_body):
 	collision_at_time_step += 1
@@ -511,26 +498,16 @@ func create_logging_message(delta):
 	data.append(str(collision_at_time_step))
 
 	var bikes_id = '['
-	for bike in drone_detector.bike_set:
-		bikes_id += ' '+str(bike)
+	for bike in camera_readings:
+		bikes_id += ' '+str(bike['id'])
 	
 	data.append(bikes_id+' ]')
 	
 	return data
-
+	
 func start_logging():
 	logging.start_run_file(str(self.id), "drone")
 
 func log_information(delta):
 	var message = create_logging_message(delta)
 	logging.append_line(str(self.id), "drone", message)
-# log base 1.9 of n + 1, rounded to nearest int. 
-# n = 1 -> 1
-# n = 2 -> 2
-# n = 3 -> 3
-# n = 4 -> 3
-# n = 5 -> 4
-# n = 10 -> 5
-# n = 20 -> 6
-func _coverage_score(n: int) -> int:
-	return round(log(float(n)) / log(1.9)) + 1 

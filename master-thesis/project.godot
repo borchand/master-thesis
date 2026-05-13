@@ -83,11 +83,6 @@ toggle_follow_drone={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":71,"key_label":0,"unicode":103,"location":0,"echo":false,"script":null)
 ]
 }
-drone_control={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":true,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":68,"key_label":0,"unicode":68,"location":0,"echo":false,"script":null)
-]
-}
 
 [physics]
 
@@ -96,6 +91,7 @@ drone_control={
 [rendering]
 
 rendering_device/driver.windows="d3d12"
-rendering_device/fallback_to_d3d12=false
 renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+rendering_device/fallback_to_d3d12=false
 textures/vram_compression/import_etc2_astc=true

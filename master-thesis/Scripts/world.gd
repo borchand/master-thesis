@@ -30,12 +30,13 @@ var rng = RandomNumberGenerator.new()
 var instance_id: int = -1
 var drone_list: Array = []
 
-var bike_count:int = 10
-var drone_count:int = 50
+var bike_count:int = 50
+var drone_count:int = 30
 
 # Spacing used only at spawn time. Smaller than avoid_radius so large fleets
 # fit within the camera frustum; boids separation takes over once running.
 @export var drone_spawn_spacing: float = 1.5
+@export var place_drone_along_road = false
 
 func _ready():
 	path_instance = $BikePath3d
@@ -60,9 +61,13 @@ func _ready():
 		add_bike()
 	for i in range(drone_count):
 		add_drone(false)
-	for i in range(drone_list.size()):
-		var bike_index = i % shared.bike_lists[instance_id].size()
-		place_drone(drone_list[i], bike_index)
+	
+	if place_drone_along_road:
+		place_all_drones()
+	else:
+		for i in range(drone_list.size()):
+			var bike_index = i % shared.bike_lists[instance_id].size()
+			place_drone(drone_list[i], bike_index)
 
 	$Menu/OtherContainer/FollowDroneInPos.max_value = drone_count - 1
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
@@ -80,6 +85,19 @@ func add_drone(auto_place: bool = true):
 		var bike_index = (drone_list.size() - 1) % shared.bike_lists[instance_id].size()
 		place_drone(drone_instance, bike_index)
 
+func place_all_drones():
+	var total = drone_list.size()
+	var route_drone_count = int(floor(float(total) / 3.0))
+	var normal_drone_count = total - route_drone_count
+
+	for i in range(total):
+		if i >= normal_drone_count:
+			var route_index = i - normal_drone_count
+			place_drone_along_middle_section(drone_list[i], route_index, route_drone_count)
+		else:
+			var bike_index = i % shared.bike_lists[instance_id].size()
+			place_drone(drone_list[i], bike_index)
+
 func place_drone(drone_instance: Node3D, bike_index: int):
 	var _bike = shared.bike_lists[instance_id][bike_index]
 	var bike_forward = -_bike.global_transform.basis.z
@@ -88,8 +106,6 @@ func place_drone(drone_instance: Node3D, bike_index: int):
 	var desired_pos = _bike.global_position - bike_forward * drone_instance.behind_distance
 	desired_pos.y = _bike.global_position.y + drone_instance.height_offset
 
-	# Place drones in a 2D grid (columns = lateral, rows = depth) so lateral
-	# spread stays small even with many drones — all drones remain near the bike.
 	var drone_index = drone_list.find(drone_instance)
 	var total = drone_list.size()
 	var spacing = drone_spawn_spacing
@@ -103,6 +119,45 @@ func place_drone(drone_instance: Node3D, bike_index: int):
 
 	drone_instance.set_position(desired_pos)
 
+func place_drone_along_middle_section(drone_instance, route_index, route_drone_count):
+	var curve := path_instance.curve
+	var length := curve.get_baked_length()
+
+	var start_offset := length / 4.0
+	var end_offset := length * 3.0 / 4.0
+
+	var t := 0.5
+	if route_drone_count > 1:
+		t = float(route_index) / float(route_drone_count - 1)
+
+	var offset = lerp(start_offset, end_offset, t)
+
+	var local_road_pos := curve.sample_baked(offset)
+	var road_world_pos := path_instance.to_global(local_road_pos)
+
+	var ahead_offset = min(offset + 5.0, length)
+	var ahead_local_pos := curve.sample_baked(ahead_offset)
+	var ahead_world_pos := path_instance.to_global(ahead_local_pos)
+
+	var road_direction := ahead_world_pos - road_world_pos
+	road_direction.y = 0
+	road_direction = road_direction.normalized()
+
+	var side_direction := Vector3(-road_direction.z, 0, road_direction.x).normalized()
+
+	var drone_world_pos := road_world_pos + side_direction * 25
+	drone_world_pos.y += drone_instance.height_offset
+
+	drone_instance.global_position = drone_world_pos
+
+	var look_target := road_world_pos
+	look_target.y = drone_world_pos.y
+
+	drone_instance.look_at(look_target, Vector3.UP)
+
+	drone_instance.idle_until_needed = true
+	drone_instance.has_activated = false
+	
 func add_bike():
 	# create bike instance
 	var bike_instance = bike.instantiate()
@@ -124,6 +179,8 @@ func add_bike():
 func bike_freed(freed_bike: Node3D):
 	# remove bike camera from list when bike is freed
 	shared.bike_lists[instance_id].erase(freed_bike)
+	if shared.bike_lists[instance_id].is_empty():
+		get_tree().quit()
 
 func reset_track_and_bike_and_drone() -> void:
 	for _bike in shared.bike_lists[instance_id].duplicate():
@@ -139,9 +196,10 @@ func reset_track_and_bike_and_drone() -> void:
 	for i in bike_count:
 		add_bike()
 
-	for i in range(drone_list.size()):
-		var bike_index = i % shared.bike_lists[instance_id].size()
-		place_drone(drone_list[i], bike_index)
+	#for i in range(drone_list.size()):
+		#var bike_index = i % shared.bike_lists[instance_id].size()
+		#place_drone(drone_list[i], bike_index)
+	place_all_drones()
 
 func respawn_drone(drone_instance: Node3D) -> void:
 	if shared.bike_lists[instance_id].is_empty():
