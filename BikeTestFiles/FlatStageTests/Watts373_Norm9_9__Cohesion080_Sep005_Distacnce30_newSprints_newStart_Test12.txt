@@ -1,0 +1,395 @@
+Godot Engine v4.6.1.stable.official.14d19694e - https://godotengine.org
+OpenGL API 3.3.0 - Build 32.0.101.7026 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics
+
+Min: -9 Max: 18
+Bike: Bike Finish time: 13974.0039253331 Watt: 391
+Max_speed: 20.5713224348604
+Bike: @PathFollow3D@27 Finish time: 13974.0039253331 Watt: 391
+Max_speed: 20.2603795939324
+Bike: @PathFollow3D@43 Finish time: 13974.0039253331 Watt: 391
+Max_speed: 21.623490894854
+Bike: @PathFollow3D@93 Finish time: 13974.0039253331 Watt: 391
+Max_speed: 21.163941147689
+Bike: @PathFollow3D@133 Finish time: 13974.0039253331 Watt: 391
+Max_speed: 20.2338614243385
+Bike: @PathFollow3D@147 Finish time: 13974.0039253331 Watt: 391
+Max_speed: 21.2826949893958
+Bike: @PathFollow3D@150 Finish time: 13974.0039253331 Watt: 391
+Max_speed: 21.4462758472649
+Bike: @PathFollow3D@21 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.4863647499785
+Bike: @PathFollow3D@29 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.2494029839526
+Bike: @PathFollow3D@33 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.5847378475169
+Bike: @PathFollow3D@68 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.45284799692
+Bike: @PathFollow3D@75 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 21.1027726701004
+Bike: @PathFollow3D@81 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.2385579246074
+Bike: @PathFollow3D@82 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.3453903855348
+Bike: @PathFollow3D@88 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 21.9213101215565
+Bike: @PathFollow3D@92 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.8469978635135
+Bike: @PathFollow3D@107 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 19.8148617810792
+Bike: @PathFollow3D@118 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 21.1068127790652
+Bike: @PathFollow3D@120 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 21.1530511407615
+Bike: @PathFollow3D@137 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.4560760029792
+Bike: @PathFollow3D@139 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.2162095084627
+Bike: @PathFollow3D@143 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.2942283882249
+Bike: @PathFollow3D@156 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.1449747449504
+Bike: @PathFollow3D@171 Finish time: 13975.1194613331 Watt: 391
+Max_speed: 20.9900513759583
+Bike: @PathFollow3D@167 Finish time: 13975.832917333 Watt: 391
+Max_speed: 20.5092101773639
+Bike: @PathFollow3D@14 Finish time: 13976.5070506664 Watt: 391
+Max_speed: 20.327130504144
+Bike: @PathFollow3D@170 Finish time: 13976.5070506664 Watt: 391
+Max_speed: 20.762634130339
+Bike: @PathFollow3D@154 Finish time: 13993.0782719997 Watt: 382
+Max_speed: 21.8255243997363
+Bike: @PathFollow3D@46 Finish time: 13993.4782719997 Watt: 382
+Max_speed: 19.8197338474
+Bike: @PathFollow3D@51 Finish time: 13993.4782719997 Watt: 382
+Max_speed: 20.4379423513148
+Bike: @PathFollow3D@59 Finish time: 13993.4782719997 Watt: 382
+Max_speed: 20.9474608637461
+Bike: @PathFollow3D@72 Finish time: 13993.4782719997 Watt: 382
+Max_speed: 21.454133971051
+Bike: @PathFollow3D@87 Finish time: 13993.4782719997 Watt: 382
+Max_speed: 20.1288534235852
+Bike: @PathFollow3D@95 Finish time: 13993.4782719997 Watt: 382
+Max_speed: 20.2597295806648
+Bike: @PathFollow3D@119 Finish time: 13993.4782719997 Watt: 382
+Max_speed: 21.59803968412
+Bike: @PathFollow3D@140 Finish time: 13993.4782719997 Watt: 382
+Max_speed: 20.6522106548026
+Bike: @PathFollow3D@151 Finish time: 13993.4782719997 Watt: 382
+Max_speed: 20.980067244103
+Bike: @PathFollow3D@157 Finish time: 13993.4782719997 Watt: 382
+Max_speed: 20.5114153945633
+Bike: @PathFollow3D@30 Finish time: 13994.2782719997 Watt: 382
+Max_speed: 20.0870337605231
+Bike: @PathFollow3D@49 Finish time: 13994.2782719997 Watt: 382
+Max_speed: 19.9030768814202
+Bike: @PathFollow3D@128 Finish time: 13994.2782719997 Watt: 382
+Max_speed: 20.4748490501354
+Bike: @PathFollow3D@90 Finish time: 13994.6782719997 Watt: 382
+Max_speed: 20.2201839293902
+Bike: @PathFollow3D@39 Finish time: 13995.0782719997 Watt: 373
+Max_speed: 20.1520681754666
+Bike: @PathFollow3D@61 Finish time: 13995.0782719997 Watt: 382
+Max_speed: 20.6528410875343
+Bike: @PathFollow3D@71 Finish time: 13995.0782719997 Watt: 373
+Max_speed: 20.80473184429
+Bike: @PathFollow3D@85 Finish time: 13995.0782719997 Watt: 373
+Max_speed: 21.0946747865751
+Bike: @PathFollow3D@108 Finish time: 13995.0782719997 Watt: 373
+Max_speed: 20.8583773834764
+Bike: @PathFollow3D@126 Finish time: 13995.0782719997 Watt: 373
+Max_speed: 21.3405422896784
+Bike: @PathFollow3D@159 Finish time: 13995.0782719997 Watt: 373
+Max_speed: 19.9506440178887
+Bike: @PathFollow3D@162 Finish time: 13995.0782719997 Watt: 373
+Max_speed: 21.8562546595912
+Bike: @PathFollow3D@174 Finish time: 13995.0782719997 Watt: 382
+Max_speed: 20.9164442325822
+Bike: @PathFollow3D@177 Finish time: 13995.0782719997 Watt: 382
+Max_speed: 21.8072524322117
+Bike: @PathFollow3D@31 Finish time: 13995.5499519997 Watt: 382
+Max_speed: 20.3645737277631
+Bike: @PathFollow3D@35 Finish time: 13995.5499519997 Watt: 373
+Max_speed: 21.7231687767126
+Bike: @PathFollow3D@15 Finish time: 13995.9777439997 Watt: 373
+Max_speed: 21.6638336295571
+Bike: @PathFollow3D@165 Finish time: 13996.3967916188 Watt: 373
+Max_speed: 20.6931043090052
+Bike: @PathFollow3D@11 Finish time: 13996.8158392378 Watt: 364
+Max_speed: 20.9364667225487
+Bike: @PathFollow3D@103 Finish time: 13996.8158392378 Watt: 364
+Max_speed: 20.4843457541749
+Bike: @PathFollow3D@152 Finish time: 13997.2348868569 Watt: 373
+Max_speed: 20.4607527381941
+Bike: @PathFollow3D@64 Finish time: 13997.6166666664 Watt: 364
+Max_speed: 21.3351230408481
+Bike: @PathFollow3D@117 Finish time: 13999.1346186664 Watt: 364
+Max_speed: 20.5014982165502
+Bike: @PathFollow3D@45 Finish time: 14020.028181333 Watt: 391
+Max_speed: 21.3876321898628
+Bike: @PathFollow3D@122 Finish time: 14020.028181333 Watt: 391
+Max_speed: 20.7540494955947
+Bike: @PathFollow3D@141 Finish time: 14020.2942026664 Watt: 391
+Max_speed: 20.2291331979916
+Bike: @PathFollow3D@101 Finish time: 14020.5605226664 Watt: 391
+Max_speed: 20.9480935283844
+Bike: @PathFollow3D@123 Finish time: 14020.827189333 Watt: 391
+Max_speed: 21.1176791250848
+Bike: @PathFollow3D@131 Finish time: 14020.827189333 Watt: 391
+Max_speed: 20.1670106423075
+Bike: @PathFollow3D@145 Finish time: 14020.827189333 Watt: 391
+Max_speed: 21.1339365827735
+Bike: @PathFollow3D@37 Finish time: 14021.3605226664 Watt: 391
+Max_speed: 21.0266652888679
+Bike: @PathFollow3D@67 Finish time: 14021.3605226664 Watt: 391
+Max_speed: 21.8367412595261
+Bike: @PathFollow3D@113 Finish time: 14021.3605226664 Watt: 391
+Max_speed: 21.8888633661189
+Bike: @PathFollow3D@134 Finish time: 14021.3605226664 Watt: 391
+Max_speed: 21.2177295934043
+Bike: @PathFollow3D@110 Finish time: 14021.627189333 Watt: 391
+Max_speed: 21.5487810364973
+Bike: @PathFollow3D@169 Finish time: 14028.2918986664 Watt: 364
+Max_speed: 20.6598997210289
+Bike: @PathFollow3D@125 Finish time: 14038.957093333 Watt: 382
+Max_speed: 21.7250587853653
+Bike: @PathFollow3D@136 Finish time: 14038.957093333 Watt: 382
+Max_speed: 21.553836620853
+Bike: @PathFollow3D@168 Finish time: 14038.957093333 Watt: 382
+Max_speed: 20.3984349627635
+Bike: @PathFollow3D@50 Finish time: 14039.2237599997 Watt: 382
+Max_speed: 20.9731693260509
+Bike: @PathFollow3D@89 Finish time: 14039.2237599997 Watt: 382
+Max_speed: 21.1359533376036
+Bike: @PathFollow3D@112 Finish time: 14039.2237599997 Watt: 382
+Max_speed: 20.5578012034361
+Bike: @PathFollow3D@163 Finish time: 14039.4904266664 Watt: 382
+Max_speed: 22.0029376162
+Bike: @PathFollow3D@24 Finish time: 14039.757093333 Watt: 382
+Max_speed: 21.4573996946164
+Bike: @PathFollow3D@130 Finish time: 14040.0237599997 Watt: 382
+Max_speed: 21.0629533755371
+Bike: @PathFollow3D@182 Finish time: 14040.0237599997 Watt: 382
+Max_speed: 20.5024564694087
+Bike: @PathFollow3D@16 Finish time: 14040.2904266664 Watt: 382
+Max_speed: 20.0496783962006
+Bike: @PathFollow3D@17 Finish time: 14040.2904266664 Watt: 382
+Max_speed: 20.9538668191279
+Bike: @PathFollow3D@66 Finish time: 14040.2904266664 Watt: 382
+Max_speed: 20.1078462311601
+Bike: @PathFollow3D@23 Finish time: 14040.557093333 Watt: 382
+Max_speed: 21.0448628688676
+Bike: @PathFollow3D@6 Finish time: 14040.8237599997 Watt: 373
+Max_speed: 20.3461179692245
+Bike: @PathFollow3D@10 Finish time: 14040.8237599997 Watt: 382
+Max_speed: 21.9932036127391
+Bike: @PathFollow3D@13 Finish time: 14040.8237599997 Watt: 373
+Max_speed: 21.3964742541904
+Bike: @PathFollow3D@28 Finish time: 14040.8237599997 Watt: 382
+Max_speed: 19.9140773161799
+Bike: @PathFollow3D@83 Finish time: 14040.8237599997 Watt: 373
+Max_speed: 21.1325212079278
+Bike: @PathFollow3D@142 Finish time: 14040.8237599997 Watt: 373
+Max_speed: 21.7738443567727
+Bike: @PathFollow3D@166 Finish time: 14040.8237599997 Watt: 382
+Max_speed: 21.8162953792358
+Bike: @PathFollow3D@180 Finish time: 14040.8237599997 Watt: 373
+Max_speed: 21.5882366881759
+Bike: @PathFollow3D@9 Finish time: 14041.357093333 Watt: 373
+Max_speed: 19.8129441255868
+Bike: @PathFollow3D@38 Finish time: 14041.357093333 Watt: 373
+Max_speed: 20.8261286937152
+Bike: @PathFollow3D@52 Finish time: 14041.357093333 Watt: 373
+Max_speed: 22.101476808461
+Bike: @PathFollow3D@158 Finish time: 14041.6234986664 Watt: 373
+Max_speed: 21.7814731556142
+Bike: @PathFollow3D@164 Finish time: 14041.6234986664 Watt: 373
+Max_speed: 20.4218629526778
+Bike: @PathFollow3D@5 Finish time: 14041.890165333 Watt: 373
+Max_speed: 20.2733994722118
+Bike: @PathFollow3D@12 Finish time: 14041.890165333 Watt: 373
+Max_speed: 20.8086694696478
+Bike: @PathFollow3D@56 Finish time: 14041.890165333 Watt: 373
+Max_speed: 20.4400477747436
+Bike: @PathFollow3D@60 Finish time: 14041.890165333 Watt: 373
+Max_speed: 20.4400477747436
+Bike: @PathFollow3D@70 Finish time: 14041.890165333 Watt: 373
+Max_speed: 20.1982370150198
+Bike: @PathFollow3D@102 Finish time: 14041.890165333 Watt: 373
+Max_speed: 21.1901956013539
+Bike: @PathFollow3D@105 Finish time: 14041.890165333 Watt: 373
+Max_speed: 21.3528840488236
+Bike: @PathFollow3D@73 Finish time: 14042.423317333 Watt: 373
+Max_speed: 20.5094621158486
+Bike: @PathFollow3D@94 Finish time: 14042.423317333 Watt: 373
+Max_speed: 21.2518672923035
+Bike: @PathFollow3D@99 Finish time: 14042.423317333 Watt: 373
+Max_speed: 21.8542620330069
+Bike: @PathFollow3D@116 Finish time: 14042.423317333 Watt: 373
+Max_speed: 20.9364544462426
+Bike: @PathFollow3D@129 Finish time: 14042.423317333 Watt: 373
+Max_speed: 20.5680230540343
+Bike: @PathFollow3D@175 Finish time: 14042.423317333 Watt: 373
+Max_speed: 21.2810620654835
+Bike: @PathFollow3D@4 Finish time: 14042.6886826664 Watt: 373
+Max_speed: 20.5215245871805
+Bike: @PathFollow3D@48 Finish time: 14042.6886826664 Watt: 364
+Max_speed: 20.0238933700924
+Bike: @PathFollow3D@135 Finish time: 14042.6886826664 Watt: 364
+Max_speed: 20.4575260084001
+Bike: @PathFollow3D@144 Finish time: 14042.6886826664 Watt: 364
+Max_speed: 20.4110752767683
+Bike: @PathFollow3D@181 Finish time: 14042.955349333 Watt: 364
+Max_speed: 20.0588012682532
+Bike: @PathFollow3D@55 Finish time: 14043.2220159997 Watt: 364
+Max_speed: 19.6964472857834
+Bike: @PathFollow3D@132 Finish time: 14043.4886826664 Watt: 364
+Max_speed: 20.2669098637809
+Bike: @PathFollow3D@7 Finish time: 14043.755349333 Watt: 364
+Max_speed: 20.3697468481006
+Bike: @PathFollow3D@78 Finish time: 14043.755349333 Watt: 364
+Max_speed: 19.9563676999559
+Bike: @PathFollow3D@146 Finish time: 14044.0220159997 Watt: 364
+Max_speed: 20.7669351070171
+Bike: @PathFollow3D@65 Finish time: 14044.2886826664 Watt: 364
+Max_speed: 20.6741476391144
+Bike: @PathFollow3D@32 Finish time: 14044.555349333 Watt: 364
+Max_speed: 21.8076933768852
+Bike: @PathFollow3D@148 Finish time: 14044.555349333 Watt: 364
+Max_speed: 20.1998757061065
+Bike: @PathFollow3D@178 Finish time: 14044.555349333 Watt: 364
+Max_speed: 20.3125709511906
+Bike: @PathFollow3D@53 Finish time: 14100.5545866663 Watt: 373
+Max_speed: 21.5497295718817
+Bike: @PathFollow3D@115 Finish time: 14100.5545866663 Watt: 373
+Max_speed: 19.6673222669544
+Bike: @PathFollow3D@54 Finish time: 14102.4211786663 Watt: 364
+Max_speed: 20.9908223979931
+Bike: @PathFollow3D@179 Finish time: 14102.4211786663 Watt: 364
+Max_speed: 20.5241979504753
+Bike: @PathFollow3D@20 Finish time: 14102.6878346663 Watt: 364
+Max_speed: 21.4121438888917
+Bike: @PathFollow3D@26 Finish time: 14102.6878346663 Watt: 364
+Max_speed: 20.7067533795254
+Bike: @PathFollow3D@47 Finish time: 14102.6878346663 Watt: 364
+Max_speed: 21.6512965052846
+Bike: @PathFollow3D@58 Finish time: 14106.6876746663 Watt: 364
+Max_speed: 20.9337239967422
+Bike: @PathFollow3D@44 Finish time: 14113.0874186663 Watt: 391
+Max_speed: 21.7382493691655
+Bike: @PathFollow3D@138 Finish time: 14115.4873226663 Watt: 373
+Max_speed: 22.0276434134253
+Bike: @PathFollow3D@18 Finish time: 14117.0872586663 Watt: 364
+Max_speed: 20.5323360897125
+Bike: @PathFollow3D@36 Finish time: 14117.0872586663 Watt: 364
+Max_speed: 20.9801702130052
+Bike: @PathFollow3D@42 Finish time: 14117.0872586663 Watt: 364
+Max_speed: 20.8664403031994
+Bike: @PathFollow3D@106 Finish time: 14117.0872586663 Watt: 364
+Max_speed: 20.5832428535413
+Bike: @PathFollow3D@121 Finish time: 14117.0872586663 Watt: 364
+Max_speed: 20.2103617949242
+Bike: @PathFollow3D@149 Finish time: 14117.0872586663 Watt: 364
+Max_speed: 20.3553227260288
+Bike: @PathFollow3D@155 Finish time: 14117.0872586663 Watt: 364
+Max_speed: 21.3663495218374
+Bike: @PathFollow3D@176 Finish time: 14117.0872586663 Watt: 364
+Max_speed: 21.4480217638649
+Bike: @PathFollow3D@79 Finish time: 14130.6867146663 Watt: 382
+Max_speed: 20.628295713599
+Bike: @PathFollow3D@25 Finish time: 14134.1532426663 Watt: 364
+Max_speed: 20.1888885433646
+Bike: @PathFollow3D@57 Finish time: 14165.6186506662 Watt: 373
+Max_speed: 20.4392855293993
+Bike: @PathFollow3D@8 Finish time: 14167.4852426662 Watt: 364
+Max_speed: 20.8812689184562
+Bike: @PathFollow3D@63 Finish time: 14167.4852426662 Watt: 364
+Max_speed: 19.8824905835073
+Bike: @PathFollow3D@76 Finish time: 14167.7518986662 Watt: 364
+Max_speed: 21.0837739427724
+Bike: @PathFollow3D@84 Finish time: 14167.7518986662 Watt: 364
+Max_speed: 21.3532605748478
+Bike: @PathFollow3D@173 Finish time: 14194.9508106662 Watt: 382
+Max_speed: 21.5846079146425
+Bike: @PathFollow3D@19 Finish time: 14196.5507466662 Watt: 373
+Max_speed: 21.7202264070015
+Bike: @PathFollow3D@91 Finish time: 14196.5507466662 Watt: 373
+Max_speed: 20.9051195208785
+Bike: @PathFollow3D@104 Finish time: 14196.8174026662 Watt: 373
+Max_speed: 21.1165766501452
+Bike: @PathFollow3D@34 Finish time: 14197.0840586662 Watt: 373
+Max_speed: 21.7966576288171
+Bike: @PathFollow3D@69 Finish time: 14197.0840586662 Watt: 373
+Max_speed: 21.2584268594438
+Bike: @PathFollow3D@62 Finish time: 14198.4173386662 Watt: 364
+Max_speed: 20.5537219433298
+Bike: @PathFollow3D@124 Finish time: 14198.4173386662 Watt: 364
+Max_speed: 21.2869951369407
+Bike: @PathFollow3D@127 Finish time: 14198.4173386662 Watt: 364
+Max_speed: 20.357239800993
+Bike: @PathFollow3D@22 Finish time: 14198.6839946662 Watt: 364
+Max_speed: 21.6106529174627
+Bike: @PathFollow3D@41 Finish time: 14198.6839946662 Watt: 364
+Max_speed: 20.9501813795759
+Bike: @PathFollow3D@77 Finish time: 14198.6839946662 Watt: 364
+Max_speed: 21.3420218840631
+Bike: @PathFollow3D@86 Finish time: 14198.6839946662 Watt: 364
+Max_speed: 21.3420218840631
+Bike: @PathFollow3D@100 Finish time: 14198.6839946662 Watt: 364
+Max_speed: 20.8998162294105
+Bike: @PathFollow3D@111 Finish time: 14198.6839946662 Watt: 364
+Max_speed: 21.34485704479
+Bike: @PathFollow3D@114 Finish time: 14198.6839946662 Watt: 364
+Max_speed: 21.2016939919135
+Bike: @PathFollow3D@153 Finish time: 14198.6839946662 Watt: 364
+Max_speed: 21.3785861401506
+Bike: @PathFollow3D@96 Finish time: 14312.9460853328 Watt: 391
+Max_speed: 19.0023947320639
+Bike: @PathFollow3D@109 Finish time: 14408.9422453327 Watt: 373
+Max_speed: 19.2849210562256
+Bike: @PathFollow3D@40 Finish time: 14410.8088373327 Watt: 364
+Max_speed: 19.0077889916401
+Bike: @PathFollow3D@74 Finish time: 14410.8088373327 Watt: 364
+Max_speed: 18.7839602036809
+Bike: @PathFollow3D@80 Finish time: 14410.8088373327 Watt: 364
+Max_speed: 20.1322822178665
+Bike: @PathFollow3D@160 Finish time: 14426.0082293327 Watt: 373
+Max_speed: 19.043757728873
+Bike: @PathFollow3D@161 Finish time: 14474.2729653327 Watt: 364
+Max_speed: 19.3416543157634
+Bike: @PathFollow3D@98 Finish time: 14483.3392693327 Watt: 364
+Max_speed: 19.1475456793347
+Bike: @PathFollow3D@97 Finish time: 14568.1358773326 Watt: 364
+Max_speed: 19.0098182677474
+Bike: @PathFollow3D@172 Finish time: 14576.9355253326 Watt: 364
+Max_speed: 19.3709454701913
+--- Debugging process stopped ---
+
+  Sequence  1:   7 bike(s)  |  13974
+  Sequence  2:  20 bike(s)  |  13975
+  Sequence  3:  33 bike(s)  |  13993
+  Sequence  4:   1 bike(s)  |  13999
+  Sequence  5:  12 bike(s)  |  14020
+  Sequence  6:   1 bike(s)  |  14028
+  Sequence  7:  54 bike(s)  |  14039
+  Sequence  8:   2 bike(s)  |  14101
+  Sequence  9:   5 bike(s)  |  14102
+  Sequence 10:   1 bike(s)  |  14107
+  Sequence 11:   1 bike(s)  |  14113
+  Sequence 12:   1 bike(s)  |  14115
+  Sequence 13:   8 bike(s)  |  14117
+  Sequence 14:   1 bike(s)  |  14131
+  Sequence 15:   1 bike(s)  |  14134
+  Sequence 16:   1 bike(s)  |  14166
+  Sequence 17:   4 bike(s)  |  14167
+  Sequence 18:   1 bike(s)  |  14195
+  Sequence 19:   5 bike(s)  |  14197
+  Sequence 20:  11 bike(s)  |  14198
+  Sequence 21:   1 bike(s)  |  14313
+  Sequence 22:   1 bike(s)  |  14409
+  Sequence 23:   3 bike(s)  |  14411
+  Sequence 24:   1 bike(s)  |  14426
+  Sequence 25:   1 bike(s)  |  14474
+  Sequence 26:   1 bike(s)  |  14483
+  Sequence 27:   1 bike(s)  |  14568
+  Sequence 28:   1 bike(s)  |  14577
+
