@@ -189,7 +189,7 @@ func add_bike():
 func bike_freed(freed_bike: Node3D):
 	# remove bike camera from list when bike is freed
 	shared.bike_lists[instance_id].erase(freed_bike)
-	if shared.bike_lists[instance_id].is_empty():
+	if shared.bike_lists[instance_id].is_empty() and not is_training:
 		get_tree().quit()
 
 func reset_track_and_bike_and_drone() -> void:

@@ -1,8 +1,8 @@
 extends AIController3D
 
-enum Version { V1, BoidsRl, GroupingRl, GroupingBoidsRl }
+enum Version { BoidsRl, GroupingRl, GroupingBoidsRl }
 
-@export var rl_version: Version = Version.V1
+@export var rl_version: Version = Version.BoidsRl
 @export var no_bike_reset_steps: int = 500
 # Boids RL filming reward parameters
 @export var optimal_film_dist: float = 10.0   # ideal horizontal distance to bike centroid (metres)
@@ -12,7 +12,6 @@ enum Version { V1, BoidsRl, GroupingRl, GroupingBoidsRl }
 
 @onready var drone: RigidBody3D = $".."
 
-var _steps_without_bike: int = 0
 var _boids_rl_model: ONNXModel = null
 var _debug_lines: Array[MeshInstance3D] = []
 var _debug_force_line: MeshInstance3D = null
@@ -53,31 +52,15 @@ func _physics_process(_delta):
 		return
 
 	if rl_version == Version.GroupingRl or rl_version == Version.GroupingBoidsRl:
-		_physics_process_grouping_rl(world)
+		_physics_process_grouping_rl()
 		return
 
 	if rl_version == Version.BoidsRl:
 		_physics_process_boids_rl(world)
 		return
 
-	drone.target_bike = _get_target_bike()
-	_draw_debug_lines()
-
-	if drone.target_bike == null:
-		_steps_without_bike += 1
-		reward -= 0.5
-		if _steps_without_bike >= no_bike_reset_steps and world.is_training:
-			done = true
-			needs_reset = true
-		return
-
-	_steps_without_bike = 0
-
-	_compute_reward_v1()
-
 func get_obs() -> Dictionary:
 	match rl_version:
-		Version.V1: return _get_obs_v1()
 		Version.BoidsRl: return _get_obs_boids_rl()
 		Version.GroupingRl: return _get_obs_grouping_rl()
 		Version.GroupingBoidsRl: return _get_obs_grouping_rl()
@@ -85,7 +68,6 @@ func get_obs() -> Dictionary:
 
 func get_action_space() -> Dictionary:
 	match rl_version:
-		Version.V1: return _get_action_space_v1()
 		Version.BoidsRl: return _get_action_space_boids_rl()
 		Version.GroupingRl: return _get_action_space_grouping_rl()
 		Version.GroupingBoidsRl: return _get_action_space_grouping_rl()
@@ -93,7 +75,6 @@ func get_action_space() -> Dictionary:
 
 func set_action(action) -> void:
 	match rl_version:
-		Version.V1: _set_action_v1(action)
 		Version.BoidsRl: _set_action_boids_rl(action)
 		Version.GroupingRl: _set_action_grouping_rl(action)
 		Version.GroupingBoidsRl: _set_action_grouping_boids_rl(action)
@@ -107,8 +88,7 @@ func reset():
 	super.reset()
 	drone.linear_velocity = Vector3.ZERO
 	drone.angular_velocity = Vector3.ZERO
-	drone.target_bike = null
-	drone.target_position = null
+
 	_grouping_rl_selected_cluster = {}
 
 	var world = drone.get_parent()
@@ -123,92 +103,6 @@ func reset():
 	else:
 		# close the program
 		get_tree().quit()
-
-# ─── V1 ────────────────────────────────────────────────────────────────────
-
-func _compute_reward_v1() -> void:
-	var bike_forward = -drone.target_bike.global_transform.basis.z
-	bike_forward.y = 0.0
-	bike_forward = bike_forward.normalized()
-	var desired_pos = drone.target_bike.global_position - bike_forward * drone.behind_distance
-	desired_pos.y = drone.target_bike.global_position.y + drone.height_offset
-
-	var pos_error = drone.global_position.distance_to(desired_pos)
-	reward += 1.0 / (1.0 + pos_error)
-
-	var drone_fwd_speed = drone.linear_velocity.dot(bike_forward)
-	var speed_diff = abs(drone_fwd_speed - drone.target_bike.speed)
-	reward -= speed_diff * 0.03
-
-	var cam_forward = -drone.target_bike.get_camera_node().global_transform.basis.z
-	var to_bike = (drone.target_bike.global_position - drone.global_position).normalized()
-	reward += maxf(0.0, cam_forward.dot(to_bike)) * 0.2
-
-func _get_obs_v1() -> Dictionary:
-	var bikes_in_camera = drone.get_node("Camera_detection").bike_set
-	var camera = drone.get_camera_node()
-
-	var closest_bike_pos = Vector3.ZERO
-	var closest_distance = INF
-	var bike_speed = 0.0
-	var bike_direction_local = Vector2.ZERO
-	var cam_offset = Vector2.ZERO
-
-	for bike in bikes_in_camera:
-		var pos = drone.to_local(bikes_in_camera[bike].global_position)
-		var distance = pos.length()
-		if distance < closest_distance:
-			closest_distance = distance
-			closest_bike_pos = pos
-			bike_speed = bikes_in_camera[bike].get_parent().speed
-
-			var world_dir = -bikes_in_camera[bike].get_parent().global_transform.basis.z
-			var local_dir = drone.global_transform.basis.inverse() * world_dir
-			bike_direction_local = Vector2(local_dir.x, local_dir.z).normalized()
-
-			var to_bike_cam = camera.global_transform.basis.inverse() * (
-				bikes_in_camera[bike].global_position - camera.global_position
-			)
-			var forward = -to_bike_cam.z
-			if forward > 0.01:
-				cam_offset.x = clamp(to_bike_cam.x / forward, -1.0, 1.0)
-				cam_offset.y = clamp(to_bike_cam.y / forward, -1.0, 1.0)
-
-	var local_velocity = drone.global_transform.basis.inverse() * drone.linear_velocity
-
-	closest_bike_pos = closest_bike_pos / sqrt(pow(26.0, 2) + pow(5.0, 2))
-	bike_speed = bike_speed / 22.0
-	local_velocity = local_velocity / 15.0
-
-	return {"obs": [
-		1.0 if bikes_in_camera.size() > 0 else 0.0,
-		closest_bike_pos.x,
-		closest_bike_pos.y,
-		closest_bike_pos.z,
-		bike_speed,
-		bike_direction_local.x,
-		bike_direction_local.y,
-		local_velocity.x,
-		local_velocity.y,
-		local_velocity.z,
-		cam_offset.x,
-		cam_offset.y,
-	]}
-
-func _get_action_space_v1() -> Dictionary:
-	return {
-		"thrust": {"size": 3, "action_type": "continuous"},
-		"torque":  {"size": 1, "action_type": "continuous"},
-	}
-
-
-func _set_action_v1(action) -> void:
-	var thrust = action["thrust"]
-	var torque = action["torque"][0]
-	_last_force = drone.global_transform.basis * Vector3(thrust[0], thrust[1], thrust[2]) * drone.max_force
-	_last_torque = clamp(torque, -1.0, 1.0)
-	drone.apply_central_force(_last_force)
-	drone.apply_torque(drone.global_transform.basis.y * _last_torque * drone.max_torque)
 
 # ─── Boids RL ────────────────────────────────────────────────────────────────────
 
@@ -227,15 +121,10 @@ func _physics_process_boids_rl(world) -> void:
 			if not any_has_bikes:
 				done = true
 				needs_reset = true
-		return
 
-	drone.target_bike = _get_target_bike()
 	_draw_debug_lines()
-
-	if drone.target_bike == null:
-		reward -= 0.5
-
 	_compute_reward_boids_rl()
+	
 
 func _compute_reward_boids_rl() -> void:
 
@@ -260,8 +149,8 @@ func _compute_reward_boids_rl() -> void:
 		var cam_inv = camera.global_transform.basis.inverse()
 		var centroid_cam = Vector2.ZERO
 
-		for bike_body in bikes_in_camera.values():
-			var to_bike = cam_inv * (bike_body.global_position - camera.global_position)
+		for bike_data in drone.camera_readings:
+			var to_bike = cam_inv * (bike_data["position"] - camera.global_position)
 			var fwd = -to_bike.z
 			if fwd > 0.01:
 				centroid_cam.x += clamp(to_bike.x / fwd, -1.0, 1.0)
@@ -315,8 +204,8 @@ func _get_obs_boids_rl() -> Dictionary:
 	var cam_inv = camera.global_transform.basis.inverse()
 	var centroid_cam = Vector2.ZERO
 	if visible_count > 0:
-		for bike_body in bikes_in_camera.values():
-			var to_bike = cam_inv * (bike_body.global_position - camera.global_position)
+		for bike_data in bikes_in_camera:
+			var to_bike = cam_inv * (bike_data["position"] - camera.global_position)
 			var fwd = -to_bike.z
 			if fwd > 0.01:
 				centroid_cam.x += clamp(to_bike.x / fwd, -1.0, 1.0)
@@ -409,7 +298,7 @@ func _set_action_boids_rl(action) -> void:
 
 # ─── Grouping RL ────────────────────────────────────────────────────────────────────
 
-func _physics_process_grouping_rl(world) -> void:
+func _physics_process_grouping_rl() -> void:
 	drone.read_sensor(drone.drone_sensor.drone_set, drone.drone_sensor.bike_set)
 	_grouping_rl_clusters = drone._cluster_bikes(drone.sensor_readings_bikes)
 
@@ -538,7 +427,7 @@ func _set_action_grouping_boids_rl(action) -> void:
 	assert(_boids_rl_model != null, "GroupingBoidsRl requires a BoidsRl ONNX model — set boids_rl_model_path")
 
 	var boids_obs = _get_obs_boids_rl()
-	var result = _boids_rl_model.run_inference(boids_obs["obs"], 1.0)
+	var result = _boids_rl_model.run_inference(boids_obs["obs"], 1)
 	var output = result["output"]
 	drone.set_tunable_parameters({
 		"avoid_radius":     _remap_action(output[0], 1.0, 8.0),
@@ -555,27 +444,18 @@ func _set_action_grouping_boids_rl(action) -> void:
 func _remap_action(value: float, low: float, high: float) -> float:
 	return low + (value + 1.0) * 0.5 * (high - low)
 	
-func _get_desired_pos() -> Vector3:
-	var bike_forward = -drone.target_bike.global_transform.basis.z
-	bike_forward.y = 0
-	bike_forward = bike_forward.normalized()
-	var pos = drone.target_bike.global_position - bike_forward * drone.behind_distance
-	pos.y = drone.target_bike.global_position.y + drone.height_offset
-	return pos
+func closest_bike() -> Dictionary:
+	var closest_bike_data = null
+	var closest_distance = INF
 
-func _get_target_bike() -> Bike:
-	var world = drone.get_parent()
-	var closest_bike: Bike = null
-	var min_dist := INF
-	for bike_body: Bike_body in drone.camera_readings:
-		var bike: Bike = bike_body.get_parent()
-		if bike.get_parent().get_parent() != world:
-			continue
-		var dist = drone.global_position.distance_to(bike.global_position)
-		if dist < min_dist:
-			min_dist = dist
-			closest_bike = bike
-	return closest_bike
+	for bike_data in drone.camera_readings:
+		var distance = bike_data["distance"]
+		if distance < closest_distance:
+			closest_distance = distance
+			closest_bike_data = bike_data
+
+	return closest_bike_data
+
 
 # ─── Debug ────────────────────────────────────────────────────────────────────
 
@@ -623,9 +503,8 @@ func _draw_debug_lines() -> void:
 		drone.get_parent().add_child.call_deferred(mi)
 		_debug_lines.append(mi)
 	for i in bikes.size():
-		var bike_body: Bike_body = bikes[i]
-		var color := Color.GREEN if bike_body.get_parent() == drone.target_bike else Color.YELLOW
-		drone.place_debug_line(_debug_lines[i], drone.global_position, bike_body.global_position, color)
+		var color := Color.YELLOW
+		drone.place_debug_line(_debug_lines[i], drone.global_position, bikes[i]["position"], color)
 	for i in range(bikes.size(), _debug_lines.size()):
 		_debug_lines[i].visible = false
 	if _debug_force_line == null:
