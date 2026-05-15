@@ -43,7 +43,7 @@ class_name RaycastSensor2D
 		cone_width = value
 		_update()
 
-@export var debug_draw := true:
+@export var debug_draw := false:
 	get:
 		return debug_draw
 	set(value):

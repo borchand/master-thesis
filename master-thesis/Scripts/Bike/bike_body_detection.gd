@@ -14,7 +14,7 @@ func _ready():
 		start_logging()
 
 func _physics_process(_delta):
-	if not get_parent().is_training:
+	if not get_parent().is_training and timestep % 30 == 0:
 		log_information(timestep)
 	timestep += 1
 

@@ -37,13 +37,19 @@ var rng = RandomNumberGenerator.new()
 var instance_id: int = -1
 var drone_list: Array = []
 
-var bike_count:int = 10
-var drone_count:int = 5
+var bike_count:int = 180
+var drone_count:int = 100
 
 # Spacing used only at spawn time. Smaller than avoid_radius so large fleets
 # fit within the camera frustum; boids separation takes over once running.
 @export var drone_spawn_spacing: float = 1.5
 @export var place_drone_along_road = false
+
+var cached_bikes: Array = []
+var cached_drones: Array = []
+var cached_clusters: Array = []
+
+@export var cluster_distance_threshold := 10.0
 
 func _ready():
 	path_instance = $BikePath3d
@@ -80,6 +86,68 @@ func _ready():
 
 	$Menu/OtherContainer/FollowDroneInPos.max_value = drone_count - 1
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
+	
+func _physics_process(delta: float) -> void:
+	update_cached_world_data()
+
+func update_cached_world_data():
+	cached_bikes.clear()
+	cached_drones.clear()
+
+	for bike in shared.bike_lists[instance_id]:
+		var bike_body = bike.bikebody
+		var pos = bike_body.global_position
+		
+		var forward = -bike_body.global_transform.basis.z
+		forward.y = 0.0
+		forward = forward.normalized()
+		
+		cached_bikes.append({
+			"position": pos,
+			"velocity": forward * bike.speed,
+			"id": bike_body.bike_id
+		})
+		
+	for d in drone_list:
+		cached_drones.append({
+			"id": d.id,
+			"position": d.global_position
+		})
+		
+	cached_clusters = cluster_bikes_once(cached_bikes)
+
+func cluster_bikes_once(readings: Array) -> Array:
+	var clusters: Array = []
+	var threshold_sq = cluster_distance_threshold * cluster_distance_threshold
+
+	for bike_data in readings:
+		var bike_pos: Vector3 = bike_data["position"]
+		var assigned := false
+
+		for cluster in clusters:
+			var c: Vector3 = cluster["centroid"]
+			var dx = bike_pos.x - c.x
+			var dz = bike_pos.z - c.z
+			var dist_sq = dx * dx + dz * dz
+
+			if dist_sq < threshold_sq:
+				var n = float(cluster["size"])
+				cluster["centroid"] = (cluster["centroid"] * n + bike_pos) / (n + 1.0)
+				cluster["velocity"] = (cluster["velocity"] * n + bike_data["velocity"]) / (n + 1.0)
+				cluster["size"] += 1
+				cluster["bikes"].append(bike_data)
+				assigned = true
+				break
+
+		if not assigned:
+			clusters.append({
+				"centroid": bike_pos,
+				"velocity": bike_data["velocity"],
+				"size": 1,
+				"bikes": [bike_data]
+			})
+
+	return clusters
 
 func add_drone(auto_place: bool = true):
 	var drone_instance = drone.instantiate()
