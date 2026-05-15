@@ -47,7 +47,6 @@ environment = SubResource("Environment_5v1tr")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1854748252]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
-shadow_enabled = true
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=79264867]
 process_mode = 3

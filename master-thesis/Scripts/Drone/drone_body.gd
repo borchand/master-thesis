@@ -47,7 +47,7 @@ var keep_selection_for_n_frames = 100
 
 @export var coverage_radius := 10.0
 
-@export var debug_draw: bool = true
+@export var debug_draw: bool = false
 @export var debug_line_width: float = 0.1
 
 var _debug_bike_lines: Array[MeshInstance3D] = []

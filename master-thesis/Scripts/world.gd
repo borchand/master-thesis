@@ -37,8 +37,8 @@ var rng = RandomNumberGenerator.new()
 var instance_id: int = -1
 var drone_list: Array = []
 
-var bike_count:int = 10
-var drone_count:int = 5
+var bike_count:int = 180
+var drone_count:int = 90
 
 # Spacing used only at spawn time. Smaller than avoid_radius so large fleets
 # fit within the camera frustum; boids separation takes over once running.
