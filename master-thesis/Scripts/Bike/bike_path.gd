@@ -1,6 +1,6 @@
 extends Path3D
 
-@export var route_file_path : String = "res://stages/rl-5k-hairpin.json"
+@export var route_file_path : String = "res://stages/stage-1-route.json"
 @export var rl_route_file_path : String = "res://stages/rl-5k-straight-flat.json"
 
 # Fully-built Curve3D objects cached across all instances.

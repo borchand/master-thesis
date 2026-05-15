@@ -43,7 +43,6 @@ func _physics_process(delta):
 	if timer >= timer_threashold:
 		timer = timer-timer_threashold
 		coltroler(delta)
-
 		
 	self.progress += speed * delta
 	if self.progress >= max_progress:

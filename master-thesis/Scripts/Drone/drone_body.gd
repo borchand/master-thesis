@@ -68,6 +68,7 @@ func _ready():
 	if not is_training:
 		start_logging()
 	body_entered.connect(_on_body_entered)
+	$CollisionShape3D.disabled = true
 
 func _physics_process(_delta):
 	if is_training:
@@ -115,8 +116,11 @@ func _assigned_cluster_fast(clusters: Array) -> Dictionary:
 			"bikes": []
 		}
 
+	var sim = get_parent()
+
 	var best: Dictionary = {}
 	var best_val = -INF
+
 	var self_pos = global_position
 	var coverage_radius_sq = coverage_radius * coverage_radius
 
@@ -124,21 +128,25 @@ func _assigned_cluster_fast(clusters: Array) -> Dictionary:
 	forward.y = 0.0
 	forward = forward.normalized()
 
-	for cluster in clusters:
+	for i in range(clusters.size()):
+		var cluster = clusters[i]
 		var centroid: Vector3 = cluster["centroid"]
+
 		var v = _coverage_score(cluster["size"])
 
 		var self_dist_sq = self_pos.distance_squared_to(centroid)
 
+		var sorted_distances: Array = sim.cached_cluster_drone_distances_sq[i]
+
 		var count := 0
-		for drone in sensor_readings_drones:
-			if drone["id"] == id:
-				continue
 
-			var drone_dist_sq = drone["position"].distance_squared_to(centroid)
-
-			if drone_dist_sq < self_dist_sq or drone_dist_sq < coverage_radius_sq:
+		for dist_sq in sorted_distances:
+			if dist_sq < self_dist_sq or dist_sq < coverage_radius_sq:
 				count += 1
+			else:
+				break
+
+		count -= 1
 
 		var to_cluster = centroid - self_pos
 		to_cluster.y = 0.0
