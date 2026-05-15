@@ -1,16 +1,16 @@
 [gd_scene format=3 uid="uid://7f0tuhwy0gs3"]
 
-[ext_resource type="Script" uid="uid://jhdxc8a8bmo1" path="res://Scripts/Bike/bike.gd" id="1_l5bd3"]
-[ext_resource type="Script" uid="uid://47jusnkjgki" path="res://Scripts/Bike/bike_body_detection.gd" id="2_l5bd3"]
-[ext_resource type="Script" uid="uid://r41oj3afmccb" path="res://Scenes/Bike/ray_cast_3d.gd" id="4_l0kmq"]
+[ext_resource type="Script" path="res://Scripts/Bike/Bike.cs" id="1_l5bd3"]
+[ext_resource type="Script" path="res://Scripts/Bike/BikeBody.cs" id="2_l5bd3"]
+[ext_resource type="Script" path="res://Scenes/Bike/BikeRayCast.cs" id="4_l0kmq"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_l0kmq"]
+[sub_resource type="BoxMesh" id="BoxMesh_bike"]
 size = Vector3(0.5175991, 1.1637268, 1.7457428)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bike"]
 albedo_color = Color(0.1, 0.8, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_bike"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_l0kmq"]
 size = Vector3(0.5175991, 1.1637268, 1.7457428)
 
 [node name="Bike" type="PathFollow3D" unique_id=1407203146]

@@ -12,20 +12,20 @@ var default_follow_camera_position = Vector3(0, 2.5, 3)
 var target_bike_camera_position = default_follow_camera_position
 
 func _process(delta):
-	var instance_id = get_parent().instance_id
-	var bikes = shared.bike_lists[instance_id]
-	var drone_cameras = shared.drone_camera_lists[instance_id]
+	var instance_id = get_parent().InstanceId
+	var bikes = shared.BikeLists[instance_id]
+	var drone_cameras = shared.DroneCameraLists[instance_id]
 
 	# CAMERA CONTROLS
-	if shared.follow_bike and not bikes.is_empty():
+	if shared.FollowBike and not bikes.is_empty():
 
-		if shared.follow_bike_in_pos >= bikes.size():
-			shared.follow_bike_in_pos = bikes.size() - 1
+		if shared.FollowBikeInPos >= bikes.size():
+			shared.FollowBikeInPos = bikes.size() - 1
 
-		var bike_camera = shared.get_camera_of_bike_in_pos(shared.follow_bike_in_pos, instance_id)
+		var bike_camera = shared.GetCameraOfBikeInPos(shared.FollowBikeInPos, instance_id)
 
 		# if free roam is disabled reset camera rotation
-		if not shared.free_roam:
+		if not shared.FreeRoam:
 			bike_camera.set_current(true)
 			bike_camera.position = default_follow_camera_position
 		else:
@@ -44,12 +44,12 @@ func _process(delta):
 			look_at(bike_camera.global_transform.origin, Vector3.UP)
 
 
-	elif shared.follow_drone and not drone_cameras.is_empty():
+	elif shared.FollowDrone and not drone_cameras.is_empty():
 		var drone_camera = drone_cameras[shared.followed_drone_index]
 		drone_camera.set_current(true)
 	else:
 		set_current(true)
-		if shared.free_roam:
+		if shared.FreeRoam:
 			var speed_multiplier = 1.0
 			if Input.is_key_pressed(KEY_SHIFT):
 				speed_multiplier = 10.0
@@ -67,7 +67,7 @@ func _process(delta):
 				translate(Vector3(1, 0, 0) * delta * camera_speed * speed_multiplier)
 		else:
 			if not bikes.is_empty():
-				var bike_camera = shared.get_camera_of_bike_in_pos(shared.follow_bike_in_pos, instance_id)
+				var bike_camera = shared.GetCameraOfBikeInPos(shared.FollowBikeInPos, instance_id)
 
 				if Input.is_key_pressed(KEY_W):
 					default_offset *= 0.95
@@ -81,29 +81,29 @@ func _process(delta):
 
 
 func _input(event):
-	if event is InputEventMouseMotion and shared.free_roam:
+	if event is InputEventMouseMotion and shared.FreeRoam:
 		yaw -= event.relative.x * mouse_sens
 		pitch -= event.relative.y * mouse_sens
 		pitch = clamp(pitch, -pitch_limit, pitch_limit)
 		rotation_degrees = Vector3(pitch, yaw, 0)
 
 	if event.is_action_released("toggle_follow_drone"):
-		shared.toggle_drone()
+		shared.ToggleDrone()
 
-	var instance_id = get_parent().instance_id
-	var bikes = shared.bike_lists[instance_id]
-	var drone_cameras = shared.drone_camera_lists[instance_id]
+	var instance_id = get_parent().InstanceId
+	var bikes = shared.BikeLists[instance_id]
+	var drone_cameras = shared.DroneCameraLists[instance_id]
 
-	if shared.follow_drone:
+	if shared.FollowDrone:
 		if event.is_action_released("follow_next_bike"):
-			shared.followed_drone_index = (shared.followed_drone_index + 1) % drone_cameras.size()
+			shared.FollowedDroneIndex = (shared.FollowedDroneIndex + 1) % drone_cameras.size()
 
 		if event.is_action_released("follow_prev_bike"):
-			shared.followed_drone_index = (shared.followed_drone_index - 1 + drone_cameras.size()) % drone_cameras.size()
+			shared.FollowedDroneIndex = (shared.FollowedDroneIndex - 1 + drone_cameras.size()) % drone_cameras.size()
 
 
 	if event.is_action_released("follow_next_bike"):
-		shared.follow_bike_in_pos = (shared.follow_bike_in_pos - 1 + bikes.size()) % bikes.size()
+		shared.FollowBikeInPos = (shared.follow_bike_in_pos - 1 + bikes.size()) % bikes.size()
 
 	if event.is_action_released("follow_prev_bike"):
-		shared.follow_bike_in_pos = (shared.follow_bike_in_pos + 1) % bikes.size()
+		shared.FollowBikeInPos = (shared.follow_bike_in_pos + 1) % bikes.size()

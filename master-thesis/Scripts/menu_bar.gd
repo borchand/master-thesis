@@ -1,10 +1,10 @@
 extends Panel
 
 func _process(_delta):
-	set_target_bike(shared.follow_bike_in_pos)
-	set_target_drone(shared.followed_drone_index)
+	set_target_bike(shared.FollowBikeInPos)
+	set_target_drone(shared.FollowedDroneIndex)
 
-	if !shared.drone_controlled and $ToggleContainer/DroneControl.button_pressed:
+	if !shared.DroneControlled and $ToggleContainer/DroneControl.button_pressed:
 		toggle_drone()
 
 func _input(event):
@@ -18,7 +18,7 @@ func _input(event):
 		#toggle_drone()
 
 	if event.is_action_released("free_roam", true):
-		if shared.follow_drone:
+		if shared.FollowDrone:
 			toggle_drone()
 		toggle_free_roam()
 
@@ -54,22 +54,22 @@ func toggle_check_btn(btn: CheckButton):
 	btn.button_pressed = !btn.button_pressed
 
 func _on_pause_toggled(_toggled_on):
-	shared.pause()
+	shared.Pause()
 
 func _on_free_roam_toggled(_toggled_on):
-	shared.toggle_free_roam()
+	shared.ToggleFreeRoam()
 
 func _on_follow_bike_in_pos_value_changed(value):
-	shared.follow_bike_in_pos = value
+	shared.FollowBikeInPos = value
 
 func _on_follow_drone_in_pos_value_changed(value):
-	shared.followed_drone_index = value
+	shared.FollowedDroneIndex = value
 
 func _on_drone_control_toggled(toggled_on):
-	if !toggled_on == shared.follow_drone:
-		shared.toggle_drone()
-	shared.drone_controlled = toggled_on
+	if !toggled_on == shared.FollowDrone:
+		shared.ToggleDrone()
+	shared.DroneControlled = toggled_on
 
 func _on_follow_bike_toggled(_toggled_on):
-	shared.toggle_bike()
+	shared.ToggleBike()
 	

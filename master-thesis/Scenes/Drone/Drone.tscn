@@ -1,20 +1,17 @@
 [gd_scene format=3 uid="uid://4qvlvq7nlg67"]
 
-[ext_resource type="Script" uid="uid://bmlo511l3yfy2" path="res://Scripts/Drone/drone_body.gd" id="2_0xxxp"]
-[ext_resource type="Script" uid="uid://b1h3vwlgsuca4" path="res://Scripts/Drone/drone_communication.gd" id="4_6hc2f"]
+[ext_resource type="Script" uid="uid://b2m28ak3t2aof" path="res://Scripts/Drone/Drone.cs" id="2_0xxxp"]
+[ext_resource type="Script" uid="uid://dvgtxv61l1wac" path="res://Scripts/Drone/DroneCommunication.cs" id="4_6hc2f"]
 [ext_resource type="Script" uid="uid://bvvitlfs8wu3l" path="res://Scripts/Drone/drone_rl_base.gd" id="5_6hc2f"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uvgqj"]
 size = Vector3(0.2685547, 0.09057617, 0.20922852)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_drone"]
-albedo_color = Color(0.1, 0.3, 0.9, 1)
-
 [sub_resource type="BoxMesh" id="BoxMesh_drone"]
 size = Vector3(0.2685547, 0.09057617, 0.20922852)
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_mj1ce"]
-radius = 30.0
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_drone"]
+albedo_color = Color(0.1, 0.3, 0.9, 1)
 
 [node name="RigidBody" type="RigidBody3D" unique_id=1754414733]
 axis_lock_angular_x = true
@@ -23,7 +20,6 @@ gravity_scale = 0.0
 can_sleep = false
 angular_damp = 6.0
 script = ExtResource("2_0xxxp")
-version = 4
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1101559629]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00048828125, 0.03894043, 0.006225586)
@@ -42,12 +38,20 @@ visible = false
 polygon = PackedVector2Array(-5, 0.55, -27, 26.5, 27, 26.5, 5, 0.55)
 depth = 0.01
 
-[node name="Drone_communication" type="Area3D" parent="." unique_id=1717689195]
+[node name="Drone_communication" type="Node3D" parent="." unique_id=1717689195]
 script = ExtResource("4_6hc2f")
-
-[node name="sensor" type="CollisionShape3D" parent="Drone_communication" unique_id=700398335]
-shape = SubResource("SphereShape3D_mj1ce")
 
 [node name="DroneRL" type="Node3D" parent="." unique_id=210817093]
 script = ExtResource("5_6hc2f")
+rl_version = null
+no_bike_reset_steps = null
+optimal_film_dist = null
+film_dist_tolerance = null
+boids_rl_model_path = null
+control_mode = null
+onnx_model_path = null
+reset_after = null
+expert_demo_save_path = null
+action_repeat = null
+policy_name = null
 metadata/_custom_type_script = "uid://dg8tmq3tcha7"

@@ -58,6 +58,19 @@ TemporaryDependencyNodeTargetIdentifier=net6.0
 addons/godot_rl_agents/onnx/csharp/
  ONNXInference.cs
  SessionConfigurator.cs
+Scenes/Bike/BikeRayCast.cs
+Scripts/Bike/
+ Bike.cs
+ BikeBody.cs
+ BikePath.cs
+Scripts/
+ CustomLogger.cs
+ Drone/
+  Drone.cs
+  DroneCommunication.cs
+ DroneRegistry.cs
+ SharedState.cs
+ World.cs
 
 [metadataReferences]
 <NUGET>/microsoft.netcore.app.ref/6.0.36/ref/net6.0/
