@@ -7,11 +7,17 @@ public partial class Bike : PathFollow3D
     [Signal]
     public delegate void FreeingBikeEventHandler(Bike bike);
 
-    private BikeRayCast _raycast;
+    private record struct PelotonResult(int NBikes, float AvgDist, float? DistTo1st, float? DistTo3rd);
+
     private BikeBody _bikebody;
+    private DroneRegistry _droneRegistry;
+    private readonly System.Collections.Generic.List<float> _aheadDistances = new(16);
+
+    private enum BikeState { Cruise, Attack }
 
     private RandomNumberGenerator _rng = new RandomNumberGenerator();
     private float _maxProgress;
+    private Camera3D _camera;
 
     public int PrSecChecks = 4;
     private float _timerThreshold;
@@ -26,23 +32,23 @@ public partial class Bike : PathFollow3D
     private int _speedDownProbability = 7;
     private float _acceleration = 0.0f;
 
-    // sustainable_force = 25 (not used)
-    private float? _sustainableWatt = null;
-    private float? _initialBreakoutWatt = null;
+    private float _sustainableWatt = 0f;
+    private float _initialBreakoutWatt = 0f;
     private float _aFatigueResistence = 0.00003f;
     private float _fatigueThreashold = 52800.0f;
     private float _bStaminaDegresse = 0.0000002f;
     private float _fatigue = 0f;
     private bool _inPeloton = false;
-    private string _behavior = "cruise";
+    private BikeState _behavior = BikeState.Cruise;
 
     private float _cohesionC = 0.8f;
     private float _separationC = 0.05f;
 
     public override void _Ready()
     {
-        _raycast = GetNode<BikeRayCast>("RayCast3D");
         _bikebody = GetNode<BikeBody>("BikeBody");
+        _droneRegistry = GetNode<DroneRegistry>("/root/DroneRegistry");
+        _camera = GetNode<Camera3D>("Camera3D");
         _maxProgress = GetParent<Path3D>().Curve.GetBakedLength();
         _timerThreshold = 1.0f / PrSecChecks;
     }
@@ -77,9 +83,9 @@ public partial class Bike : PathFollow3D
     private void Control1(float delta)
     {
         float elevation = -1f * _bikebody.GlobalRotation.X;
-        float? wantedPower = _sustainableWatt;
+        float wantedPower = _sustainableWatt;
 
-        BikeRayCast.RaycastResult result = _raycast.RunRaycast();
+        PelotonResult result = FindNearbyBikesInFront();
 
         if (result.NBikes == 0 || (result.DistTo1st.HasValue && result.DistTo1st.Value > 6f) || ProgressRatio >= 0.985f)
             _inPeloton = false;
@@ -88,21 +94,21 @@ public partial class Bike : PathFollow3D
 
         BehaviorChange(delta, elevation);
 
-        if (_behavior == "cruise")
+        if (_behavior == BikeState.Cruise)
             wantedPower = Cruise(elevation, result);
-        else if (_behavior == "attack")
+        else if (_behavior == BikeState.Attack)
             wantedPower = Attack();
 
-        float actualPower = wantedPower ?? 0f;
+        float actualPower = wantedPower;
         if (wantedPower > _sustainableWatt)
-            actualPower = Mathf.Min(MaxPossiblePower(), wantedPower.Value);
+            actualPower = Mathf.Min(MaxPossiblePower(), wantedPower);
 
         _acceleration = AccelerationBasedOnSpeed(Speed, elevation, actualPower, _inPeloton);
         FatigueChanges(actualPower);
         Speed = Mathf.Max(0.5f, Speed + _acceleration * delta);
     }
 
-    private float Cruise(float elevation, BikeRayCast.RaycastResult rayHits)
+    private float Cruise(float elevation, PelotonResult rayHits)
     {
         if (!_inPeloton)
             return Solo();
@@ -118,41 +124,35 @@ public partial class Bike : PathFollow3D
             sepMod = 1f / Mathf.Max(0.5f, distTo1.Value);
 
         float additionalForceAmplification = distToCenter * _cohesionC - sepMod * _separationC;
-        return (_sustainableWatt ?? 0f) * 0.7f * additionalForceAmplification;
+        return _sustainableWatt * 0.7f * additionalForceAmplification;
     }
 
-    private float Attack()
-    {
-        return _initialBreakoutWatt ?? 0f;
-    }
+    private float Attack() => _initialBreakoutWatt;
 
-    private float Solo()
-    {
-        return _sustainableWatt ?? 0f;
-    }
+    private float Solo() => _sustainableWatt;
 
     private void BehaviorChange(float delta, float elevation)
     {
-        if (_sustainableWatt > 390f && ProgressRatio > 0.985f && _behavior != "attack")
+        if (_sustainableWatt > 390f && ProgressRatio > 0.985f && _behavior != BikeState.Attack)
         {
-            _behavior = "attack";
+            _behavior = BikeState.Attack;
             return;
         }
 
-        if (_behavior == "attack" && ProgressRatio <= 0.985f)
+        if (_behavior == BikeState.Attack && ProgressRatio <= 0.985f)
         {
             if (elevation < 0f || _rng.RandiRange(0, 1000) < _speedDownProbability * delta)
             {
-                _behavior = "cruise";
+                _behavior = BikeState.Cruise;
                 return;
             }
         }
 
-        if (_behavior == "cruise" && elevation > 0.017f)
+        if (_behavior == BikeState.Cruise && elevation > 0.017f)
         {
             float threshold = (_speedUpProbability * (elevation / 0.034f) * delta) / Mathf.Max(1f - ProgressRatio, 0.15f);
             if (_rng.RandiRange(0, 10000) < threshold)
-                _behavior = "attack";
+                _behavior = BikeState.Attack;
         }
     }
 
@@ -160,7 +160,7 @@ public partial class Bike : PathFollow3D
     {
         if (currentWatt == _sustainableWatt)
             return;
-        _fatigue = Mathf.Max(0f, _fatigue + currentWatt - (_sustainableWatt ?? 0f));
+        _fatigue = Mathf.Max(0f, _fatigue + currentWatt - _sustainableWatt);
     }
 
     public float CalcWattCurrentState(float speedMs, float elevation, float accelerationMss, bool inPeloton = false)
@@ -178,20 +178,17 @@ public partial class Bike : PathFollow3D
     private float MaxPossiblePower()
     {
         if (_fatigue < _fatigueThreashold)
-            return (_sustainableWatt ?? 0f) + WattLimitedByStamina();
-        else
-            return WattLimitedByFatigue();
+            return _sustainableWatt + WattLimitedByStamina();
+        return WattLimitedByFatigue();
     }
 
-    private float WattLimitedByFatigue()
-    {
-        return ((_sustainableWatt ?? 0f) + WattLimitedByStamina()) * Mathf.Exp(-_aFatigueResistence * (_fatigue - _fatigueThreashold));
-    }
+    private float WattLimitedByFatigue() =>
+        (_sustainableWatt + WattLimitedByStamina()) * Mathf.Exp(-_aFatigueResistence * (_fatigue - _fatigueThreashold));
 
     private float WattLimitedByStamina()
     {
-        float breakAwayBonus = (_initialBreakoutWatt ?? 0f) - (_sustainableWatt ?? 0f);
-        return breakAwayBonus * Mathf.Exp(-1f * _bStaminaDegresse * breakAwayBonus * _totalTime);
+        float breakAwayBonus = _initialBreakoutWatt - _sustainableWatt;
+        return breakAwayBonus * Mathf.Exp(-_bStaminaDegresse * breakAwayBonus * _totalTime);
     }
 
     public void SetWatts(float sustainableWatt = 355f, float initialBreakoutWatt = 531f)
@@ -224,7 +221,40 @@ public partial class Bike : PathFollow3D
         _separationC = (float)dict["separation_c"];
     }
 
-    public Camera3D GetCameraNode() => GetNode<Camera3D>("Camera3D");
+    public Camera3D GetCameraNode() => _camera;
+
+    private PelotonResult FindNearbyBikesInFront()
+    {
+        const float maxDist = 30f;
+        var myPos = GlobalPosition;
+        var forward = -GlobalTransform.Basis.Z;
+        forward.Y = 0f;
+        forward = forward.Normalized();
+
+        _aheadDistances.Clear();
+        foreach (var other in _droneRegistry.BikeList)
+        {
+            if (other == _bikebody) continue;
+            var toOther = other.GlobalPosition - myPos;
+            if (toOther.Dot(forward) <= 0f) continue;
+            float dist = toOther.Length();
+            if (dist <= maxDist)
+                _aheadDistances.Add(dist);
+        }
+
+        _aheadDistances.Sort();
+
+        int n = _aheadDistances.Count;
+        float sum = 0f;
+        for (int i = 0; i < n; i++) sum += _aheadDistances[i];
+
+        return new PelotonResult(
+            n,
+            n > 0 ? sum / n : 0f,
+            n >= 1 ? _aheadDistances[0] : null,
+            n >= 3 ? _aheadDistances[2] : null
+        );
+    }
 
     public void SafeQueueFree()
     {

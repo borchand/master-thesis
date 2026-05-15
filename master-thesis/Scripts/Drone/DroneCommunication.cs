@@ -24,12 +24,12 @@ public partial class DroneCommunication : Node3D
         DroneSet.Clear();
         BikeSet.Clear();
 
-        foreach (Variant key in _droneRegistry.Drones.Keys)
-            if (((Drone)(GodotObject)key).GlobalPosition.DistanceTo(origin) <= radius)
-                DroneSet[key] = key;
+        foreach (var drone in _droneRegistry.DroneList)
+            if (drone.GlobalPosition.DistanceTo(origin) <= radius)
+                DroneSet[drone] = drone;
 
-        foreach (Variant key in _droneRegistry.Bikes.Keys)
-            if (((BikeBody)(GodotObject)key).GlobalPosition.DistanceTo(origin) <= radius)
-                BikeSet[key] = key;
+        foreach (var bike in _droneRegistry.BikeList)
+            if (bike.GlobalPosition.DistanceTo(origin) <= radius)
+                BikeSet[bike] = bike;
     }
 }

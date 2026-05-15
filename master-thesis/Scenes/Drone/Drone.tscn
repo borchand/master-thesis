@@ -11,7 +11,9 @@ size = Vector3(0.2685547, 0.09057617, 0.20922852)
 size = Vector3(0.2685547, 0.09057617, 0.20922852)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_drone"]
+transparency = 0
 albedo_color = Color(0.1, 0.3, 0.9, 1)
+shading_mode = 1
 
 [node name="RigidBody" type="RigidBody3D" unique_id=1754414733]
 axis_lock_angular_x = true

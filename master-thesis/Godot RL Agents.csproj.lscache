@@ -58,7 +58,6 @@ TemporaryDependencyNodeTargetIdentifier=net6.0
 addons/godot_rl_agents/onnx/csharp/
  ONNXInference.cs
  SessionConfigurator.cs
-Scenes/Bike/BikeRayCast.cs
 Scripts/Bike/
  Bike.cs
  BikeBody.cs

@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://fqaxsomnll1"]
 
-[ext_resource type="Script" path="res://Scripts/World.cs" id="1_fo5ed"]
+[ext_resource type="Script" uid="uid://yhwcwrxwv87d" path="res://Scripts/World.cs" id="1_fo5ed"]
 [ext_resource type="Script" uid="uid://8jp2it32jtap" path="res://Scripts/camera_3d.gd" id="2_o06y3"]
 [ext_resource type="Material" uid="uid://baqw4impxlrog" path="res://sprites/godot-material-mud-cracked/materials/mudCracked/mud.tres" id="3_k7acu"]
 [ext_resource type="PackedScene" uid="uid://bxvm5tel50r7s" path="res://Scenes/Bike/Bike_Path3d.tscn" id="4_5v1tr"]
 [ext_resource type="Script" uid="uid://buennhw6hcyks" path="res://Scripts/menu_bar.gd" id="5_0fj1v"]
-[ext_resource type="Script" path="res://Scripts/Bike/BikePath.cs" id="5_5ukr8"]
+[ext_resource type="Script" uid="uid://chmw60xr0noc3" path="res://Scripts/Bike/BikePath.cs" id="5_5ukr8"]
 [ext_resource type="Script" uid="uid://t7drcqgmu3nt" path="res://Scripts/fps.gd" id="6_5ukr8"]
 [ext_resource type="Script" uid="uid://b2qiyxefmfote" path="res://Scripts/h_slider.gd" id="8_k7acu"]
 [ext_resource type="Script" uid="uid://cmlgykcqebdwh" path="res://Scripts/progress_bars.gd" id="9_5v1tr"]
@@ -19,10 +19,8 @@ ground_horizon_color = Color(0.64528894, 0.67970026, 0.66589224, 1)
 sky_material = SubResource("ProceduralSkyMaterial_o06y3")
 
 [sub_resource type="Environment" id="Environment_5v1tr"]
-background_mode = 2
-sky = SubResource("Sky_k7acu")
-tonemap_mode = 2
-ssao_enabled = true
+background_mode = 1
+background_color = Color(0.15, 0.15, 0.15, 1)
 
 [sub_resource type="Theme" id="Theme_tlwt5"]
 default_font_size = 40
@@ -47,6 +45,8 @@ environment = SubResource("Environment_5v1tr")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1854748252]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+light_bake_mode = 0
+sky_mode = 1
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=79264867]
 process_mode = 3
