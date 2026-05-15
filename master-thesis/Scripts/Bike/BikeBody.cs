@@ -6,6 +6,7 @@ public partial class BikeBody : StaticBody3D
 {
     private static int _nextId = 1;
     public int BikeId { get; private set; }
+    public Bike ParentBike { get; private set; }
     private int _timestep = 1;
 
     private CustomLogger _logging;
@@ -14,6 +15,7 @@ public partial class BikeBody : StaticBody3D
     public override void _Ready()
     {
         BikeId = _nextId++;
+        ParentBike = GetParent<Bike>();
         AddToGroup("bikes");
 
         _logging = GetNode<CustomLogger>("/root/logging");

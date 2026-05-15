@@ -107,7 +107,7 @@ func reset():
 # ─── Boids RL ────────────────────────────────────────────────────────────────────
 
 func _physics_process_boids_rl(world) -> void:
-	drone.ReadSensor(drone.DroneSensor.DroneSet, drone.DroneSensor.BikeSet)
+	drone.ReadSensor()
 
 	if drone.SensorReadingsBikes.is_empty():
 		reward -= 0.5
@@ -293,7 +293,7 @@ func _set_action_boids_rl(action) -> void:
 # ─── Grouping RL ────────────────────────────────────────────────────────────────────
 
 func _physics_process_grouping_rl() -> void:
-	drone.ReadSensor(drone.DroneSensor.DroneSet, drone.DroneSensor.BikeSet)
+	drone.ReadSensor()
 	_grouping_rl_clusters = drone.ClusterBikes(drone.SensorReadingsBikes)
 
 	if _grouping_rl_clusters.is_empty():

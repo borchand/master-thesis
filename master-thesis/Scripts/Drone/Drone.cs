@@ -1,11 +1,29 @@
 using Godot;
 using Godot.Collections;
+using System.Collections.Generic;
 
 [GlobalClass]
 public partial class Drone : RigidBody3D
 {
+    private struct DroneReading
+    {
+        public int Id;
+        public Vector3 Position;
+        public float Distance;
+    }
+
+    private struct BikeReading
+    {
+        public Vector3 Position;
+        public Vector3 Velocity;
+        public bool InFrustum;
+    }
+
     private static int _nextId = 1;
     public int Id { get; private set; }
+
+    private readonly List<DroneReading> _droneReadings = new(32);
+    private readonly List<BikeReading> _bikeReadings = new(64);
 
     public enum BoidMode { Boids, BoidsPriorityAttractionFields, BoidsPriorityGroups }
 
@@ -85,7 +103,7 @@ public partial class Drone : RigidBody3D
     {
         if (IdleUntilNeeded && !HasActivated)
         {
-            ReadSensor(GetDroneSet(), GetBikeSet());
+            ReadSensor();
             if (!ShouldActivateFromCoverage())
             {
                 LinearVelocity = Vector3.Zero;
@@ -113,39 +131,148 @@ public partial class Drone : RigidBody3D
         MatchingFactor = (float)parameters["matching_factor"];
     }
 
-    private Dictionary GetDroneSet() => DroneSensor.DroneSet;
-    private Dictionary GetBikeSet() => DroneSensor.BikeSet;
-
     private void BoidsUpdate()
     {
-        ReadSensor(GetDroneSet(), GetBikeSet());
+        if (DroneVersion == BoidMode.Boids)
+        {
+            CacheReadings();
+            DrawBikeDebugLines();
+            BoidsBikes();
+            return;
+        }
 
-        Array bikesForBoids;
+        // Priority modes need Godot Arrays for ClusterBikes / GDScript RL
+        ReadSensor();
 
         if (DroneVersion == BoidMode.BoidsPriorityAttractionFields)
         {
             var clusters = ClusterBikes(SensorReadingsBikes);
-            var alignmentVec = PriorityAlignment(clusters);
-            var cohesionVec = PriorityCohesion(clusters);
             DrawClusterDebugLines(clusters);
-            ApplyBoids(new Array(), alignmentVec, cohesionVec);
+            ApplyBoids(new Array(), PriorityAlignment(clusters), PriorityCohesion(clusters));
             return;
         }
-        else if (DroneVersion == BoidMode.BoidsPriorityGroups)
+
+        var assignedClusters = ClusterBikes(SensorReadingsBikes);
+        var assigned = AssignedCluster(assignedClusters);
+        DrawClusterDebugLines(assignedClusters);
+        DrawBikeDebugLines((Array)assigned["bikes"]);
+        BoidsBikes((Array)assigned["bikes"]);
+    }
+
+    // Populates struct lists only — used by the standard Boids mode (no Godot allocations)
+    private void CacheReadings()
+    {
+        _droneReadings.Clear();
+        _bikeReadings.Clear();
+
+        foreach (var other in DroneSensor.DroneListFiltered)
         {
-            var clusters = ClusterBikes(SensorReadingsBikes);
-            var assignedCluster = AssignedCluster(clusters);
-            DrawClusterDebugLines(clusters);
-            DrawBikeDebugLines((Array)assignedCluster["bikes"]);
-            bikesForBoids = (Array)assignedCluster["bikes"];
+            if (other.Id == Id) continue;
+            _droneReadings.Add(new DroneReading
+            {
+                Id = other.Id,
+                Position = other.GlobalPosition,
+                Distance = GlobalPosition.DistanceTo(other.GlobalPosition)
+            });
+        }
+
+        foreach (var bike in DroneSensor.BikeListFiltered)
+        {
+            var pos = bike.GlobalPosition;
+            _bikeReadings.Add(new BikeReading
+            {
+                Position = pos,
+                Velocity = FlatDir(-bike.GlobalTransform.Basis.Z) * bike.ParentBike.Speed,
+                InFrustum = _camera.IsPositionInFrustum(pos)
+            });
+        }
+    }
+
+    // No-arg overload: uses struct lists, combines alignment + cohesion in one pass
+    private void BoidsBikes()
+    {
+        int count = _bikeReadings.Count;
+        var alignX = 0f; var alignZ = 0f;
+        var cohX = 0f;   var cohZ = 0f;
+
+        for (int i = 0; i < count; i++)
+        {
+            alignX += _bikeReadings[i].Velocity.X;
+            alignZ += _bikeReadings[i].Velocity.Z;
+            cohX   += _bikeReadings[i].Position.X;
+            cohZ   += _bikeReadings[i].Position.Z;
+        }
+
+        Vector3 align, cohesion;
+        if (count > 0)
+        {
+            align = new Vector3(
+                (alignX / count - LinearVelocity.X) * MatchingFactor,
+                0,
+                (alignZ / count - LinearVelocity.Z) * MatchingFactor);
+            cohesion = new Vector3(
+                (cohX / count - GlobalPosition.X) * CenteringFactor,
+                0,
+                (cohZ / count - GlobalPosition.Z) * CenteringFactor);
         }
         else
         {
-            DrawBikeDebugLines(SensorReadingsBikes);
-            bikesForBoids = SensorReadingsBikes;
+            align = cohesion = Vector3.Zero;
         }
 
-        BoidsBikes(bikesForBoids);
+        var dir = align + cohesion + Separation();
+        dir.Y = HeightForce();
+        ApplyCentralForce(ClampVector(dir, MaxForce));
+        RotateTowardsDirection(-align);
+    }
+
+    // No-arg overload: uses _droneReadings struct list
+    private Vector3 Separation()
+    {
+        var result = Vector3.Zero;
+        int count = _droneReadings.Count;
+        for (int i = 0; i < count; i++)
+        {
+            if (_droneReadings[i].Distance > AvoidRadius) continue;
+            var diff = new Vector3(
+                GlobalPosition.X - _droneReadings[i].Position.X,
+                0,
+                GlobalPosition.Z - _droneReadings[i].Position.Z
+            );
+            float dist = Mathf.Max(diff.Length(), 0.01f);
+            result += diff / (dist * dist);
+        }
+        return result * AvoidFactor;
+    }
+
+    // No-arg overload: uses _bikeReadings struct list
+    private float HeightForce()
+    {
+        int count = _bikeReadings.Count;
+        if (count == 0) return 0f;
+        float highestY = float.NegativeInfinity;
+        for (int i = 0; i < count; i++)
+            if (_bikeReadings[i].Position.Y > highestY)
+                highestY = _bikeReadings[i].Position.Y;
+        float yError = (highestY + HeightOffset) - GlobalPosition.Y;
+        return Mathf.Clamp(yError * YGain - LinearVelocity.Y * YDamp, -MaxUpForce, MaxUpForce);
+    }
+
+    // No-arg overload: uses _bikeReadings struct list
+    private void DrawBikeDebugLines()
+    {
+        if (!DebugDraw) return;
+        int count = _bikeReadings.Count;
+        while (_debugBikeLines.Count < count)
+        {
+            var mi = MakeDebugLine();
+            GetParent().CallDeferred(Node.MethodName.AddChild, mi);
+            _debugBikeLines.Add(mi);
+        }
+        for (int i = 0; i < count; i++)
+            PlaceDebugLine(_debugBikeLines[i], GlobalPosition, _bikeReadings[i].Position, Colors.Yellow);
+        for (int i = count; i < _debugBikeLines.Count; i++)
+            _debugBikeLines[i].Visible = false;
     }
 
     public void BoidsBikes(Array bikes)
@@ -212,25 +339,6 @@ public partial class Drone : RigidBody3D
         }
 
         return result;
-    }
-
-    private Vector3 Separation()
-    {
-        var result = Vector3.Zero;
-
-        foreach (Variant v in SensorReadingsDrones)
-        {
-            var reading = (Dictionary)v;
-            if ((float)reading["distance"] > AvoidRadius)
-                continue;
-
-            var pos = (Vector3)reading["position"];
-            var diff = new Vector3(GlobalPosition.X - pos.X, 0, GlobalPosition.Z - pos.Z);
-            float dist = Mathf.Max(diff.Length(), 0.01f);
-            result += diff / (dist * dist);
-        }
-
-        return result * AvoidFactor;
     }
 
     private float HeightForce(Array bikes)
@@ -481,48 +589,46 @@ public partial class Drone : RigidBody3D
 
     public Camera3D GetCameraNode() => _camera;
 
-    public void ReadSensor(Dictionary drones, Dictionary bikes)
+    public void ReadSensor()
     {
+        _droneReadings.Clear();
+        _bikeReadings.Clear();
         CameraReadings = new Array();
         SensorReadingsDrones = new Array();
         SensorReadingsBikes = new Array();
 
-        foreach (Variant key in drones.Keys)
+        foreach (var other in DroneSensor.DroneListFiltered)
         {
-            var drone = (Drone)(GodotObject)key;
-            if (drone.Id == Id) continue;
-            var pos = drone.GlobalPosition;
+            if (other.Id == Id) continue;
+            var pos = other.GlobalPosition;
+            float dist = GlobalPosition.DistanceTo(pos);
+            _droneReadings.Add(new DroneReading { Id = other.Id, Position = pos, Distance = dist });
             SensorReadingsDrones.Add(new Dictionary
             {
-                ["id"] = drone.Id,
+                ["id"] = other.Id,
                 ["position"] = pos,
-                ["distance"] = GlobalPosition.DistanceTo(pos),
+                ["distance"] = dist,
                 ["direction"] = GlobalPosition.DirectionTo(pos)
             });
         }
 
-        foreach (Variant key in bikes.Keys)
+        foreach (var bike in DroneSensor.BikeListFiltered)
         {
-            var bike = (BikeBody)(GodotObject)key;
-            var data = GetBikeData(bike);
-            if (_camera.IsPositionInFrustum(bike.GlobalPosition))
-                CameraReadings.Add(data);
+            var pos = bike.GlobalPosition;
+            bool inFrustum = _camera.IsPositionInFrustum(pos);
+            var vel = FlatDir(-bike.GlobalTransform.Basis.Z) * bike.ParentBike.Speed;
+            _bikeReadings.Add(new BikeReading { Position = pos, Velocity = vel, InFrustum = inFrustum });
+            var data = new Dictionary
+            {
+                ["position"] = pos,
+                ["distance"] = GlobalPosition.DistanceTo(pos),
+                ["direction"] = GlobalPosition.DirectionTo(pos),
+                ["velocity"] = vel,
+                ["id"] = bike.BikeId
+            };
+            if (inFrustum) CameraReadings.Add(data);
             SensorReadingsBikes.Add(data);
         }
-    }
-
-    private Dictionary GetBikeData(BikeBody bike)
-    {
-        var bikePos = bike.GlobalPosition;
-        var parentSpeed = (float)bike.GetParent().Get("speed");
-        return new Dictionary
-        {
-            ["position"] = bikePos,
-            ["distance"] = GlobalPosition.DistanceTo(bikePos),
-            ["direction"] = GlobalPosition.DirectionTo(bikePos),
-            ["velocity"] = FlatDir(-bike.GlobalTransform.Basis.Z) * parentSpeed,
-            ["id"] = bike.BikeId
-        };
     }
 
     public int CoverageScore(int n) =>

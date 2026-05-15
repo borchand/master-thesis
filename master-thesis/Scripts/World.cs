@@ -41,7 +41,7 @@ public partial class World : Node3D
 	public int InstanceId { get; private set; } = -1;
 
 	private int _bikeCount = 180;
-	private int _droneCount = 0;
+	private int _droneCount = 90;
 
 	[Export] public float DroneSpawnSpacing = 1.5f;
 	[Export] public bool PlaceDroneAlongRoad = false;
