@@ -5,7 +5,7 @@
 [ext_resource type="Material" uid="uid://baqw4impxlrog" path="res://sprites/godot-material-mud-cracked/materials/mudCracked/mud.tres" id="3_k7acu"]
 [ext_resource type="PackedScene" uid="uid://bxvm5tel50r7s" path="res://Scenes/Bike/Bike_Path3d.tscn" id="4_5v1tr"]
 [ext_resource type="Script" uid="uid://buennhw6hcyks" path="res://Scripts/menu_bar.gd" id="5_0fj1v"]
-[ext_resource type="Script" uid="uid://b3ui8wkm4hyq" path="res://Scripts/Bike/bike_path.gd" id="5_5ukr8"]
+[ext_resource type="Script" path="res://Scripts/Bike/bike_path.gd" id="5_5ukr8"]
 [ext_resource type="Script" uid="uid://t7drcqgmu3nt" path="res://Scripts/fps.gd" id="6_5ukr8"]
 [ext_resource type="Script" uid="uid://b2qiyxefmfote" path="res://Scripts/h_slider.gd" id="8_k7acu"]
 [ext_resource type="Script" uid="uid://cmlgykcqebdwh" path="res://Scripts/progress_bars.gd" id="9_5v1tr"]
@@ -20,6 +20,7 @@ sky_material = SubResource("ProceduralSkyMaterial_o06y3")
 
 [sub_resource type="Environment" id="Environment_5v1tr"]
 background_mode = 2
+background_color = Color(0.15, 0.15, 0.15, 1)
 sky = SubResource("Sky_k7acu")
 tonemap_mode = 2
 ssao_enabled = true
@@ -47,7 +48,6 @@ environment = SubResource("Environment_5v1tr")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1854748252]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
-shadow_enabled = true
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=79264867]
 process_mode = 3

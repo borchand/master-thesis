@@ -40,15 +40,9 @@ var drone_count: int = 100
 
 @export var drone_spawn_spacing: float = 1.5
 @export var place_drone_along_road: bool = false
-@export var cluster_distance_threshold := 10.0
 
 var cached_bikes: Array = []
 var cached_drones: Array = []
-var cached_clusters: Array = []
-
-# For same-behavior optimized _assigned_cluster_fast().
-# One sorted list of drone distances per cluster.
-var cached_cluster_drone_distances_sq: Array = []
 
 var start_time := 0
 var wall_start := 0
@@ -114,7 +108,7 @@ func _physics_process(delta: float) -> void:
 			"sim_time=", sim_time,
 			" wall_time=", wall,
 			" ratio=", sim_time / max(wall, 0.001),
-			" clusters=", cached_clusters.size()
+			" drones=", drone_list.size()
 		)
 
 	update_cached_world_data()
@@ -143,61 +137,6 @@ func update_cached_world_data():
 			"id": d.id,
 			"position": d.global_position
 		})
-
-	cached_clusters = cluster_bikes_once(cached_bikes)
-	update_cluster_drone_distances()
-
-
-func cluster_bikes_once(readings: Array) -> Array:
-	var clusters: Array = []
-	var threshold_sq = cluster_distance_threshold * cluster_distance_threshold
-
-	for bike_data in readings:
-		var bike_pos: Vector3 = bike_data["position"]
-		var assigned := false
-
-		for cluster in clusters:
-			var c: Vector3 = cluster["centroid"]
-			var dx = bike_pos.x - c.x
-			var dz = bike_pos.z - c.z
-			var dist_sq = dx * dx + dz * dz
-
-			if dist_sq < threshold_sq:
-				var n = float(cluster["size"])
-				var new_size = cluster["size"] + 1
-
-				cluster["centroid"] = (cluster["centroid"] * n + bike_pos) / float(new_size)
-				cluster["velocity"] = (cluster["velocity"] * n + bike_data["velocity"]) / float(new_size)
-				cluster["size"] = new_size
-				cluster["bikes"].append(bike_data)
-
-				assigned = true
-				break
-
-		if not assigned:
-			clusters.append({
-				"centroid": bike_pos,
-				"velocity": bike_data["velocity"],
-				"size": 1,
-				"bikes": [bike_data]
-			})
-
-	return clusters
-
-
-func update_cluster_drone_distances() -> void:
-	cached_cluster_drone_distances_sq.clear()
-
-	for cluster in cached_clusters:
-		var centroid: Vector3 = cluster["centroid"]
-		var distances: Array = []
-
-		for d in cached_drones:
-			distances.append(d["position"].distance_squared_to(centroid))
-
-		distances.sort()
-		cached_cluster_drone_distances_sq.append(distances)
-
 
 func add_drone(auto_place: bool = true):
 	var drone_instance = drone.instantiate()

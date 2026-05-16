@@ -60,6 +60,10 @@ var _debug_cluster_target_line: MeshInstance3D = null
 
 var should_check_camera = false
 
+var _cached_force: Vector3 = Vector3.ZERO
+var _cached_rotation_dir: Vector3 = Vector3.ZERO
+var _boids_throttle: int = 0
+
 func _ready():
 	id = _next_id
 	_next_id += 1
@@ -77,7 +81,11 @@ func _physics_process(_delta):
 	should_check_camera = timestep % 30 == 0
 
 	if not is_rl:
-		boids_priority_groups_cached()
+		if _boids_throttle % 3 == id % 3:
+			_compute_boids()
+		_boids_throttle += 1
+		apply_central_force(_cached_force)
+		rotate_towards_direction(_cached_rotation_dir)
 
 	if should_check_camera:
 		update_camera_readings_for_log()
@@ -86,16 +94,37 @@ func _physics_process(_delta):
 	timestep += 1
 	collision_at_time_step = 0
 
-func boids_priority_groups_cached():
+func _compute_boids():
 	var sim = get_parent()
+	var self_pos = global_position
+	var sensor_radius_sq: float = shared.drone_communication_size * shared.drone_communication_size
 
-	sensor_readings_bikes = sim.cached_bikes
-	sensor_readings_drones = sim.cached_drones
+	var bike_data: Array = []
+	for bike_instance in shared.bike_lists[sim.instance_id]:
+		var b = bike_instance.bikebody
+		if self_pos.distance_squared_to(b.global_position) > sensor_radius_sq:
+			continue
+		var fwd = -b.global_transform.basis.z
+		fwd.y = 0.0
+		bike_data.append({
+			"position": b.global_position,
+			"velocity": fwd.normalized() * bike_instance.speed,
+			"id": b.bike_id
+		})
 
-	var clusters = sim.cached_clusters
-	var assigned_cluster = _assigned_cluster_fast(clusters)
+	var drone_data: Array = []
+	for d in sim.drone_list:
+		if d == self:
+			continue
+		if self_pos.distance_squared_to(d.global_position) <= sensor_radius_sq:
+			drone_data.append({"id": d.id, "position": d.global_position})
 
-	var bikes = assigned_cluster["bikes"]
+	sensor_readings_bikes = bike_data
+	sensor_readings_drones = drone_data
+
+	var clusters := _cluster_bikes(bike_data)
+	var assigned := _assigned_cluster_local(clusters, drone_data)
+	var bikes: Array = assigned["bikes"]
 
 	var alignment_vector = alignment(bikes)
 	var cohesion_vector = cohesion(bikes)
@@ -104,10 +133,10 @@ func boids_priority_groups_cached():
 	var direction_vector = alignment_vector + cohesion_vector + separation_vector
 	direction_vector.y = height_force(bikes)
 
-	apply_central_force(clamp_vector(direction_vector, max_force))
-	rotate_towards_direction(-alignment_vector)
+	_cached_force = clamp_vector(direction_vector, max_force)
+	_cached_rotation_dir = -alignment_vector
 
-func _assigned_cluster_fast(clusters: Array) -> Dictionary:
+func _assigned_cluster_local(clusters: Array, local_drones: Array) -> Dictionary:
 	if clusters.is_empty():
 		return {
 			"centroid": Vector3.ZERO,
@@ -116,47 +145,29 @@ func _assigned_cluster_fast(clusters: Array) -> Dictionary:
 			"bikes": []
 		}
 
-	var sim = get_parent()
-
 	var best: Dictionary = {}
 	var best_val = -INF
 
 	var self_pos = global_position
 	var coverage_radius_sq = coverage_radius * coverage_radius
+	var forward = flat_dir(-global_transform.basis.z)
 
-	var forward = -global_transform.basis.z
-	forward.y = 0.0
-	forward = forward.normalized()
-
-	for i in range(clusters.size()):
-		var cluster = clusters[i]
+	for cluster in clusters:
 		var centroid: Vector3 = cluster["centroid"]
-
 		var v = _coverage_score(cluster["size"])
-
 		var self_dist_sq = self_pos.distance_squared_to(centroid)
 
-		var sorted_distances: Array = sim.cached_cluster_drone_distances_sq[i]
-
 		var count := 0
-
-		for dist_sq in sorted_distances:
-			if dist_sq < self_dist_sq or dist_sq < coverage_radius_sq:
+		for d in local_drones:
+			var d_dist_sq = d["position"].distance_squared_to(centroid)
+			if d_dist_sq < self_dist_sq or d_dist_sq < coverage_radius_sq:
 				count += 1
-			else:
-				break
-
-		count -= 1
+		v -= count
 
 		var to_cluster = centroid - self_pos
 		to_cluster.y = 0.0
-
-		if to_cluster.length_squared() > 0.0001:
-			to_cluster = to_cluster.normalized()
-			if forward.dot(to_cluster) < 0.0:
-				v *= 0.8
-
-		v -= count
+		if to_cluster.length_squared() > 0.0001 and forward.dot(to_cluster.normalized()) < 0.0:
+			v *= 0.8
 
 		if v > best_val:
 			best_val = v

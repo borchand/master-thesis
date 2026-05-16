@@ -8,9 +8,6 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_uvgqj"]
 size = Vector3(0.2685547, 0.09057617, 0.20922852)
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_mj1ce"]
-radius = 30.0
-
 [node name="RigidBody" type="RigidBody3D" unique_id=1754414733]
 axis_lock_angular_x = true
 axis_lock_angular_z = true
@@ -38,9 +35,6 @@ depth = 0.01
 
 [node name="Drone_communication" type="Area3D" parent="." unique_id=1717689195]
 script = ExtResource("4_6hc2f")
-
-[node name="sensor" type="CollisionShape3D" parent="Drone_communication" unique_id=700398335]
-shape = SubResource("SphereShape3D_mj1ce")
 
 [node name="DroneRL" type="Node3D" parent="." unique_id=210817093]
 script = ExtResource("5_6hc2f")
