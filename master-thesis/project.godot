@@ -22,6 +22,10 @@ shared="*uid://f1b4m8xwxax"
 
 window/size/mode=3
 
+[dotnet]
+
+project/assembly_name="master-thesis"
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/cmd_console/plugin.cfg")

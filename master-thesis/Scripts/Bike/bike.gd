@@ -26,7 +26,7 @@ var stamina = 100.0
 var speed = 10.0
 var acceleration = 0.0
 
-var sustainable_force = 25 # not used  
+var sustainable_force = 25 # not used
 var sustainable_watt = null
 var initial_breakout_watt = null
 var a_fatigue_resistence = 0.00003
@@ -45,25 +45,33 @@ func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
 	if staminaRegen == null:
 		staminaRegen = rng.randf_range(3.0, 4.0)
-	
-func _process(delta):
+
+var processCounter = 0 
+var controllerCounter = 0
+var TotalSpeed = 0
+var total_threashold = 0
+
+func _physics_process(delta: float):
 	timer += delta
 	total_time += delta
+	processCounter += 1
 	if timer >= timer_threashold:
+		controllerCounter += 1 
 		timer = timer-timer_threashold
-		coltroler(delta)
-		
-	# move bike forward
-	if speed>max_speed:
-		max_speed = speed
-		
+		coltroler(timer_threashold)
+		total_threashold += timer_threashold
+		#move bike forward
+		if speed>max_speed:
+			max_speed = speed
+			
+	TotalSpeed += speed
 	self.progress += speed * delta
 	if self.progress >= max_progress:
-		# remove bike when it reaches the end of the path
-		print("Bike: ", self.name, " Finish time: ", total_time, " Watt: ", sustainable_watt)
-		print("Max_speed: ", max_speed)
+		print("Bike: ", self.name, " Finish time: ", total_time, " Remaining_Timer: ", timer,  "  Watts: ", sustainable_watt)
+		print("total_time: ", total_time, " total threashold: ", total_threashold, " Total_Speed: ", TotalSpeed, " Total_processcounter: ", processCounter, " Threahold_Counter: ", controllerCounter)
 		safe_queue_free()
-	
+
+
 func coltroler(delta):
 	#control1(delta)
 	control2(delta)
