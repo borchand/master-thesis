@@ -42,6 +42,8 @@ var behavior = "cruise"  #cruise, attack
 var cohesion_c =  0.8    #Set by trial and error
 var separation_c = 0.05  #0.05   #Set by trial and error 
 
+var max_speed = 0
+
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
 	if staminaRegen == null:

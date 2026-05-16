@@ -30,8 +30,11 @@ var rng = RandomNumberGenerator.new()
 var instance_id: int = -1
 var drone_list: Array = []
 
-var bike_count:int = 10
-var drone_count:int = 50
+var bike_count:int = 180
+var drone_count:int = 0
+
+var max_rng = 0
+var min_rng = 1000
 
 # Spacing used only at spawn time. Smaller than avoid_radius so large fleets
 # fit within the camera frustum; boids separation takes over once running.
@@ -114,9 +117,9 @@ func add_bike():
 	var rnW = rng.randi_range(0,3)
 	rnW = -9+9*rnW 
 	
-	if rnW < min_rng:
+	if rnW+373 < min_rng:
 		min_rng = rnW
-	if rnW > max_rng:
+	if rnW+373 > max_rng:
 		max_rng = rnW
 
 	bike_instance.set_watts(373+rnW,573+rnW)
