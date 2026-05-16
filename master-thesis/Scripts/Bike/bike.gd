@@ -44,11 +44,11 @@ func _physics_process(delta):
 		timer = timer-timer_threashold
 		coltroler(timer_threashold)
 				
-		self.progress += speed * timer_threashold
-		if self.progress >= max_progress:
-			if not is_rl:
-				print("Bike: ", self.name, " Finish time: ", total_time)
-			safe_queue_free()
+	self.progress += speed * delta
+	if self.progress >= max_progress:
+		if not is_rl:
+			print("Bike: ", self.name, " Finish time: ", total_time)
+		safe_queue_free()
 
 func coltroler(elabsted_time):
 	#control1(delta)
