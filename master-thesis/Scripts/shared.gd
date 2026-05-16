@@ -6,30 +6,39 @@ var follow_drone = false
 var drone_controlled = false
 var follow_bike = false
 
-var bikes : Array[Bike]
 var follow_bike_in_pos : int = 0
 
-var drone_cameras : Array[Camera3D]
+var bike_lists: Array[Array] = []
+var drone_camera_lists: Array[Array] = []
+
+var drone_communication_size = 60
+
+func register_instance() -> int:
+	bike_lists.append([])
+	drone_camera_lists.append([])
+	return bike_lists.size() - 1
+
 var followed_drone_index = 0
 
-func get_progress_ratio_of_bike_in_pos(pos: int) -> float:
-	
+func get_progress_ratio_of_bike_in_pos(pos: int, instance_id: int) -> float:
+	var bikes = bike_lists[instance_id]
 	if bikes.is_empty():
 		return 1.0
 
 	var bike_progress = []
-	
+
 	for bike : Bike in bikes:
 		bike_progress.append(bike.progress_ratio)
-		
+
 	# sort by progress
 	bike_progress.sort_custom(func(a, b):
 		return a > b
 	)
-	
+
 	return bike_progress[pos]
 
-func get_camera_of_bike_in_pos(pos: int) -> Camera3D:
+func get_camera_of_bike_in_pos(pos: int, instance_id: int) -> Camera3D:
+	var bikes = bike_lists[instance_id]
 	var bike_progress = []
 
 	for bike : Bike in bikes:
