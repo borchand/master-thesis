@@ -28,6 +28,54 @@ keybinding | action
 `← Left`| Turn drone left when drone movement is toggled on
 `→ Right`| Turn drone right when drone movement is toggled on
 
+## RL Training
+
+### Setup
+Install the required dependencies using pip:
+```bash
+pip install -r requirements.txt
+```
+
+### Training
+Start training with:
+```bash
+python stable_baselines3_example.py
+```
+
+Then open the `training` scene in Godot and run it.
+
+Useful flags:
+```bash
+# Save a model checkpoint every N steps
+python stable_baselines3_example.py --save_checkpoint_frequency 50000 --experiment_name my_run
+
+# Resume training from a saved checkpoint or model
+python stable_baselines3_example.py --resume_model_path logs/sb3/my_run_checkpoints/my_run_50000_steps
+
+# Speed up physics simulation (e.g. 4x)
+python stable_baselines3_example.py --speedup 4
+
+# Export trained model as ONNX after training
+python stable_baselines3_example.py --save_model_path model --onnx_export_path model.onnx
+```
+
+Logs and checkpoints are saved to `logs/sb3/` by default.
+
+### Running a trained model
+Open the `result` scene in Godot, make sure `model.onnx` is present in the project root, and run the scene. The drone will use the trained ONNX model for inference automatically.
+
+### Tensorboard
+Training metrics are logged automatically to `logs/sb3/`. To view them:
+```bash
+tensorboard --logdir logs/sb3
+```
+Then open `http://localhost:6006` in your browser.
+
+Key metrics to watch:
+- `rollout/ep_len_mean` — average episode length; higher means the drone follows the bike longer
+- `rollout/ep_rew_mean` — average episode reward; higher is better
+- `train/loss` — policy and value loss; should decrease over time
+
 ## Python scripts
 We have written some Python scripts to parse data used in the simulator. Below is a brief description of each script.
 

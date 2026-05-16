@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://cnsxxsoh3b1q6"]
+
+[ext_resource type="Script" uid="uid://c16g2vvptkvge" path="res://addons/godot_rl_agents/sync.gd" id="1_1ydqc"]
+[ext_resource type="PackedScene" uid="uid://fqaxsomnll1" path="res://Scenes/world.tscn" id="1_xyj6f"]
+
+[node name="Training" type="Node" unique_id=764490218]
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=390282933]
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 0.5
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=1370265608]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(576, 324)
+render_target_update_mode = 4
+
+[node name="World" parent="SubViewportContainer/SubViewport" unique_id=1006143094 instance=ExtResource("1_xyj6f")]
+is_training = true
+is_rl = true
+
+[node name="SubViewportContainer2" type="SubViewportContainer" parent="." unique_id=254153004]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer2" unique_id=573718283]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(576, 324)
+render_target_update_mode = 4
+
+[node name="World" parent="SubViewportContainer2/SubViewport" unique_id=170061216 instance=ExtResource("1_xyj6f")]
+is_training = true
+is_rl = true
+
+[node name="SubViewportContainer3" type="SubViewportContainer" parent="." unique_id=1260507495]
+anchors_preset = -1
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer3" unique_id=36044482]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(576, 324)
+render_target_update_mode = 4
+
+[node name="World" parent="SubViewportContainer3/SubViewport" unique_id=105610998 instance=ExtResource("1_xyj6f")]
+is_training = true
+is_rl = true
+
+[node name="SubViewportContainer4" type="SubViewportContainer" parent="." unique_id=1224062541]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer4" unique_id=461401788]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(576, 324)
+render_target_update_mode = 4
+
+[node name="World" parent="SubViewportContainer4/SubViewport" unique_id=897809837 instance=ExtResource("1_xyj6f")]
+is_training = true
+is_rl = true
+
+[node name="Sync" type="Node" parent="." unique_id=825966693]
+script = ExtResource("1_1ydqc")
+action_repeat = 4
+speed_up = 10.0
+metadata/_custom_type_script = "uid://c16g2vvptkvge"

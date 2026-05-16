@@ -47,7 +47,6 @@ environment = SubResource("Environment_5v1tr")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1854748252]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
-shadow_enabled = true
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=79264867]
 process_mode = 3
@@ -69,7 +68,7 @@ clip_contents = true
 offset_left = 16.0
 offset_top = 5.0
 offset_right = 217.0
-offset_bottom = 311.0
+offset_bottom = 366.0
 script = ExtResource("5_0fj1v")
 
 [node name="FPSContanier" type="Control" parent="Menu" unique_id=1714038171]
@@ -116,7 +115,7 @@ anchor_bottom = 1.0
 offset_top = -31.0
 grow_horizontal = 2
 grow_vertical = 0
-text = "Drone control"
+text = "Follow drone"
 
 [node name="Pause" type="CheckButton" parent="Menu/ToggleContainer" unique_id=1010535086]
 layout_mode = 1
@@ -166,18 +165,35 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -109.0
+offset_top = -167.0
+offset_bottom = -1.0
 grow_horizontal = 2
 grow_vertical = 0
+
+[node name="FollowDroneInPos" type="SpinBox" parent="Menu/OtherContainer" unique_id=300000001]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 24.0
+offset_bottom = 55.0
+grow_horizontal = 2
+
+[node name="Label" type="Label" parent="Menu/OtherContainer/FollowDroneInPos" unique_id=300000002]
+layout_mode = 0
+offset_left = 2.0
+offset_top = -25.0
+offset_right = 176.0
+offset_bottom = 1.0
+text = "Follow drone at position"
 
 [node name="FollowBikeInPos" type="SpinBox" parent="Menu/OtherContainer" unique_id=175309359]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 2.0
-offset_top = 22.0
+offset_top = 84.0
 offset_right = -2.0
-offset_bottom = 53.0
+offset_bottom = 115.0
 grow_horizontal = 2
 
 [node name="Label" type="Label" parent="Menu/OtherContainer/FollowBikeInPos" unique_id=258437761]
@@ -254,4 +270,5 @@ show_percentage = false
 [connection signal="toggled" from="Menu/ToggleContainer/Pause" to="Menu" method="_on_pause_toggled"]
 [connection signal="toggled" from="Menu/ToggleContainer/FreeRoam" to="Menu" method="_on_free_roam_toggled"]
 [connection signal="toggled" from="Menu/ToggleContainer/FollowBike" to="Menu" method="_on_follow_bike_toggled"]
+[connection signal="value_changed" from="Menu/OtherContainer/FollowDroneInPos" to="Menu" method="_on_follow_drone_in_pos_value_changed"]
 [connection signal="value_changed" from="Menu/OtherContainer/FollowBikeInPos" to="Menu" method="_on_follow_bike_in_pos_value_changed"]
