@@ -42,21 +42,20 @@ func _physics_process(delta):
 	total_time += delta
 	if timer >= timer_threashold:
 		timer = timer-timer_threashold
-		coltroler(delta)
+		coltroler(timer_threashold)
+				
+		self.progress += speed * timer_threashold
+		if self.progress >= max_progress:
+			if not is_rl:
+				print("Bike: ", self.name, " Finish time: ", total_time)
+			safe_queue_free()
 
-		
-	self.progress += speed * delta
-	if self.progress >= max_progress:
-		if not is_rl:
-			print("Bike: ", self.name, " Finish time: ", total_time)
-		safe_queue_free()
-
-func coltroler(delta):
+func coltroler(elabsted_time):
 	#control1(delta)
-	control1(delta)
+	control1(elabsted_time)
 
 #Controller1
-func control1(delta):
+func control1(elabsted_time):
 	var elevation = -1 * bikebody.global_rotation.x #positive = going up
 	var wanted_power  = sustainable_watt
 
@@ -69,7 +68,7 @@ func control1(delta):
 	else:
 		in_peloton = true
 
-	behaviorChange(delta, elevation)
+	behaviorChange(elabsted_time, elevation)
 	if behavior == "cruise":
 		wanted_power = cruise(elevation, raycast_result)
 	elif  behavior == "attack":
@@ -82,7 +81,7 @@ func control1(delta):
 	acceleration = acceleration_based_on_speed(speed, elevation, atcual_power, in_peloton)
 	fatigue_changes(atcual_power)
 
-	speed = max(0.5, speed + acceleration * delta)
+	speed = max(0.5, speed + acceleration * elabsted_time)
 
 func cruise(_elevation_, ray_hits):
 	if not in_peloton:
