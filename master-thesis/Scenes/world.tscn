@@ -5,7 +5,7 @@
 [ext_resource type="Material" uid="uid://baqw4impxlrog" path="res://sprites/godot-material-mud-cracked/materials/mudCracked/mud.tres" id="3_k7acu"]
 [ext_resource type="PackedScene" uid="uid://bxvm5tel50r7s" path="res://Scenes/Bike/Bike_Path3d.tscn" id="4_5v1tr"]
 [ext_resource type="Script" uid="uid://buennhw6hcyks" path="res://Scripts/menu_bar.gd" id="5_0fj1v"]
-[ext_resource type="Script" path="res://Scripts/Bike/bike_path.gd" id="5_5ukr8"]
+[ext_resource type="Script" uid="uid://b3ui8wkm4hyq" path="res://Scripts/Bike/bike_path.gd" id="5_5ukr8"]
 [ext_resource type="Script" uid="uid://t7drcqgmu3nt" path="res://Scripts/fps.gd" id="6_5ukr8"]
 [ext_resource type="Script" uid="uid://b2qiyxefmfote" path="res://Scripts/h_slider.gd" id="8_k7acu"]
 [ext_resource type="Script" uid="uid://cmlgykcqebdwh" path="res://Scripts/progress_bars.gd" id="9_5v1tr"]

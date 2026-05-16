@@ -42,7 +42,7 @@ func _physics_process(delta):
 	total_time += delta
 	if timer >= timer_threashold:
 		timer = timer-timer_threashold
-		coltroler(delta)
+		coltroler(timer_threashold)
 		
 	self.progress += speed * delta
 	if self.progress >= max_progress:

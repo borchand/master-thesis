@@ -1,7 +1,7 @@
 extends Node
 class_name CustomLogger
 
-var logging = true
+var logging = false
 var current_run_folders := {}
 
 var bikes = ""
