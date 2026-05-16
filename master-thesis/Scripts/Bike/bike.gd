@@ -34,22 +34,29 @@ var behavior = "cruise"  #cruise, attack
 var cohesion_c =  0.8    #Set by trial and error
 var separation_c = 0.05  #0.05   #Set by trial and error 
 
+var max_speed = 0
+var process_counter = 0
+var controller_counter = 0 
+
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
 
-func _physics_process(delta):
+func _physics_process(delta: float) -> void:
 	timer += delta
 	total_time += delta
+	process_counter += 1
 	if timer >= timer_threashold:
+		controller_counter += 1
 		timer = timer-timer_threashold
-		coltroler(delta)
-
+		coltroler(timer_threashold)
 		
-	self.progress += speed * delta
-	if self.progress >= max_progress:
-		if not is_rl:
-			print("Bike: ", self.name, " Finish time: ", total_time)
-		safe_queue_free()
+		if max_speed < speed:
+			max_speed = speed
+		self.progress += speed * timer_threashold
+		if self.progress >= max_progress:
+			if not is_rl:
+				print("Bike: ", self.name, " Finish time: ", total_time, "  Watts: ", sustainable_watt, " Maxspeed: ",max_speed," Process_counter: ", process_counter, " Controller_counter: ", controller_counter)
+				safe_queue_free()
 
 func coltroler(delta):
 	#control1(delta)
@@ -82,7 +89,7 @@ func control1(delta):
 	acceleration = acceleration_based_on_speed(speed, elevation, atcual_power, in_peloton)
 	fatigue_changes(atcual_power)
 
-	speed = max(0.5, speed + acceleration * delta)
+	speed = max(0.5, speed + acceleration * timer_threashold)
 
 func cruise(_elevation_, ray_hits):
 	if not in_peloton:

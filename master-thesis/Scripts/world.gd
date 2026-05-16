@@ -38,7 +38,7 @@ var instance_id: int = -1
 var drone_list: Array = []
 
 var bike_count:int = 180
-var drone_count:int = 100
+var drone_count:int = 0
 
 # Spacing used only at spawn time. Smaller than avoid_radius so large fleets
 # fit within the camera frustum; boids separation takes over once running.
@@ -87,8 +87,15 @@ func _ready():
 	$Menu/OtherContainer/FollowDroneInPos.max_value = drone_count - 1
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 	
+	
+var _update_cached_timer := 0.0
+const CASHED_WORLD_INTERVAL := 0.1  # 10 times per second is plenty
 func _physics_process(delta: float) -> void:
-	update_cached_world_data()
+	_update_cached_timer += delta
+	if _update_cached_timer >= CASHED_WORLD_INTERVAL:
+		_update_cached_timer = 0.0
+		update_cached_world_data()
+
 
 func update_cached_world_data():
 	cached_bikes.clear()
