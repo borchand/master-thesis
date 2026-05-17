@@ -35,6 +35,7 @@ var behavior = "cruise"  #cruise, attack
 
 var cohesion_c =  0.8    #Set by trial and error
 var separation_c = 0.05  #0.05   #Set by trial and error 
+var n_breakouts = 0
 
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
@@ -127,6 +128,7 @@ func behaviorChange(delta, elevation_):
 	if behavior == "cruise" and elevation_ > 0.017: # 0.09 rad is 5%
 		if rng.randi_range(0,10000) < (speedUpProbability * (elevation_ / 0.034) * delta) / max(1-progress_ratio, 0.15): # max(1-progress_ratio, 0.15):
 			behavior = "attack"
+			n_breakouts += 1
 	
 func fatigue_changes(current_watt):
 	if current_watt == sustainable_watt:
@@ -140,19 +142,19 @@ func calc_watt_current_state(speed_ms, elevation, acceleration_mss, in_peloton_=
 	var drag_modifier = 1
 	if in_peloton_:
 		drag_modifier = 0.7
-	return 82.9897 * speed_ms * (acceleration_mss + 0.0024 * drag_modifier * speed_ms**2 + 0.0390 + 9.81 * sin(elevation))
+	return 72.68 * (acceleration_mss + 0.00278 * drag_modifier * speed_ms**2 + 0.03896 + 9.81 * sin(elevation)) * speed_ms
 
 func acceleration_based_on_speed(speed_ms, elevation, power, in_peloton_ = false):
 	# Power: 1,200 W (300-1500)   -   DriveTrain efficientcy: 0.97, aka 3% loss
 	# Air density: $1.225 \, kg/m^3 at Sea level, 15C$   -  Drag Area: 0.32 m^2
-	# Mass: 80 kg -  Rotating mass: 0.5 kg   -   Gravity: 9.81 m/s^2
+	# Mass: 70 kg -  Rotating mass: 0.5 kg   -   Gravity: 9.81 m/s^2
 	# Rolling Resistance: 0.004   -    Speed in meter pr sec
-	# (((1200*0.97)/speed)-(0.5*1.225*0.32*speed^2)-(80*9.81*0.004)-9.81*sin(elevation)*80.5/(80+0.5)
+	# (((1200*0.97)/speed)-(0.5*1.225*0.32*speed^2)-(70*9.81*0.004)-9.81*sin(elevation)*70.5/(70+0.5)
 	var drag_modifier = 1
 	if in_peloton_:
 		drag_modifier = 0.7
 		
-	return ((power * 0.97 / 80.5) / speed_ms) - 0.0024 * drag_modifier * speed_ms**2 - 0.0390 - 9.81 * sin(elevation)
+	return ((power * 0.97 / 70.5) / speed_ms) - 0.00278 * drag_modifier * speed_ms**2 - 0.03896 - 9.81 * sin(elevation)
 
 func max_possible_power():
 	if fatigue < fatigue_threashold:

@@ -1,370 +1,726 @@
 import re
 
-data = """Godot Engine v4.6.1.stable.official.14d19694e - https://godotengine.org
-OpenGL API 3.3.0 - Build 32.0.101.7026 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics
+data = """
+Godot Engine v4.6.2.stable.mono.official.71f334935 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 560.94 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 2060
 
-Min: -9 Max: 18
-Bike: @PathFollow3D@6 Finish time: 15235.5145163253 Watt: 391
-Max_speed: 23.6694224724112
-Bike: @PathFollow3D@16 Finish time: 15235.5145163253 Watt: 391
-Max_speed: 23.524963285847
-Bike: @PathFollow3D@89 Finish time: 15235.5145163253 Watt: 391
-Max_speed: 23.992540253527
-Bike: @PathFollow3D@104 Finish time: 15235.5145163253 Watt: 391
-Max_speed: 24.0477435870526
-Bike: @PathFollow3D@107 Finish time: 15235.5145163253 Watt: 391
-Max_speed: 24.6384033681285
-Bike: @PathFollow3D@118 Finish time: 15235.5145163253 Watt: 391
-Max_speed: 24.3123367766152
-Bike: @PathFollow3D@126 Finish time: 15235.5145163253 Watt: 391
-Max_speed: 23.9649392423156
-Bike: @PathFollow3D@134 Finish time: 15235.5145163253 Watt: 391
-Max_speed: 24.9342386192938
-Bike: @PathFollow3D@164 Finish time: 15235.5145163253 Watt: 391
-Max_speed: 23.9142234460059
-Bike: @PathFollow3D@15 Finish time: 15243.7808523253 Watt: 391
-Max_speed: 23.7800219716102
-Bike: @PathFollow3D@19 Finish time: 15243.7808523253 Watt: 391
-Max_speed: 23.652957950767
-Bike: @PathFollow3D@37 Finish time: 15243.7808523253 Watt: 391
-Max_speed: 23.3645759572895
-Bike: @PathFollow3D@110 Finish time: 15243.7808523253 Watt: 391
-Max_speed: 23.8515603640222
-Bike: @PathFollow3D@161 Finish time: 15243.7808523253 Watt: 391
-Max_speed: 23.8265321579818
-Bike: @PathFollow3D@165 Finish time: 15265.9133003252 Watt: 391
-Max_speed: 23.9358437480918
-Bike: @PathFollow3D@42 Finish time: 15274.7129483252 Watt: 391
-Max_speed: 22.8843403185415
-Bike: @PathFollow3D@173 Finish time: 15280.5793803252 Watt: 391
-Max_speed: 24.4290095151416
-Bike: @PathFollow3D@39 Finish time: 15282.9792843252 Watt: 391
-Max_speed: 22.8396968293182
-Bike: @PathFollow3D@81 Finish time: 15282.9792843252 Watt: 391
-Max_speed: 23.686924532593
-Bike: @PathFollow3D@24 Finish time: 15283.2459403252 Watt: 391
-Max_speed: 23.9659852263909
-Bike: @PathFollow3D@151 Finish time: 15284.5792203252 Watt: 391
-Max_speed: 24.9000160840013
-Bike: @PathFollow3D@40 Finish time: 15288.5790603252 Watt: 391
-Max_speed: 24.5932479237318
-Bike: @PathFollow3D@140 Finish time: 15290.7123083252 Watt: 391
-Max_speed: 23.6146627615723
-Bike: @PathFollow3D@58 Finish time: 15293.6455243252 Watt: 391
-Max_speed: 23.8392581465587
-Bike: @PathFollow3D@5 Finish time: 15296.0454283252 Watt: 391
-Max_speed: 23.0395536837594
-Bike: @PathFollow3D@7 Finish time: 15296.0454283252 Watt: 391
-Max_speed: 23.9039148009913
-Bike: @PathFollow3D@13 Finish time: 15296.0454283252 Watt: 391
-Max_speed: 23.9170528458781
-Bike: @PathFollow3D@47 Finish time: 15301.1118923252 Watt: 391
-Max_speed: 24.028334095548
-Bike: @PathFollow3D@129 Finish time: 15301.1118923252 Watt: 391
-Max_speed: 24.2557230712356
-Bike: @PathFollow3D@175 Finish time: 15301.1118923252 Watt: 391
-Max_speed: 23.8584252897572
-Bike: @PathFollow3D@4 Finish time: 15324.0443083252 Watt: 391
-Max_speed: 23.6369811089361
-Bike: @PathFollow3D@167 Finish time: 15325.1109323252 Watt: 391
-Max_speed: 24.2555980484869
-Bike: @PathFollow3D@153 Finish time: 15330.9773643252 Watt: 391
-Max_speed: 24.9437749849073
-Bike: @PathFollow3D@158 Finish time: 15347.7766923252 Watt: 391
-Max_speed: 23.1529311893242
-Bike: @PathFollow3D@125 Finish time: 15352.3098443252 Watt: 391
-Max_speed: 23.6238587838535
-Bike: @PathFollow3D@29 Finish time: 15359.2429003252 Watt: 391
-Max_speed: 22.9535497912138
-Bike: @PathFollow3D@95 Finish time: 15375.7755723251 Watt: 391
-Max_speed: 24.1692264614325
-Bike: @PathFollow3D@103 Finish time: 15375.7755723251 Watt: 391
-Max_speed: 23.8286761841645
-Bike: @PathFollow3D@145 Finish time: 15375.7755723251 Watt: 391
-Max_speed: 23.1900100665077
-Bike: @PathFollow3D@69 Finish time: 15383.2419403251 Watt: 382
-Max_speed: 24.7421152401704
-Bike: @PathFollow3D@80 Finish time: 15387.5084363251 Watt: 382
-Max_speed: 24.1328287262947
-Bike: @PathFollow3D@119 Finish time: 15388.5750603251 Watt: 391
-Max_speed: 23.0390376623194
-Bike: @PathFollow3D@121 Finish time: 15388.5750603251 Watt: 391
-Max_speed: 24.4604601196108
-Bike: @PathFollow3D@159 Finish time: 15389.1083723251 Watt: 382
-Max_speed: 24.2190448399172
-Bike: @PathFollow3D@72 Finish time: 15391.5082763251 Watt: 391
-Max_speed: 23.8478109297348
-Bike: @PathFollow3D@90 Finish time: 15391.5082763251 Watt: 391
-Max_speed: 24.3130997764267
-Bike: Bike Finish time: 15398.1746763251 Watt: 382
-Max_speed: 24.4989210143347
-Bike: @PathFollow3D@86 Finish time: 15398.9746443251 Watt: 382
-Max_speed: 24.1588521823295
-Bike: @PathFollow3D@113 Finish time: 15399.2413003251 Watt: 382
-Max_speed: 24.0877142275295
-Bike: @PathFollow3D@135 Finish time: 15400.5745803251 Watt: 382
-Max_speed: 24.328632429976
-Bike: @PathFollow3D@44 Finish time: 15401.6412043251 Watt: 382
-Max_speed: 24.0960280922368
-Bike: @PathFollow3D@136 Finish time: 15402.7078283251 Watt: 382
-Max_speed: 24.5108128588827
-Bike: @PathFollow3D@54 Finish time: 15430.4400523251 Watt: 382
-Max_speed: 24.3063131676731
-Bike: @PathFollow3D@178 Finish time: 15431.5066763251 Watt: 382
-Max_speed: 24.3025180634876
-Bike: @PathFollow3D@28 Finish time: 15434.1732363251 Watt: 382
-Max_speed: 23.5691024168667
-Bike: @PathFollow3D@99 Finish time: 15441.1062923251 Watt: 382
-Max_speed: 23.6036155484609
-Bike: @PathFollow3D@149 Finish time: 15466.1719563251 Watt: 382
-Max_speed: 23.5851831770784
-Bike: @PathFollow3D@91 Finish time: 15469.1051723251 Watt: 382
-Max_speed: 24.4404922514808
-Bike: @PathFollow3D@32 Finish time: 15470.9717643251 Watt: 382
-Max_speed: 23.9307231400035
-Bike: @PathFollow3D@154 Finish time: 15478.7047883251 Watt: 391
-Max_speed: 23.9745184587518
-Bike: @PathFollow3D@97 Finish time: 15488.8377163251 Watt: 382
-Max_speed: 24.5112658959018
-Bike: @PathFollow3D@109 Finish time: 15490.1709963251 Watt: 382
-Max_speed: 23.8875942577319
-Bike: @PathFollow3D@73 Finish time: 15491.2376203251 Watt: 382
-Max_speed: 23.9531382165638
-Bike: @PathFollow3D@120 Finish time: 15493.370868325 Watt: 391
-Max_speed: 23.829369685888
-Bike: @PathFollow3D@62 Finish time: 15496.037428325 Watt: 382
-Max_speed: 24.300332086495
-Bike: @PathFollow3D@48 Finish time: 15497.904020325 Watt: 391
-Max_speed: 23.9682651944702
-Bike: @PathFollow3D@87 Finish time: 15506.170356325 Watt: 382
-Max_speed: 24.116951725509
-Bike: @PathFollow3D@22 Finish time: 15509.903540325 Watt: 382
-Max_speed: 24.0318788045883
-Bike: @PathFollow3D@27 Finish time: 15513.370068325 Watt: 382
-Max_speed: 24.1315267601958
-Bike: @PathFollow3D@133 Finish time: 15518.169876325 Watt: 382
-Max_speed: 23.5869727630939
-Bike: @PathFollow3D@64 Finish time: 15520.036468325 Watt: 382
-Max_speed: 24.3237295370662
-Bike: @PathFollow3D@10 Finish time: 15523.236340325 Watt: 382
-Max_speed: 23.9025465784651
-Bike: @PathFollow3D@148 Finish time: 15528.036148325 Watt: 382
-Max_speed: 24.2932145254452
-Bike: @PathFollow3D@162 Finish time: 15531.236020325 Watt: 373
-Max_speed: 23.8709441094629
-Bike: @PathFollow3D@98 Finish time: 15558.434932325 Watt: 382
-Max_speed: 23.8253931387941
-Bike: @PathFollow3D@142 Finish time: 15565.101332325 Watt: 373
-Max_speed: 23.8038908350673
-Bike: @PathFollow3D@180 Finish time: 15576.567540325 Watt: 373
-Max_speed: 24.6755060174997
-Bike: @PathFollow3D@105 Finish time: 15597.900020325 Watt: 373
-Max_speed: 23.3813853474358
-Bike: @PathFollow3D@112 Finish time: 15601.099892325 Watt: 382
-Max_speed: 24.1094539989596
-Bike: @PathFollow3D@56 Finish time: 15612.032788325 Watt: 382
-Max_speed: 24.3900986121514
-Bike: @PathFollow3D@156 Finish time: 15614.166036325 Watt: 382
-Max_speed: 23.1125656510978
-Bike: @PathFollow3D@115 Finish time: 15617.8992203249 Watt: 373
-Max_speed: 23.8640697923441
-Bike: @PathFollow3D@116 Finish time: 15622.9656843249 Watt: 382
-Max_speed: 23.3539201476594
-Bike: @PathFollow3D@128 Finish time: 15624.8544985472 Watt: 373
-Max_speed: 23.8987249202055
-Bike: @PathFollow3D@61 Finish time: 15631.8988149916 Watt: 391
-Max_speed: 23.9468780400209
-Bike: @PathFollow3D@60 Finish time: 15632.6988149916 Watt: 373
-Max_speed: 23.918977180715
-Bike: @PathFollow3D@138 Finish time: 15640.9654816583 Watt: 373
-Max_speed: 24.7935021284119
-Bike: @PathFollow3D@78 Finish time: 15641.7654816583 Watt: 382
-Max_speed: 23.4335147867706
-Bike: @PathFollow3D@179 Finish time: 15643.6321483249 Watt: 373
-Max_speed: 23.8458099787263
-Bike: @PathFollow3D@141 Finish time: 15656.4321483249 Watt: 373
-Max_speed: 23.8958126245765
-Bike: @PathFollow3D@106 Finish time: 15656.9654816582 Watt: 382
-Max_speed: 23.8630031044051
-Bike: @PathFollow3D@50 Finish time: 15666.2988149916 Watt: 373
-Max_speed: 23.7288898000423
-Bike: @PathFollow3D@163 Finish time: 15670.8321483249 Watt: 373
-Max_speed: 23.3584621380443
-Bike: @PathFollow3D@35 Finish time: 15681.4988149916 Watt: 373
-Max_speed: 23.8620274670312
-Bike: @PathFollow3D@174 Finish time: 15683.3654816582 Watt: 382
-Max_speed: 23.9016604281662
-Bike: @PathFollow3D@92 Finish time: 15711.6321483249 Watt: 382
-Max_speed: 24.2312914109128
-Bike: @PathFollow3D@93 Finish time: 15717.2321483249 Watt: 382
-Max_speed: 24.1636818687035
-Bike: @PathFollow3D@79 Finish time: 15723.6321483249 Watt: 373
-Max_speed: 23.8184996326352
-Bike: @PathFollow3D@41 Finish time: 15727.6321483248 Watt: 373
-Max_speed: 25.3518007652117
-Bike: @PathFollow3D@83 Finish time: 15729.2321483248 Watt: 373
-Max_speed: 23.3086415534056
-Bike: @PathFollow3D@152 Finish time: 15730.2988149915 Watt: 382
-Max_speed: 23.6372364247272
-Bike: @PathFollow3D@143 Finish time: 15731.6321483248 Watt: 373
-Max_speed: 23.672158199661
-Bike: @PathFollow3D@49 Finish time: 15733.7654816582 Watt: 373
-Max_speed: 23.6869145757957
-Bike: @PathFollow3D@33 Finish time: 15737.7654816582 Watt: 373
-Max_speed: 24.1733434729284
-Bike: @PathFollow3D@43 Finish time: 15751.0988149915 Watt: 373
-Max_speed: 23.8450090487539
-Bike: @PathFollow3D@53 Finish time: 15757.2321483248 Watt: 373
-Max_speed: 22.7922198367022
-Bike: @PathFollow3D@137 Finish time: 15766.0321483248 Watt: 373
-Max_speed: 23.3960148197239
-Bike: @PathFollow3D@77 Finish time: 15769.4988149915 Watt: 382
-Max_speed: 23.700267371087
-Bike: @PathFollow3D@88 Finish time: 15778.2988149915 Watt: 373
-Max_speed: 22.7965215219649
-Bike: @PathFollow3D@65 Finish time: 15784.4321483248 Watt: 373
-Max_speed: 23.5913169077085
-Bike: @PathFollow3D@76 Finish time: 15795.6321483248 Watt: 373
-Max_speed: 23.9161430723904
-Bike: @PathFollow3D@46 Finish time: 15823.8988149914 Watt: 373
-Max_speed: 23.4127319511541
-Bike: @PathFollow3D@101 Finish time: 15846.5654816581 Watt: 373
-Max_speed: 23.4990905413258
-Bike: @PathFollow3D@85 Finish time: 15873.2321483247 Watt: 373
-Max_speed: 24.8228001965151
-Bike: @PathFollow3D@102 Finish time: 15878.0321483247 Watt: 373
-Max_speed: 23.538363478587
-Bike: @PathFollow3D@71 Finish time: 15888.4321483247 Watt: 373
-Max_speed: 23.7189159630648
-Bike: @PathFollow3D@14 Finish time: 15889.765481658 Watt: 373
-Max_speed: 23.4366214619156
-Bike: @PathFollow3D@18 Finish time: 15889.765481658 Watt: 373
-Max_speed: 23.3356808007033
-Bike: @PathFollow3D@146 Finish time: 15891.6321483247 Watt: 373
-Max_speed: 23.4578851710216
-Bike: @PathFollow3D@57 Finish time: 15907.8988149913 Watt: 373
-Max_speed: 22.7890734778988
-Bike: @PathFollow3D@82 Finish time: 15920.4321483247 Watt: 373
-Max_speed: 23.7834142771181
-Bike: @PathFollow3D@157 Finish time: 15943.365481658 Watt: 373
-Max_speed: 23.4423769859828
-Bike: @PathFollow3D@114 Finish time: 15948.165481658 Watt: 373
-Max_speed: 22.8672629627785
-Bike: @PathFollow3D@132 Finish time: 15952.165481658 Watt: 373
-Max_speed: 23.0416921320082
-Bike: @PathFollow3D@111 Finish time: 15952.4321483246 Watt: 373
-Max_speed: 23.7021414855531
-Bike: @PathFollow3D@70 Finish time: 15952.965481658 Watt: 364
-Max_speed: 24.5024819228647
-Bike: @PathFollow3D@122 Finish time: 15956.4321483246 Watt: 373
-Max_speed: 23.6820254389301
-Bike: @PathFollow3D@100 Finish time: 15970.565481658 Watt: 382
-Max_speed: 24.0719941951244
-Bike: @PathFollow3D@172 Finish time: 15974.0321483246 Watt: 364
-Max_speed: 23.6609168214924
-Bike: @PathFollow3D@11 Finish time: 15977.2321483246 Watt: 373
-Max_speed: 24.2503618052795
-Bike: @PathFollow3D@108 Finish time: 15979.6321483246 Watt: 373
-Max_speed: 23.3802585582052
-Bike: @PathFollow3D@21 Finish time: 15984.1654816579 Watt: 373
-Max_speed: 23.057847257837
-Bike: @PathFollow3D@144 Finish time: 15991.8988149913 Watt: 373
-Max_speed: 23.5080651592549
-Bike: @PathFollow3D@30 Finish time: 15996.6988149913 Watt: 373
-Max_speed: 22.7525082405735
-Bike: @PathFollow3D@67 Finish time: 16009.4988149913 Watt: 382
-Max_speed: 23.2058799822934
-Bike: @PathFollow3D@169 Finish time: 16009.7654816579 Watt: 373
-Max_speed: 22.939808002931
-Bike: @PathFollow3D@23 Finish time: 16010.0321483246 Watt: 373
-Max_speed: 24.0354962000536
-Bike: @PathFollow3D@139 Finish time: 16011.3654816579 Watt: 364
-Max_speed: 24.7512201706115
-Bike: @PathFollow3D@127 Finish time: 16012.6988149913 Watt: 373
-Max_speed: 22.9049910179382
-Bike: @PathFollow3D@84 Finish time: 16018.0321483246 Watt: 382
-Max_speed: 22.9057957170557
-Bike: @PathFollow3D@52 Finish time: 16019.8988149912 Watt: 364
-Max_speed: 24.1063885222793
-Bike: @PathFollow3D@176 Finish time: 16027.6321483246 Watt: 364
-Max_speed: 24.4937738929047
-Bike: @PathFollow3D@68 Finish time: 16068.1654816579 Watt: 364
-Max_speed: 24.5200564355901
-Bike: @PathFollow3D@160 Finish time: 16099.6321483245 Watt: 364
-Max_speed: 24.0716789364791
-Bike: @PathFollow3D@20 Finish time: 16106.2988149912 Watt: 373
-Max_speed: 23.2851755348464
-Bike: @PathFollow3D@25 Finish time: 16118.8321483245 Watt: 364
-Max_speed: 25.2169431360341
-Bike: @PathFollow3D@130 Finish time: 16148.4321483245 Watt: 373
-Max_speed: 24.7815848802499
-Bike: @PathFollow3D@26 Finish time: 16153.4988149911 Watt: 364
-Max_speed: 23.0986465445146
-Bike: @PathFollow3D@123 Finish time: 16156.9654816578 Watt: 364
-Max_speed: 23.8254687009496
-Bike: @PathFollow3D@31 Finish time: 16159.6321483245 Watt: 364
-Max_speed: 23.7923015264994
-Bike: @PathFollow3D@166 Finish time: 16161.2321483245 Watt: 364
-Max_speed: 24.442610720994
-Bike: @PathFollow3D@66 Finish time: 16176.4321483244 Watt: 364
-Max_speed: 24.9014720784658
-Bike: @PathFollow3D@117 Finish time: 16190.5654816578 Watt: 364
-Max_speed: 24.8831774861488
-Bike: @PathFollow3D@147 Finish time: 16212.4321483244 Watt: 364
-Max_speed: 23.1288766656526
-Bike: @PathFollow3D@34 Finish time: 16246.298814991 Watt: 364
-Max_speed: 24.2892676550497
-Bike: @PathFollow3D@155 Finish time: 16313.7654816576 Watt: 373
-Max_speed: 23.3866545777374
-Bike: @PathFollow3D@94 Finish time: 16318.0321483243 Watt: 364
-Max_speed: 23.4960556801681
-Bike: @PathFollow3D@170 Finish time: 16419.6321483242 Watt: 364
-Max_speed: 23.0076298920136
-Bike: @PathFollow3D@9 Finish time: 16442.0321483242 Watt: 364
-Max_speed: 24.3801395806364
-Bike: @PathFollow3D@168 Finish time: 16456.1654816575 Watt: 364
-Max_speed: 23.0434594896423
-Bike: @PathFollow3D@131 Finish time: 16468.1654816575 Watt: 364
-Max_speed: 22.6995717064856
-Bike: @PathFollow3D@63 Finish time: 16472.4321483242 Watt: 364
-Max_speed: 24.9705887585263
-Bike: @PathFollow3D@171 Finish time: 16497.7654816575 Watt: 364
-Max_speed: 25.3135527940113
-Bike: @PathFollow3D@177 Finish time: 16544.1654816574 Watt: 364
-Max_speed: 22.6992405206781
-Bike: @PathFollow3D@38 Finish time: 16551.6321483241 Watt: 364
-Max_speed: 23.2529781120601
-Bike: @PathFollow3D@12 Finish time: 16567.6321483241 Watt: 364
-Max_speed: 22.6996239055503
-Bike: @PathFollow3D@51 Finish time: 16603.0988149907 Watt: 364
-Max_speed: 23.3807747001944
-Bike: @PathFollow3D@59 Finish time: 16605.7654816574 Watt: 364
-Max_speed: 22.7646128395106
-Bike: @PathFollow3D@74 Finish time: 16638.2988149907 Watt: 364
-Max_speed: 22.7006641326654
-Bike: @PathFollow3D@36 Finish time: 16644.432148324 Watt: 364
-Max_speed: 22.7106389455823
-Bike: @PathFollow3D@75 Finish time: 16665.232148324 Watt: 364
-Max_speed: 22.8360652821598
-Bike: @PathFollow3D@8 Finish time: 16674.032148324 Watt: 364
-Max_speed: 22.7001396626031
-Bike: @PathFollow3D@182 Finish time: 16679.632148324 Watt: 364
-Max_speed: 22.6999852881092
-Bike: @PathFollow3D@55 Finish time: 16704.1654816573 Watt: 364
-Max_speed: 22.7319927936682
-Bike: @PathFollow3D@181 Finish time: 16705.7654816573 Watt: 364
-Max_speed: 22.6991991370689
-Bike: @PathFollow3D@17 Finish time: 16714.032148324 Watt: 364
-Max_speed: 22.6992404867764
-Bike: @PathFollow3D@45 Finish time: 16720.6988149906 Watt: 364
-Max_speed: 22.6995021691902
-Bike: @PathFollow3D@96 Finish time: 16728.6988149906 Watt: 364
-Max_speed: 22.6991329489824
-Bike: @PathFollow3D@124 Finish time: 16734.8321483239 Watt: 364
-Max_speed: 22.6989771912333
-Bike: @PathFollow3D@150 Finish time: 16770.8321483239 Watt: 364
-Max_speed: 22.6989336480662
+sim_time=30.0166666666662 wall_time=4.91 ratio=6.1133740665308 drones=0
+sim_time=60.0166666666645 wall_time=8.602 ratio=6.97705959854273 drones=0
+sim_time=90.0166666666628 wall_time=12.192 ratio=7.38325678040214 drones=0
+sim_time=120.016666666661 wall_time=15.788 ratio=7.60176505362688 drones=0
+sim_time=150.000000000012 wall_time=19.404 ratio=7.73036487322261 drones=0
+sim_time=180.000000000035 wall_time=23.171 ratio=7.76833110353612 drones=0
+sim_time=210.000000000059 wall_time=27.29 ratio=7.69512641993621 drones=0
+sim_time=240.000000000083 wall_time=30.949 ratio=7.75469320495276 drones=0
+sim_time=270.000000000083 wall_time=35.125 ratio=7.68683274021589 drones=0
+sim_time=300.000000000056 wall_time=39.013 ratio=7.68974444416107 drones=0
+sim_time=330.000000000029 wall_time=42.835 ratio=7.70398038986876 drones=0
+sim_time=360.000000000001 wall_time=46.522 ratio=7.73827436481667 drones=0
+sim_time=390.016666666641 wall_time=49.989 ratio=7.80204978428536 drones=0
+sim_time=420.016666666613 wall_time=53.595 ratio=7.83686289143788 drones=0
+sim_time=450.016666666586 wall_time=57.14 ratio=7.8756854509378 drones=0
+sim_time=480.016666666559 wall_time=60.651 ratio=7.91440646760249 drones=0
+sim_time=510.016666666531 wall_time=64.177 ratio=7.94703190654801 drones=0
+sim_time=540.016666666504 wall_time=68.217 ratio=7.91615970603375 drones=0
+sim_time=570.016666666477 wall_time=72.012 ratio=7.91557888499801 drones=0
+sim_time=600.01666666645 wall_time=75.726 ratio=7.92352252418522 drones=0
+sim_time=630.016666666422 wall_time=79.511 ratio=7.92364159256483 drones=0
+sim_time=660.016666666395 wall_time=83.988 ratio=7.85846390753911 drones=0
+sim_time=690.016666666368 wall_time=88.562 ratio=7.79134015341081 drones=0
+sim_time=720.01666666634 wall_time=92.798 ratio=7.7589675064801 drones=0
+sim_time=750.016666666313 wall_time=97.287 ratio=7.70932053271571 drones=0
+sim_time=780.016666666286 wall_time=101.802 ratio=7.66209570211082 drones=0
+sim_time=810.016666666259 wall_time=106.123 ratio=7.63280972707385 drones=0
+sim_time=840.016666666231 wall_time=109.64 ratio=7.66158944423779 drones=0
+sim_time=870.016666666204 wall_time=113.051 ratio=7.69578921607243 drones=0
+sim_time=900.016666666177 wall_time=116.395 ratio=7.73243409653488 drones=0
+sim_time=930.016666666149 wall_time=119.835 ratio=7.76081000263821 drones=0
+sim_time=960.016666666122 wall_time=123.237 ratio=7.79000354330373 drones=0
+sim_time=990.016666666095 wall_time=126.625 ratio=7.81849292529986 drones=0
+sim_time=1020.01666666607 wall_time=130.012 ratio=7.84555784593782 drones=0
+sim_time=1050.01666666604 wall_time=133.394 ratio=7.87154344772659 drones=0
+sim_time=1080.01666666601 wall_time=136.765 ratio=7.89687907480725 drones=0
+sim_time=1110.01666666599 wall_time=140.54 ratio=7.89822589060756 drones=0
+sim_time=1140.01666666596 wall_time=144.141 ratio=7.90903814088954 drones=0
+sim_time=1170.01666666593 wall_time=148.444 ratio=7.88187240081062 drones=0
+sim_time=1200.0166666659 wall_time=152.263 ratio=7.88120992405183 drones=0
+sim_time=1230.01666666588 wall_time=155.86 ratio=7.89180461097059 drones=0
+sim_time=1260.01666666585 wall_time=160.153 ratio=7.8675807925287 drones=0
+sim_time=1290.01666666582 wall_time=164.646 ratio=7.83509266344656 drones=0
+sim_time=1320.01666666579 wall_time=168.729 ratio=7.82329455319355 drones=0
+sim_time=1350.01666666577 wall_time=172.728 ratio=7.8158530560521 drones=0
+sim_time=1380.01666666574 wall_time=176.632 ratio=7.81294820115121 drones=0
+sim_time=1410.01666666571 wall_time=180.345 ratio=7.8184405814728 drones=0
+sim_time=1440.01666666569 wall_time=184.09 ratio=7.82235138609205 drones=0
+sim_time=1470.01666666566 wall_time=187.979 ratio=7.82011111169683 drones=0
+sim_time=1500.01666666563 wall_time=191.794 ratio=7.82097806326387 drones=0
+sim_time=1530.0166666656 wall_time=195.452 ratio=7.82809419532982 drones=0
+sim_time=1560.01666666558 wall_time=199.031 ratio=7.83805872786439 drones=0
+sim_time=1590.01666666555 wall_time=202.636 ratio=7.84666429788167 drones=0
+sim_time=1620.01666666552 wall_time=206.22 ratio=7.85576891991816 drones=0
+sim_time=1650.01666666549 wall_time=209.758 ratio=7.86628718173083 drones=0
+sim_time=1680.01666666547 wall_time=213.308 ratio=7.87601340158582 drones=0
+sim_time=1710.01666666544 wall_time=216.881 ratio=7.88458494135236 drones=0
+sim_time=1740.01666666541 wall_time=220.441 ratio=7.8933440996249 drones=0
+sim_time=1770.01666666539 wall_time=224.01 ratio=7.90150737317703 drones=0
+sim_time=1800.01666666536 wall_time=227.802 ratio=7.90167191976084 drones=0
+sim_time=1830.01666666533 wall_time=231.538 ratio=7.90374222229323 drones=0
+sim_time=1860.0166666653 wall_time=235.189 ratio=7.90860400216551 drones=0
+sim_time=1890.01666666528 wall_time=238.867 ratio=7.91242267314144 drones=0
+sim_time=1920.01666666525 wall_time=242.571 ratio=7.91527703915657 drones=0
+sim_time=1950.01666666522 wall_time=246.231 ratio=7.9194604524419 drones=0
+sim_time=1980.01666666519 wall_time=249.907 ratio=7.92301402787915 drones=0
+sim_time=2010.01666666517 wall_time=253.527 ratio=7.92821540374464 drones=0
+sim_time=2040.01666666514 wall_time=257.157 ratio=7.93296183524127 drones=0
+sim_time=2070.01666666541 wall_time=260.853 ratio=7.93556779743922 drones=0
+sim_time=2100.0166666658 wall_time=264.475 ratio=7.94032202161185 drones=0
+sim_time=2130.01666666618 wall_time=268.095 ratio=7.94500705595471 drones=0
+sim_time=2160.01666666656 wall_time=271.527 ratio=7.95507138025522 drones=0
+sim_time=2190.00000000027 wall_time=274.862 ratio=7.96763466757964 drones=0
+sim_time=2220.00000000066 wall_time=278.24 ratio=7.97872340425768 drones=0
+sim_time=2250.00000000104 wall_time=281.576 ratio=7.99073784697928 drones=0
+sim_time=2280.00000000142 wall_time=285.007 ratio=7.99980351360289 drones=0
+sim_time=2310.0000000018 wall_time=288.818 ratio=7.99811646089164 drones=0
+sim_time=2340.00000000218 wall_time=292.459 ratio=8.00112152473401 drones=0
+sim_time=2370.00000000257 wall_time=296.179 ratio=8.00191775920159 drones=0
+sim_time=2400.00000000295 wall_time=299.572 ratio=8.01142963962903 drones=0
+sim_time=2430.00000000333 wall_time=303.004 ratio=8.0196961096333 drones=0
+sim_time=2460.00000000371 wall_time=306.489 ratio=8.02638920158215 drones=0
+sim_time=2490.00000000409 wall_time=309.882 ratio=8.0353166689388 drones=0
+sim_time=2520.00000000448 wall_time=313.254 ratio=8.0445900132304 drones=0
+sim_time=2550.00000000486 wall_time=316.649 ratio=8.05308085610521 drones=0
+sim_time=2580.00000000524 wall_time=320.083 ratio=8.06040933134606 drones=0
+sim_time=2610.00000000562 wall_time=323.906 ratio=8.05789333944299 drones=0
+sim_time=2640.000000006 wall_time=327.476 ratio=8.06165948040774 drones=0
+sim_time=2670.00000000639 wall_time=330.855 ratio=8.07000045339011 drones=0
+sim_time=2700.00000000677 wall_time=334.177 ratio=8.07955065730666 drones=0
+sim_time=2730.00000000715 wall_time=337.47 ratio=8.08960796517365 drones=0
+sim_time=2760.00000000753 wall_time=340.773 ratio=8.09923321392109 drones=0
+sim_time=2790.00000000791 wall_time=344.084 ratio=8.10848513737318 drones=0
+sim_time=2820.0000000083 wall_time=347.426 ratio=8.11683639108269 drones=0
+sim_time=2850.00000000868 wall_time=350.726 ratio=8.12600149406853 drones=0
+sim_time=2880.00000000906 wall_time=354.028 ratio=8.13494977800925 drones=0
+sim_time=2910.00000000944 wall_time=357.341 ratio=8.14348199621494 drones=0
+sim_time=2940.00000000982 wall_time=360.657 ratio=8.15178965058164 drones=0
+sim_time=2970.00000001021 wall_time=363.964 ratio=8.16014770694411 drones=0
+sim_time=3000.00000001059 wall_time=367.282 ratio=8.16811060713726 drones=0
+sim_time=3030.00000001097 wall_time=370.599 ratio=8.17595298425244 drones=0
+sim_time=3060.00000001135 wall_time=373.94 ratio=8.18313098361061 drones=0
+sim_time=3090.00000001173 wall_time=377.262 ratio=8.19059433500255 drones=0
+sim_time=3120.00000001212 wall_time=380.573 ratio=8.19816434695082 drones=0
+sim_time=3150.0000000125 wall_time=383.929 ratio=8.20464200415311 drones=0
+sim_time=3180.00000001288 wall_time=387.231 ratio=8.21215243617603 drones=0
+sim_time=3210.00000001326 wall_time=390.53 ratio=8.21959900651233 drones=0
+sim_time=3240.00000001364 wall_time=393.833 ratio=8.22683726354481 drones=0
+sim_time=3270.00000001403 wall_time=397.142 ratio=8.23383072053328 drones=0
+sim_time=3300.00000001441 wall_time=400.454 ratio=8.24064686584329 drones=0
+sim_time=3330.00000001479 wall_time=403.756 ratio=8.2475554543209 drones=0
+sim_time=3360.00000001517 wall_time=407.066 ratio=8.25418973831067 drones=0
+sim_time=3390.00000001555 wall_time=410.402 ratio=8.26019366381147 drones=0
+sim_time=3420.00000001594 wall_time=413.788 ratio=8.26510193629573 drones=0
+sim_time=3450.00000001632 wall_time=417.184 ratio=8.26973230041497 drones=0
+sim_time=3480.0000000167 wall_time=420.574 ratio=8.27440593098171 drones=0
+sim_time=3510.00000001708 wall_time=424.019 ratio=8.27793094181412 drones=0
+sim_time=3540.00000001746 wall_time=427.34 ratio=8.28380212481271 drones=0
+sim_time=3570.00000001785 wall_time=430.626 ratio=8.29025651033111 drones=0
+sim_time=3600.00000001823 wall_time=433.9 ratio=8.29684259050064 drones=0
+sim_time=3630.00000001861 wall_time=437.183 ratio=8.30315908902819 drones=0
+sim_time=3660.00000001899 wall_time=440.475 ratio=8.30921164656108 drones=0
+sim_time=3690.00000001937 wall_time=443.775 ratio=8.31502450570531 drones=0
+sim_time=3720.00000001976 wall_time=447.078 ratio=8.32069571756999 drones=0
+sim_time=3750.00000002014 wall_time=450.358 ratio=8.32670897379449 drones=0
+sim_time=3780.00000002052 wall_time=453.636 ratio=8.33267201020316 drones=0
+sim_time=3810.0000000209 wall_time=456.911 ratio=8.33860423588161 drones=0
+sim_time=3840.00000002128 wall_time=460.18 ratio=8.34456082407163 drones=0
+sim_time=3870.00000002167 wall_time=463.439 ratio=8.35061356515456 drones=0
+sim_time=3900.00000002205 wall_time=466.73 ratio=8.35600882742067 drones=0
+sim_time=3930.00000002243 wall_time=470.018 ratio=8.36138190457053 drones=0
+sim_time=3960.00000002281 wall_time=473.309 ratio=8.36662729849382 drones=0
+sim_time=3990.00000002319 wall_time=476.605 ratio=8.37171242438328 drones=0
+sim_time=4020.00000002358 wall_time=479.915 ratio=8.3764833356398 drones=0
+sim_time=4050.00000002396 wall_time=483.257 ratio=8.38063390705972 drones=0
+sim_time=4080.00000002434 wall_time=486.589 ratio=8.38489978200152 drones=0
+sim_time=4110.00000002434 wall_time=489.911 ratio=8.38927886906875 drones=0
+sim_time=4140.0000000239 wall_time=493.245 ratio=8.39339476329999 drones=0
+sim_time=4170.00000002347 wall_time=496.557 ratio=8.39782743979738 drones=0
+sim_time=4200.00000002303 wall_time=499.861 ratio=8.40233584941219 drones=0
+sim_time=4230.00000002259 wall_time=503.166 ratio=8.40676834289795 drones=0
+sim_time=4260.00000002216 wall_time=506.498 ratio=8.41069461285564 drones=0
+sim_time=4290.00000002172 wall_time=509.837 ratio=8.4144540314291 drones=0
+sim_time=4320.00000002128 wall_time=513.135 ratio=8.41883714816039 drones=0
+sim_time=4350.00000002085 wall_time=516.422 ratio=8.42334369957292 drones=0
+sim_time=4380.00000002041 wall_time=519.712 ratio=8.42774459704684 drones=0
+sim_time=4410.00000001997 wall_time=522.994 ratio=8.43221910771438 drones=0
+sim_time=4440.00000001954 wall_time=526.295 ratio=8.43633323519991 drones=0
+sim_time=4470.0000000191 wall_time=529.581 ratio=8.44063514366849 drones=0
+sim_time=4500.00000001866 wall_time=532.856 ratio=8.44505832723787 drones=0
+sim_time=4530.00000001823 wall_time=536.137 ratio=8.44933291307675 drones=0
+sim_time=4560.00000001779 wall_time=539.435 ratio=8.4532890895433 drones=0
+sim_time=4590.00000001735 wall_time=542.781 ratio=8.45644928620817 drones=0
+sim_time=4620.00000001692 wall_time=546.085 ratio=8.46022139413629 drones=0
+sim_time=4650.00000001648 wall_time=549.364 ratio=8.4643333018117 drones=0
+sim_time=4680.00000001604 wall_time=552.657 ratio=8.46818189223342 drones=0
+sim_time=4710.00000001561 wall_time=555.948 ratio=8.47201536837188 drones=0
+sim_time=4740.00000001517 wall_time=559.241 ratio=8.47577341435119 drones=0
+sim_time=4770.00000001473 wall_time=562.529 ratio=8.47956283145355 drones=0
+sim_time=4800.0000000143 wall_time=565.834 ratio=8.4830533336885 drones=0
+sim_time=4830.00000001386 wall_time=569.123 ratio=8.48674188183198 drones=0
+sim_time=4860.00000001343 wall_time=572.531 ratio=8.48862332347668 drones=0
+sim_time=4890.00000001299 wall_time=575.835 ratio=8.49201594208929 drones=0
+sim_time=4920.00000001255 wall_time=579.107 ratio=8.4958392836083 drones=0
+sim_time=4950.00000001212 wall_time=582.399 ratio=8.49932778045999 drones=0
+sim_time=4980.00000001168 wall_time=585.72 ratio=8.50235607459482 drones=0
+sim_time=5010.00000001124 wall_time=589.004 ratio=8.50588451014126 drones=0
+sim_time=5040.00000001081 wall_time=592.301 ratio=8.50918705187195 drones=0
+sim_time=5070.00000001037 wall_time=595.595 ratio=8.5124959074713 drones=0
+sim_time=5100.00000000993 wall_time=598.891 ratio=8.51573992597974 drones=0
+sim_time=5130.0000000095 wall_time=602.187 ratio=8.51894843297762 drones=0
+sim_time=5160.00000000906 wall_time=605.482 ratio=8.52213608333371 drones=0
+sim_time=5190.00000000862 wall_time=608.774 ratio=8.52533123952177 drones=0
+sim_time=5220.00000000819 wall_time=612.072 ratio=8.5284084225519 drones=0
+sim_time=5250.00000000775 wall_time=615.384 ratio=8.53125853127112 drones=0
+sim_time=5280.00000000731 wall_time=618.681 ratio=8.53428503543395 drones=0
+sim_time=5310.00000000688 wall_time=621.964 ratio=8.53747162216282 drones=0
+sim_time=5340.00000000644 wall_time=625.255 ratio=8.54051546969867 drones=0
+sim_time=5370.000000006 wall_time=628.575 ratio=8.54313327766138 drones=0
+sim_time=5400.00000000557 wall_time=631.884 ratio=8.54587234366682 drones=0
+sim_time=5430.00000000513 wall_time=635.196 ratio=8.54854249712708 drones=0
+sim_time=5460.00000000469 wall_time=638.487 ratio=8.55146620057213 drones=0
+sim_time=5490.00000000426 wall_time=641.774 ratio=8.55441323581862 drones=0
+sim_time=5520.00000000382 wall_time=645.094 ratio=8.55689248389199 drones=0
+sim_time=5550.00000000338 wall_time=648.397 ratio=8.55957075681008 drones=0
+sim_time=5580.00000000295 wall_time=651.686 ratio=8.5624058212129 drones=0
+sim_time=5610.00000000251 wall_time=654.979 ratio=8.56516010437359 drones=0
+sim_time=5640.00000000207 wall_time=658.276 ratio=8.56783476839817 drones=0
+sim_time=5670.00000000164 wall_time=661.575 ratio=8.57045686430357 drones=0
+sim_time=5700.0000000012 wall_time=664.877 ratio=8.57301425677411 drones=0
+sim_time=5730.00000000076 wall_time=668.167 ratio=8.57570038628182 drones=0
+sim_time=5760.00000000033 wall_time=671.44 ratio=8.57857738591732 drones=0
+sim_time=5790.01666666656 wall_time=674.715 ratio=8.58142573778048 drones=0
+sim_time=5820.01666666612 wall_time=678.002 ratio=8.58407005682302 drones=0
+sim_time=5850.01666666569 wall_time=681.293 ratio=8.58663844581654 drones=0
+sim_time=5880.01666666525 wall_time=684.601 ratio=8.58896885436225 drones=0
+sim_time=5910.01666666481 wall_time=687.871 ratio=8.59175145727151 drones=0
+sim_time=5940.01666666438 wall_time=691.14 ratio=8.59452016474864 drones=0
+sim_time=5970.01666666394 wall_time=694.416 ratio=8.59717614033078 drones=0
+sim_time=6000.0166666635 wall_time=697.71 ratio=8.59958531003354 drones=0
+sim_time=6030.01666666307 wall_time=700.987 ratio=8.60218044937077 drones=0
+sim_time=6060.01666666263 wall_time=704.269 ratio=8.60469034795317 drones=0
+sim_time=6090.01666666219 wall_time=707.55 ratio=8.60718912679273 drones=0
+sim_time=6120.01666666176 wall_time=710.823 ratio=8.60976173627156 drones=0
+sim_time=6150.01666666132 wall_time=714.102 ratio=8.6122384010426 drones=0
+sim_time=6180.01666666088 wall_time=717.373 ratio=8.61478849449433 drones=0
+sim_time=6210.01666666045 wall_time=720.643 ratio=8.61732739603444 drones=0
+sim_time=6240.01666666001 wall_time=723.943 ratio=8.61948615658969 drones=0
+sim_time=6270.01666665957 wall_time=727.226 ratio=8.62182686903325 drones=0
+sim_time=6300.01666665914 wall_time=730.511 ratio=8.62412293128938 drones=0
+sim_time=6330.0166666587 wall_time=733.809 ratio=8.62624561249412 drones=0
+sim_time=6360.01666665826 wall_time=737.093 ratio=8.62851318172641 drones=0
+sim_time=6390.01666665783 wall_time=740.369 ratio=8.63085389401478 drones=0
+sim_time=6420.01666665739 wall_time=743.644 ratio=8.63318559237672 drones=0
+sim_time=6450.01666665695 wall_time=746.945 ratio=8.63519625495445 drones=0
+sim_time=6480.01666665652 wall_time=750.239 ratio=8.63726981222853 drones=0
+sim_time=6510.01666665608 wall_time=753.521 ratio=8.63946282407004 drones=0
+sim_time=6540.01666665564 wall_time=756.837 ratio=8.6412485999702 drones=0
+sim_time=6570.01666665521 wall_time=760.148 ratio=8.64307564665724 drones=0
+sim_time=6600.01666665477 wall_time=763.434 ratio=8.64516993827203 drones=0
+sim_time=6630.01666665433 wall_time=766.739 ratio=8.64703199739981 drones=0
+sim_time=6660.0166666539 wall_time=770.033 ratio=8.64900162285759 drones=0
+sim_time=6690.01666665346 wall_time=773.333 ratio=8.65088734950333 drones=0
+sim_time=6720.01666665302 wall_time=776.643 ratio=8.65264563854052 drones=0
+sim_time=6750.01666665259 wall_time=779.939 ratio=8.65454435110001 drones=0
+sim_time=6780.01666665215 wall_time=783.237 ratio=8.65640497914699 drones=0
+sim_time=6810.01666665172 wall_time=786.524 ratio=8.65837109439981 drones=0
+sim_time=6840.01666665128 wall_time=789.823 ratio=8.66018926601438 drones=0
+sim_time=6870.01666665084 wall_time=793.132 ratio=8.66188309972469 drones=0
+sim_time=6900.01666665041 wall_time=796.444 ratio=8.66353022516386 drones=0
+sim_time=6930.01666664997 wall_time=799.744 ratio=8.6652937273052 drones=0
+sim_time=6960.01666664953 wall_time=803.04 ratio=8.66708590686583 drones=0
+sim_time=6990.0166666491 wall_time=806.337 ratio=8.66885268398833 drones=0
+sim_time=7020.01666664866 wall_time=809.666 ratio=8.67026238800772 drones=0
+sim_time=7050.01666664822 wall_time=812.964 ratio=8.6719912156605 drones=0
+sim_time=7080.01666664779 wall_time=816.281 ratio=8.67350418133925 drones=0
+sim_time=7110.01666664735 wall_time=819.59 ratio=8.67508957728541 drones=0
+sim_time=7140.01666664691 wall_time=822.903 ratio=8.67662004713425 drones=0
+sim_time=7170.01666664648 wall_time=826.2 ratio=8.67830630192021 drones=0
+sim_time=7200.01666664604 wall_time=829.683 ratio=8.67803325685357 drones=0
+sim_time=7230.0166666456 wall_time=833.128 ratio=8.6781582981794 drones=0
+sim_time=7260.01666664517 wall_time=836.882 ratio=8.67507804761623 drones=0
+sim_time=7290.01666664473 wall_time=840.489 ratio=8.67354202927668 drones=0
+sim_time=7320.01666664429 wall_time=844.084 ratio=8.67214242497701 drones=0
+sim_time=7350.01666664386 wall_time=847.642 ratio=8.67113317490622 drones=0
+sim_time=7380.01666664342 wall_time=851.215 ratio=8.66997957818344 drones=0
+sim_time=7410.01666664298 wall_time=854.786 ratio=8.66885590854668 drones=0
+sim_time=7440.01666664255 wall_time=858.346 ratio=8.66785266855388 drones=0
+sim_time=7470.01666664211 wall_time=861.867 ratio=8.66724989661063 drones=0
+sim_time=7500.01666664167 wall_time=865.425 ratio=8.66628149942707 drones=0
+sim_time=7530.01666664124 wall_time=868.961 ratio=8.66554041739645 drones=0
+sim_time=7560.0166666408 wall_time=872.5 ratio=8.66477554915851 drones=0
+sim_time=7590.01666664036 wall_time=876.041 ratio=8.66399708077632 drones=0
+sim_time=7620.01666663993 wall_time=879.567 ratio=8.66337262157394 drones=0
+sim_time=7650.01666663949 wall_time=883.13 ratio=8.662390210546 drones=0
+sim_time=7680.01666663906 wall_time=886.721 ratio=8.66114219313522 drones=0
+sim_time=7710.01666663862 wall_time=890.261 ratio=8.66040033949439 drones=0
+sim_time=7740.01666663818 wall_time=893.813 ratio=8.65954810081995 drones=0
+sim_time=7770.01666663775 wall_time=897.368 ratio=8.65867366190654 drones=0
+sim_time=7800.01666663731 wall_time=900.911 ratio=8.65792144466802 drones=0
+sim_time=7830.01666663687 wall_time=904.45 ratio=8.65721340774711 drones=0
+sim_time=7860.01666663644 wall_time=907.966 ratio=8.65673017121394 drones=0
+sim_time=7890.016666636 wall_time=911.499 ratio=8.65608921856853 drones=0
+sim_time=7920.01666663556 wall_time=915.06 ratio=8.65518836648478 drones=0
+sim_time=7950.01666663513 wall_time=918.571 ratio=8.65476557243275 drones=0
+sim_time=7980.01666663469 wall_time=922.114 ratio=8.65404566749305 drones=0
+sim_time=8010.01666663425 wall_time=925.636 ratio=8.65352759252477 drones=0
+sim_time=8040.01666663382 wall_time=929.178 ratio=8.65282719418003 drones=0
+sim_time=8070.01666663338 wall_time=932.717 ratio=8.65215994415603 drones=0
+sim_time=8100.01666663294 wall_time=936.242 ratio=8.65162710777015 drones=0
+sim_time=8130.01666663251 wall_time=939.754 ratio=8.65121794281536 drones=0
+sim_time=8160.01666663207 wall_time=943.28 ratio=8.65068343082867 drones=0
+sim_time=8190.01666663163 wall_time=946.797 ratio=8.65023512604247 drones=0
+sim_time=8220.0166666312 wall_time=950.352 ratio=8.64944427604845 drones=0
+sim_time=8250.01666663076 wall_time=953.873 ratio=8.64896759487978 drones=0
+sim_time=8280.01666663032 wall_time=957.395 ratio=8.64848538652314 drones=0
+sim_time=8310.01666662989 wall_time=960.916 ratio=8.64801571274689 drones=0
+sim_time=8340.01666662945 wall_time=964.452 ratio=8.64741497412982 drones=0
+sim_time=8370.01666662902 wall_time=968.0 ratio=8.64671143246799 drones=0
+sim_time=8400.01666662858 wall_time=971.553 ratio=8.64596853350108 drones=0
+sim_time=8430.01666662814 wall_time=975.127 ratio=8.64504486762047 drones=0
+sim_time=8460.01666662771 wall_time=978.652 ratio=8.64456074950821 drones=0
+sim_time=8490.01666662727 wall_time=982.237 ratio=8.64355208226453 drones=0
+sim_time=8520.01666662683 wall_time=985.785 ratio=8.64287513669495 drones=0
+sim_time=8550.0166666264 wall_time=989.374 ratio=8.64184491064693 drones=0
+sim_time=8580.01666662596 wall_time=992.935 ratio=8.64106579647808 drones=0
+sim_time=8610.01666662552 wall_time=996.485 ratio=8.64038762914196 drones=0
+sim_time=8640.01666662509 wall_time=1000.036 ratio=8.63970563722215 drones=0
+sim_time=8670.01666662465 wall_time=1003.574 ratio=8.63914037891042 drones=0
+sim_time=8700.01666662421 wall_time=1007.14 ratio=8.63833892668766 drones=0
+sim_time=8730.01666662378 wall_time=1010.698 ratio=8.63761149880951 drones=0
+sim_time=8760.01666662334 wall_time=1014.271 ratio=8.63676144405523 drones=0
+sim_time=8790.0166666229 wall_time=1017.849 ratio=8.6358749349097 drones=0
+sim_time=8820.01666662247 wall_time=1021.453 ratio=8.63477484193836 drones=0
+sim_time=8850.01666662203 wall_time=1025.026 ratio=8.63394359423276 drones=0
+sim_time=8880.01666662159 wall_time=1028.597 ratio=8.63313490766704 drones=0
+sim_time=8910.01666662116 wall_time=1032.18 ratio=8.63223145829328 drones=0
+sim_time=8940.01666662072 wall_time=1035.747 ratio=8.63146759451943 drones=0
+sim_time=8970.01666662028 wall_time=1039.308 ratio=8.63075879972086 drones=0
+sim_time=9000.01666661985 wall_time=1042.859 ratio=8.63013759925344 drones=0
+sim_time=9030.01666661941 wall_time=1046.431 ratio=8.62934743582655 drones=0
+sim_time=9060.01666661897 wall_time=1049.976 ratio=8.62878453090259 drones=0
+sim_time=9090.01666661854 wall_time=1053.529 ratio=8.62815989556864 drones=0
+sim_time=9120.0166666181 wall_time=1057.07 ratio=8.6276374001893 drones=0
+sim_time=9150.01666661766 wall_time=1060.594 ratio=8.62725667561542 drones=0
+sim_time=9180.01666661723 wall_time=1064.142 ratio=8.62668390742704 drones=0
+sim_time=9210.01666661679 wall_time=1067.661 ratio=8.62634925001175 drones=0
+sim_time=9240.01666661636 wall_time=1071.233 ratio=8.62559001320568 drones=0
+sim_time=9270.01666661592 wall_time=1074.771 ratio=8.62510866651214 drones=0
+sim_time=9300.01666661548 wall_time=1078.303 ratio=8.62467846849678 drones=0
+sim_time=9330.01666661505 wall_time=1081.945 ratio=8.62337426266127 drones=0
+sim_time=9360.01666661461 wall_time=1085.51 ratio=8.62269040968265 drones=0
+sim_time=9390.01666661417 wall_time=1089.069 ratio=8.62205853496351 drones=0
+sim_time=9420.01666661374 wall_time=1092.612 ratio=8.62155702720978 drones=0
+sim_time=9450.0166666133 wall_time=1096.195 ratio=8.62074418019905 drones=0
+sim_time=9480.01666661286 wall_time=1099.766 ratio=8.62003068526656 drones=0
+sim_time=9510.01666661243 wall_time=1103.356 ratio=8.61917338249162 drones=0
+sim_time=9540.01666661199 wall_time=1106.925 ratio=8.61848514272601 drones=0
+sim_time=9570.01666661155 wall_time=1110.515 ratio=8.61763836293211 drones=0
+sim_time=9600.01666661112 wall_time=1114.108 ratio=8.61677383755535 drones=0
+sim_time=9630.01666661068 wall_time=1117.665 ratio=8.61619238914226 drones=0
+sim_time=9660.01666661024 wall_time=1121.245 ratio=8.61543789859508 drones=0
+sim_time=9690.01666660981 wall_time=1124.782 ratio=8.61501754705339 drones=0
+sim_time=9720.01666660937 wall_time=1128.374 ratio=8.61417993201666 drones=0
+sim_time=9750.01666660893 wall_time=1131.941 ratio=8.61353786691085 drones=0
+sim_time=9780.0166666085 wall_time=1135.493 ratio=8.61301361312531 drones=0
+sim_time=9810.01666660806 wall_time=1139.067 ratio=8.61232628687168 drones=0
+sim_time=9840.01666660762 wall_time=1142.616 ratio=8.6118316797661 drones=0
+sim_time=9870.01666660719 wall_time=1146.193 ratio=8.61112977186843 drones=0
+sim_time=9900.01666660675 wall_time=1149.747 ratio=8.61060447786056 drones=0
+sim_time=9930.01666660631 wall_time=1153.278 ratio=8.61025413352749 drones=0
+sim_time=9960.01666660588 wall_time=1156.829 ratio=8.60975707438686 drones=0
+sim_time=9990.01666660544 wall_time=1160.386 ratio=8.60921854159344 drones=0
+sim_time=10020.016666605 wall_time=1163.93 ratio=8.60877945117404 drones=0
+sim_time=10050.0166666046 wall_time=1167.448 ratio=8.60853474125149 drones=0
+sim_time=10080.0166666041 wall_time=1170.964 ratio=8.60830620463493 drones=0
+sim_time=10110.0166666037 wall_time=1174.484 ratio=8.60804971936927 drones=0
+sim_time=10140.0166666033 wall_time=1178.019 ratio=8.60768516178708 drones=0
+sim_time=10170.0166666028 wall_time=1181.548 ratio=8.60736649429631 drones=0
+sim_time=10200.0166666024 wall_time=1185.108 ratio=8.60682458189666 drones=0
+sim_time=10230.0166666019 wall_time=1188.635 ratio=8.60652485128063 drones=0
+sim_time=10260.0166666015 wall_time=1192.183 ratio=8.6060752976695 drones=0
+sim_time=10290.0166666011 wall_time=1195.693 ratio=8.60590190508858 drones=0
+sim_time=10320.0166666006 wall_time=1199.227 ratio=8.6055573019959 drones=0
+sim_time=10350.0166666002 wall_time=1202.772 ratio=8.60513602461664 drones=0
+sim_time=10380.0166665998 wall_time=1206.343 ratio=8.60453176799614 drones=0
+sim_time=10410.0166665993 wall_time=1209.874 ratio=8.60421553533618 drones=0
+sim_time=10440.0166665989 wall_time=1213.436 ratio=8.60368133679806 drones=0
+sim_time=10470.0166665985 wall_time=1216.982 ratio=8.60326337332718 drones=0
+sim_time=10500.016666598 wall_time=1220.527 ratio=8.60285488694475 drones=0
+sim_time=10530.0166665976 wall_time=1224.093 ratio=8.60230118675426 drones=0
+sim_time=10560.0166665971 wall_time=1227.663 ratio=8.60172267682348 drones=0
+sim_time=10590.0166665967 wall_time=1231.278 ratio=8.60083317219727 drones=0
+sim_time=10620.0166665963 wall_time=1234.831 ratio=8.6003806728178 drones=0
+sim_time=10650.0166665958 wall_time=1238.394 ratio=8.59986132571366 drones=0
+sim_time=10680.0166665954 wall_time=1241.948 ratio=8.59940727518012 drones=0
+sim_time=10710.016666595 wall_time=1245.517 ratio=8.59885225701051 drones=0
+sim_time=10740.0166665945 wall_time=1249.066 ratio=8.59843808621364 drones=0
+sim_time=10770.0166665941 wall_time=1252.631 ratio=8.59791643875498 drones=0
+sim_time=10800.0166665937 wall_time=1256.168 ratio=8.5975893881978 drones=0
+sim_time=10830.0166665932 wall_time=1259.688 ratio=8.59738019778962 drones=0
+sim_time=10860.0166665928 wall_time=1263.25 ratio=8.59688633809047 drones=0
+sim_time=10890.0166665923 wall_time=1266.799 ratio=8.59648347258906 drones=0
+sim_time=10920.0166665919 wall_time=1270.38 ratio=8.5958663286512 drones=0
+sim_time=10950.0166665915 wall_time=1273.908 ratio=8.595610253324 drones=0
+sim_time=10980.016666591 wall_time=1277.487 ratio=8.59501244755605 drones=0
+sim_time=11010.0166665906 wall_time=1281.057 ratio=8.59447836168929 drones=0
+sim_time=11040.0166665902 wall_time=1284.611 ratio=8.59405428303989 drones=0
+sim_time=11070.0166665897 wall_time=1288.18 ratio=8.59353247728557 drones=0
+sim_time=11100.0166665893 wall_time=1291.729 ratio=8.59314660163958 drones=0
+sim_time=11130.0166665889 wall_time=1295.266 ratio=8.59284244826071 drones=0
+sim_time=11160.0166665884 wall_time=1298.823 ratio=8.59240763875325 drones=0
+sim_time=11190.016666588 wall_time=1302.348 ratio=8.59218631777987 drones=0
+sim_time=11220.0166665875 wall_time=1305.866 ratio=8.59201224826096 drones=0
+sim_time=11250.0166665871 wall_time=1309.406 ratio=8.59169475822404 drones=0
+sim_time=11280.0166665867 wall_time=1312.921 ratio=8.59154257307688 drones=0
+sim_time=11310.0166665862 wall_time=1316.465 ratio=8.59120194352773 drones=0
+sim_time=11340.0166665858 wall_time=1319.995 ratio=8.59095425860386 drones=0
+sim_time=11370.0166665854 wall_time=1323.535 ratio=8.5906429875941 drones=0
+sim_time=11400.0166665849 wall_time=1327.097 ratio=8.59019097065619 drones=0
+sim_time=11430.0166665845 wall_time=1330.638 ratio=8.58987693616482 drones=0
+sim_time=11460.0166665841 wall_time=1334.202 ratio=8.58941649509149 drones=0
+sim_time=11490.0166665836 wall_time=1337.823 ratio=8.58859256163455 drones=0
+sim_time=11520.0166665832 wall_time=1341.455 ratio=8.58770265613321 drones=0
+sim_time=11550.0166665827 wall_time=1345.062 ratio=8.58697715538967 drones=0
+sim_time=11580.0166665823 wall_time=1348.638 ratio=8.5864529003204 drones=0
+sim_time=11610.0166665819 wall_time=1352.207 ratio=8.58597586507234 drones=0
+sim_time=11640.0166665814 wall_time=1355.768 ratio=8.58555200195124 drones=0
+sim_time=11670.016666581 wall_time=1359.353 ratio=8.58497878518751 drones=0
+sim_time=11700.0166665806 wall_time=1362.927 ratio=8.58447786754577 drones=0
+sim_time=11730.0166665801 wall_time=1366.502 ratio=8.58397328842557 drones=0
+sim_time=11760.0166665797 wall_time=1370.07 ratio=8.58351519745683 drones=0
+sim_time=11790.0166665792 wall_time=1373.614 ratio=8.58320945082042 drones=0
+sim_time=11820.0166665788 wall_time=1377.196 ratio=8.58266845574545 drones=0
+sim_time=11850.0166665784 wall_time=1380.742 ratio=8.58235402890502 drones=0
+sim_time=11880.0166665779 wall_time=1384.304 ratio=8.58194202037843 drones=0
+sim_time=11910.0166665775 wall_time=1387.868 ratio=8.58151976022035 drones=0
+sim_time=11940.0166665771 wall_time=1391.406 ratio=8.58126001079273 drones=0
+sim_time=11970.0166665766 wall_time=1394.929 ratio=8.5810938525019 drones=0
+sim_time=12000.0166665762 wall_time=1398.464 ratio=8.58085489978733 drones=0
+sim_time=12030.0166665758 wall_time=1402.008 ratio=8.58056206995663 drones=0
+sim_time=12060.0166665753 wall_time=1405.549 ratio=8.58028903053207 drones=0
+sim_time=12090.0166665749 wall_time=1409.098 ratio=8.57996865127541 drones=0
+sim_time=12120.0166665744 wall_time=1412.653 ratio=8.57961344121624 drones=0
+sim_time=12150.016666574 wall_time=1416.213 ratio=8.57922972503007 drones=0
+sim_time=12180.0166665736 wall_time=1419.758 ratio=8.57893857021659 drones=0
+sim_time=12210.0166665731 wall_time=1423.318 ratio=8.57855845747271 drones=0
+sim_time=12240.0166665727 wall_time=1426.827 ratio=8.57848685690185 drones=0
+sim_time=12270.0166665723 wall_time=1430.358 ratio=8.57828366504907 drones=0
+sim_time=12300.0166665718 wall_time=1433.873 ratio=8.57817719321852 drones=0
+sim_time=12330.0166665714 wall_time=1437.411 ratio=8.57793398448418 drones=0
+sim_time=12360.016666571 wall_time=1440.924 ratio=8.57784079283221 drones=0
+sim_time=12390.0166665705 wall_time=1444.47 ratio=8.57755208939647 drones=0
+sim_time=12420.0166665701 wall_time=1447.982 ratio=8.57746620232163 drones=0
+sim_time=12450.0166665696 wall_time=1451.491 ratio=8.57739845894301 drones=0
+sim_time=12480.0166665692 wall_time=1455.02 ratio=8.5772131424786 drones=0
+sim_time=12510.0166665688 wall_time=1458.545 ratio=8.57705224492132 drones=0
+sim_time=12540.0166665683 wall_time=1462.071 ratio=8.5768862569385 drones=0
+sim_time=12570.0166665679 wall_time=1465.576 ratio=8.576843962079 drones=0
+sim_time=12600.0166665675 wall_time=1469.11 ratio=8.57663256431953 drones=0
+sim_time=12630.016666567 wall_time=1472.638 ratio=8.57645712426749 drones=0
+sim_time=12660.0166665666 wall_time=1476.161 ratio=8.57631157208908 drones=0
+sim_time=12690.0166665662 wall_time=1479.67 ratio=8.5762478569993 drones=0
+sim_time=12720.0166665657 wall_time=1483.205 ratio=8.57603410625349 drones=0
+sim_time=12750.0166665653 wall_time=1486.745 ratio=8.57579253104283 drones=0
+sim_time=12780.0166665648 wall_time=1490.27 ratio=8.57563841892063 drones=0
+sim_time=12810.0166665644 wall_time=1493.798 ratio=8.5754678119561 drones=0
+sim_time=12840.016666564 wall_time=1497.349 ratio=8.57516628826277 drones=0
+sim_time=12870.0166665635 wall_time=1500.892 ratio=8.57491189676774 drones=0
+sim_time=12900.0166665631 wall_time=1504.438 ratio=8.57464160474748 drones=0
+sim_time=12930.0166665627 wall_time=1507.984 ratio=8.57437258390186 drones=0
+sim_time=12960.0166665622 wall_time=1511.542 ratio=8.57403675621466 drones=0
+sim_time=12990.0166665618 wall_time=1515.099 ratio=8.57370816465577 drones=0
+sim_time=13020.0166665613 wall_time=1518.645 ratio=8.57344321191677 drones=0
+sim_time=13050.0166665609 wall_time=1522.181 ratio=8.57323581529458 drones=0
+sim_time=13080.0166665605 wall_time=1525.734 ratio=8.57293385777631 drones=0
+sim_time=13110.01666656 wall_time=1529.342 ratio=8.57232500419137 drones=0
+sim_time=13140.0166665596 wall_time=1532.869 ratio=8.57217196417933 drones=0
+sim_time=13170.0166665592 wall_time=1536.453 ratio=8.57170161831124 drones=0
+sim_time=13200.0166665587 wall_time=1540.0 ratio=8.57143939386931 drones=0
+sim_time=13230.0166665583 wall_time=1543.565 ratio=8.57107842336299 drones=0
+sim_time=13260.0166665579 wall_time=1547.156 ratio=8.57057508522596 drones=0
+sim_time=13290.0166665574 wall_time=1550.715 ratio=8.57025092718999 drones=0
+sim_time=13320.016666557 wall_time=1554.291 ratio=8.5698345204064 drones=0
+sim_time=13350.0166665565 wall_time=1557.868 ratio=8.56941452456597 drones=0
+sim_time=13380.0166665561 wall_time=1561.452 ratio=8.56895803813125 drones=0
+sim_time=13410.0166665557 wall_time=1565.027 ratio=8.56855291733349 drones=0
+sim_time=13440.0166665552 wall_time=1568.566 ratio=8.56834628989487 drones=0
+sim_time=13470.0166665548 wall_time=1572.137 ratio=8.56796619286665 drones=0
+sim_time=13500.0166665544 wall_time=1575.687 ratio=8.56770200335115 drones=0
+sim_time=13530.0166665539 wall_time=1579.228 ratio=8.56748782731431 drones=0
+sim_time=13560.0166665535 wall_time=1582.785 ratio=8.56718800503763 drones=0
+sim_time=13590.0166665531 wall_time=1586.328 ratio=8.56696513366281 drones=0
+sim_time=13620.0166665526 wall_time=1589.872 ratio=8.56673786729537 drones=0
+sim_time=13650.0166665522 wall_time=1593.413 ratio=8.56652774048673 drones=0
+sim_time=13680.0166665517 wall_time=1596.963 ratio=8.56627026834795 drones=0
+sim_time=13710.0166665513 wall_time=1600.482 ratio=8.56617985491327 drones=0
+sim_time=13740.0166665509 wall_time=1604.024 ratio=8.56596700956524 drones=0
+sim_time=13770.0166665504 wall_time=1607.55 ratio=8.56584035740751 drones=0
+sim_time=13800.01666655 wall_time=1611.096 ratio=8.56560792562951 drones=0
+sim_time=13830.0166665496 wall_time=1614.648 ratio=8.56534468599321 drones=0
+sim_time=13860.0166665491 wall_time=1618.187 ratio=8.56515141114663 drones=0
+sim_time=13890.0166665487 wall_time=1621.722 ratio=8.5649801054365 drones=0
+sim_time=13920.0166665483 wall_time=1625.274 ratio=8.56471995894123 drones=0
+sim_time=13950.0166665478 wall_time=1628.81 ratio=8.5645450768032 drones=0
+sim_time=13980.0166665474 wall_time=1632.343 ratio=8.56438669234798 drones=0
+sim_time=14010.0166665469 wall_time=1635.892 ratio=8.56414522874795 drones=0
+sim_time=14040.0166665465 wall_time=1639.435 ratio=8.56393615272732 drones=0
+sim_time=14070.0166665461 wall_time=1642.995 ratio=8.56363936989831 drones=0
+sim_time=14100.0166665456 wall_time=1646.547 ratio=8.56338547672531 drones=0
+sim_time=14130.0166665452 wall_time=1650.069 ratio=8.5632883634231 drones=0
+sim_time=14160.0166665448 wall_time=1653.586 ratio=8.56321755659806 drones=0
+sim_time=14190.0166665443 wall_time=1657.133 ratio=8.56299202691898 drones=0
+sim_time=14220.0166665439 wall_time=1660.644 ratio=8.56295308720225 drones=0
+sim_time=14250.0166665435 wall_time=1664.188 ratio=8.56274451356665 drones=0
+sim_time=14280.016666543 wall_time=1667.719 ratio=8.56260357203043 drones=0
+sim_time=14310.0166665426 wall_time=1671.285 ratio=8.56228391120759 drones=0
+sim_time=14340.0166665421 wall_time=1674.827 ratio=8.56208830317528 drones=0
+sim_time=14370.0166665417 wall_time=1678.396 ratio=8.56175578739565 drones=0
+sim_time=14400.0166665413 wall_time=1681.933 ratio=8.56158757010016 drones=0
+sim_time=14430.0166665408 wall_time=1685.498 ratio=8.56127783393444 drones=0
+sim_time=14460.0166665404 wall_time=1689.062 ratio=8.56097447372589 drones=0
+sim_time=14490.01666654 wall_time=1692.589 ratio=8.56085952735127 drones=0
+sim_time=14520.0166665395 wall_time=1696.124 ratio=8.56070468110794 drones=0
+sim_time=14550.0166665391 wall_time=1699.672 ratio=8.56048500330598 drones=0
+sim_time=14580.0166665386 wall_time=1703.2 ratio=8.56036676053232 drones=0
+sim_time=14610.0166665382 wall_time=1706.706 ratio=8.56035935101782 drones=0
+sim_time=14640.0166665378 wall_time=1710.251 ratio=8.56015676443854 drones=0
+sim_time=14670.0166665373 wall_time=1713.769 ratio=8.56008987590354 drones=0
+sim_time=14700.0166665369 wall_time=1717.311 ratio=8.55990363221158 drones=0
+sim_time=14730.0166665365 wall_time=1720.848 ratio=8.55974302584334 drones=0
+sim_time=14760.016666536 wall_time=1724.402 ratio=8.55949869377096 drones=0
+sim_time=14790.0166665356 wall_time=1728.019 ratio=8.55894331401194 drones=0
+sim_time=14820.0166665352 wall_time=1731.52 ratio=8.55896360800635 drones=0
+sim_time=14850.0166665347 wall_time=1735.06 ratio=8.55879143461017 drones=0
+sim_time=14880.0166665343 wall_time=1738.627 ratio=8.55848705129639 drones=0
+sim_time=14910.0166665338 wall_time=1742.19 ratio=8.55820356363763 drones=0
+sim_time=14940.0166665334 wall_time=1745.725 ratio=8.55805849520022 drones=0
+sim_time=14970.016666533 wall_time=1749.289 ratio=8.55777213858486 drones=0
+sim_time=15000.0166665325 wall_time=1752.821 ratio=8.55764317436437 drones=0
+sim_time=15030.0166665321 wall_time=1756.397 ratio=8.55730035210268 drones=0
+sim_time=15060.0166665317 wall_time=1759.956 ratio=8.55704157747788 drones=0
+sim_time=15090.0166665312 wall_time=1763.494 ratio=8.55688574303696 drones=0
+sim_time=15120.0166665308 wall_time=1767.04 ratio=8.55669179335544 drones=0
+sim_time=15150.0166665304 wall_time=1770.571 ratio=8.55657110984555 drones=0
+sim_time=15180.0166665299 wall_time=1774.124 ratio=8.55634480257858 drones=0
+sim_time=15210.0166665295 wall_time=1777.672 ratio=8.55614346545903 drones=0
+sim_time=15240.016666529 wall_time=1781.249 ratio=8.55580363359027 drones=0
+Bike: @PathFollow3D@101 Finish time: 15261.6333331954
+Bike: @PathFollow3D@127 Finish time: 15261.9166665287
+Bike: @PathFollow3D@77 Finish time: 15262.0833331954
+Bike: @PathFollow3D@177 Finish time: 15262.1166665287
+Bike: @PathFollow3D@21 Finish time: 15262.1333331954
+Bike: @PathFollow3D@27 Finish time: 15262.1333331954
+Bike: @PathFollow3D@33 Finish time: 15262.1333331954
+Bike: @PathFollow3D@40 Finish time: 15262.1333331954
+Bike: @PathFollow3D@44 Finish time: 15262.1333331954
+Bike: @PathFollow3D@49 Finish time: 15262.1333331954
+Bike: @PathFollow3D@56 Finish time: 15262.1333331954
+Bike: @PathFollow3D@64 Finish time: 15262.1333331954
+Bike: @PathFollow3D@65 Finish time: 15262.1333331954
+Bike: @PathFollow3D@72 Finish time: 15262.1333331954
+Bike: @PathFollow3D@107 Finish time: 15262.1333331954
+Bike: @PathFollow3D@117 Finish time: 15262.1333331954
+Bike: @PathFollow3D@118 Finish time: 15262.1333331954
+Bike: @PathFollow3D@129 Finish time: 15262.1333331954
+Bike: @PathFollow3D@134 Finish time: 15262.1333331954
+Bike: @PathFollow3D@139 Finish time: 15262.1333331954
+Bike: @PathFollow3D@147 Finish time: 15262.1333331954
+Bike: @PathFollow3D@159 Finish time: 15262.1333331954
+Bike: @PathFollow3D@160 Finish time: 15262.1333331954
+Bike: @PathFollow3D@172 Finish time: 15262.1333331954
+Bike: @PathFollow3D@183 Finish time: 15262.1333331954
+Bike: @PathFollow3D@184 Finish time: 15262.1333331954
+Bike: @PathFollow3D@32 Finish time: 15262.1499998621
+Bike: @PathFollow3D@74 Finish time: 15262.2499998621
+Bike: @PathFollow3D@119 Finish time: 15262.2833331954
+Bike: @PathFollow3D@173 Finish time: 15262.2833331954
+Bike: @PathFollow3D@174 Finish time: 15262.2833331954
+Bike: @PathFollow3D@18 Finish time: 15262.3833331954
+Bike: @PathFollow3D@123 Finish time: 15262.3833331954
+Bike: @PathFollow3D@9 Finish time: 15262.3999998621
+Bike: @PathFollow3D@91 Finish time: 15262.3999998621
+Bike: @PathFollow3D@156 Finish time: 15262.3999998621
+Bike: @PathFollow3D@58 Finish time: 15262.4999998621
+Bike: @PathFollow3D@51 Finish time: 15262.5333331954
+Bike: @PathFollow3D@31 Finish time: 15262.8833331954
+sim_time=15270.0166665286 wall_time=1784.641 ratio=8.556352043088 drones=0
+Bike: @PathFollow3D@165 Finish time: 15279.6333331951
+Bike: @PathFollow3D@60 Finish time: 15279.8666665285
+Bike: @PathFollow3D@26 Finish time: 15279.8833331951
+Bike: @PathFollow3D@66 Finish time: 15279.8833331951
+Bike: @PathFollow3D@167 Finish time: 15279.8999998618
+Bike: @PathFollow3D@12 Finish time: 15279.9666665285
+Bike: @PathFollow3D@143 Finish time: 15279.9666665285
+Bike: @PathFollow3D@179 Finish time: 15279.9666665285
+Bike: @PathFollow3D@136 Finish time: 15279.9999998618
+Bike: @PathFollow3D@171 Finish time: 15279.9999998618
+Bike: @PathFollow3D@149 Finish time: 15280.0166665285
+Bike: @PathFollow3D@53 Finish time: 15280.0666665285
+Bike: @PathFollow3D@131 Finish time: 15280.0666665285
+Bike: @PathFollow3D@62 Finish time: 15280.1166665285
+Bike: @PathFollow3D@115 Finish time: 15280.1166665285
+Bike: Bike Finish time: 15280.1333331951
+Bike: @PathFollow3D@43 Finish time: 15280.1333331951
+Bike: @PathFollow3D@45 Finish time: 15280.1333331951
+Bike: @PathFollow3D@52 Finish time: 15280.1333331951
+Bike: @PathFollow3D@148 Finish time: 15280.1333331951
+Bike: @PathFollow3D@153 Finish time: 15280.1333331951
+Bike: @PathFollow3D@164 Finish time: 15280.1333331951
+Bike: @PathFollow3D@14 Finish time: 15280.1499998618
+Bike: @PathFollow3D@19 Finish time: 15280.1499998618
+Bike: @PathFollow3D@20 Finish time: 15280.1499998618
+Bike: @PathFollow3D@59 Finish time: 15280.1499998618
+Bike: @PathFollow3D@83 Finish time: 15280.1499998618
+Bike: @PathFollow3D@92 Finish time: 15280.1499998618
+Bike: @PathFollow3D@145 Finish time: 15280.1499998618
+Bike: @PathFollow3D@7 Finish time: 15280.1666665285
+Bike: @PathFollow3D@78 Finish time: 15280.1666665285
+Bike: @PathFollow3D@104 Finish time: 15280.1666665285
+Bike: @PathFollow3D@112 Finish time: 15280.1666665285
+Bike: @PathFollow3D@126 Finish time: 15280.1666665285
+Bike: @PathFollow3D@180 Finish time: 15280.1666665285
+Bike: @PathFollow3D@29 Finish time: 15280.1833331951
+Bike: @PathFollow3D@132 Finish time: 15280.3499998618
+Bike: @PathFollow3D@68 Finish time: 15280.3666665285
+Bike: @PathFollow3D@54 Finish time: 15280.3999998618
+Bike: @PathFollow3D@158 Finish time: 15280.3999998618
+Bike: @PathFollow3D@15 Finish time: 15280.4166665285
+Bike: @PathFollow3D@28 Finish time: 15280.4166665285
+Bike: @PathFollow3D@73 Finish time: 15280.4166665285
+Bike: @PathFollow3D@97 Finish time: 15280.4166665285
+Bike: @PathFollow3D@116 Finish time: 15280.4166665285
+Bike: @PathFollow3D@146 Finish time: 15280.4166665285
+sim_time=15300.0166665282 wall_time=1786.899 ratio=8.56232874187527 drones=0
+sim_time=15330.0166665277 wall_time=1788.868 ratio=8.56967460233384 drones=0
+sim_time=15360.0166665273 wall_time=1790.844 ratio=8.57697078390262 drones=0
+sim_time=15390.0166665269 wall_time=1792.79 ratio=8.58439452837581 drones=0
+Bike: @PathFollow3D@85 Finish time: 15390.0166665269
+Bike: @PathFollow3D@22 Finish time: 15390.3666665269
+Bike: @PathFollow3D@122 Finish time: 15390.3833331935
+Bike: @PathFollow3D@100 Finish time: 15390.4166665269
+Bike: @PathFollow3D@48 Finish time: 15390.7333331935
+Bike: @PathFollow3D@144 Finish time: 15390.8833331935
+Bike: @PathFollow3D@71 Finish time: 15390.9499998602
+Bike: @PathFollow3D@13 Finish time: 15390.9833331935
+Bike: @PathFollow3D@75 Finish time: 15390.9833331935
+Bike: @PathFollow3D@95 Finish time: 15390.9833331935
+Bike: @PathFollow3D@99 Finish time: 15390.9833331935
+Bike: @PathFollow3D@120 Finish time: 15390.9833331935
+Bike: @PathFollow3D@11 Finish time: 15390.9999998602
+Bike: @PathFollow3D@61 Finish time: 15391.0666665268
+Bike: @PathFollow3D@151 Finish time: 15391.0666665268
+Bike: @PathFollow3D@34 Finish time: 15391.1833331935
+Bike: @PathFollow3D@25 Finish time: 15391.2166665268
+Bike: @PathFollow3D@35 Finish time: 15391.2166665268
+Bike: @PathFollow3D@6 Finish time: 15391.2333331935
+Bike: @PathFollow3D@30 Finish time: 15391.2333331935
+Bike: @PathFollow3D@39 Finish time: 15391.2333331935
+Bike: @PathFollow3D@57 Finish time: 15391.2333331935
+Bike: @PathFollow3D@152 Finish time: 15391.2333331935
+Bike: @PathFollow3D@157 Finish time: 15391.2333331935
+Bike: @PathFollow3D@161 Finish time: 15391.2333331935
+Bike: @PathFollow3D@23 Finish time: 15391.2499998602
+Bike: @PathFollow3D@37 Finish time: 15391.2499998602
+Bike: @PathFollow3D@109 Finish time: 15391.2499998602
+Bike: @PathFollow3D@142 Finish time: 15391.2499998602
+Bike: @PathFollow3D@182 Finish time: 15391.2499998602
+Bike: @PathFollow3D@93 Finish time: 15391.2833331935
+Bike: @PathFollow3D@175 Finish time: 15391.4499998602
+Bike: @PathFollow3D@63 Finish time: 15391.4666665268
+Bike: @PathFollow3D@90 Finish time: 15391.4666665268
+Bike: @PathFollow3D@106 Finish time: 15391.4666665268
+Bike: @PathFollow3D@125 Finish time: 15391.4666665268
+Bike: @PathFollow3D@108 Finish time: 15391.4999998602
+Bike: @PathFollow3D@114 Finish time: 15391.5166665268
+Bike: @PathFollow3D@166 Finish time: 15391.5166665268
+sim_time=15420.0166665264 wall_time=1794.791 ratio=8.59153888476509 drones=0
+sim_time=15450.016666526 wall_time=1796.693 ratio=8.59914112568257 drones=0
+Bike: @PathFollow3D@81 Finish time: 15458.6333331925
+sim_time=15480.0166665256 wall_time=1798.657 ratio=8.606430612688 drones=0
+Bike: @PathFollow3D@163 Finish time: 15509.7333331918
+sim_time=15510.0166665251 wall_time=1800.626 ratio=8.61368027926128 drones=0
+Bike: @PathFollow3D@103 Finish time: 15511.7499998584
+Bike: @PathFollow3D@47 Finish time: 15532.9999998581
+sim_time=15540.0166665247 wall_time=1802.61 ratio=8.62084237107565 drones=0
+Bike: @PathFollow3D@178 Finish time: 15558.4166665244
+Bike: @PathFollow3D@17 Finish time: 15558.7333331911
+Bike: @PathFollow3D@130 Finish time: 15559.0333331911
+Bike: @PathFollow3D@69 Finish time: 15559.2333331911
+Bike: @PathFollow3D@102 Finish time: 15559.4499998577
+Bike: @PathFollow3D@141 Finish time: 15559.4999998577
+Bike: @PathFollow3D@121 Finish time: 15559.7333331911
+Bike: @PathFollow3D@170 Finish time: 15559.7833331911
+Bike: @PathFollow3D@67 Finish time: 15562.5999998577
+Bike: @PathFollow3D@155 Finish time: 15562.633333191
+Bike: @PathFollow3D@80 Finish time: 15562.833333191
+Bike: @PathFollow3D@87 Finish time: 15562.833333191
+Bike: @PathFollow3D@86 Finish time: 15562.8666665243
+Bike: @PathFollow3D@98 Finish time: 15562.883333191
+Bike: @PathFollow3D@55 Finish time: 15562.8999998577
+Bike: @PathFollow3D@88 Finish time: 15563.133333191
+Bike: @PathFollow3D@150 Finish time: 15563.1499998577
+Bike: @PathFollow3D@41 Finish time: 15563.1666665243
+Bike: @PathFollow3D@70 Finish time: 15563.1666665243
+Bike: @PathFollow3D@105 Finish time: 15563.1666665243
+Bike: @PathFollow3D@137 Finish time: 15563.1666665243
+Bike: @PathFollow3D@16 Finish time: 15563.3166665243
+Bike: @PathFollow3D@110 Finish time: 15563.333333191
+Bike: @PathFollow3D@42 Finish time: 15563.4166665243
+Bike: @PathFollow3D@140 Finish time: 15563.6166665243
+Bike: @PathFollow3D@84 Finish time: 15563.6499998577
+Bike: @PathFollow3D@176 Finish time: 15563.6666665243
+Bike: @PathFollow3D@38 Finish time: 15563.733333191
+sim_time=15570.0166665242 wall_time=1804.523 ratio=8.62832818785033 drones=0
+Bike: @PathFollow3D@154 Finish time: 15580.8166665241
+Bike: @PathFollow3D@46 Finish time: 15581.0833331907
+Bike: @PathFollow3D@168 Finish time: 15581.1166665241
+Bike: @PathFollow3D@76 Finish time: 15581.4333331907
+Bike: @PathFollow3D@24 Finish time: 15585.5833331907
+Bike: @PathFollow3D@135 Finish time: 15585.9333331907
+Bike: @PathFollow3D@169 Finish time: 15586.1333331907
+sim_time=15600.0166665238 wall_time=1806.404 ratio=8.63595113082334 drones=0
+Bike: @PathFollow3D@128 Finish time: 15621.0499998568
+Bike: @PathFollow3D@96 Finish time: 15621.4166665235
+Bike: @PathFollow3D@89 Finish time: 15621.6833331902
+sim_time=15630.0166665234 wall_time=1808.272 ratio=8.64362035497058 drones=0
+Bike: @PathFollow3D@10 Finish time: 15631.33333319
+sim_time=15660.0166665229 wall_time=1810.154 ratio=8.65120684014892 drones=0
+Bike: @PathFollow3D@181 Finish time: 15662.3333331896
+sim_time=15690.0166665225 wall_time=1812.023 ratio=8.65883968720182 drones=0
+Bike: @PathFollow3D@124 Finish time: 15711.4333331889
+sim_time=15720.0166665221 wall_time=1813.905 ratio=8.66639469350493 drones=0
+Bike: @PathFollow3D@8 Finish time: 15723.0833331887
+sim_time=15750.0166665216 wall_time=1815.773 ratio=8.67400091670138 drones=0
+Bike: @PathFollow3D@133 Finish time: 15753.9833331882
+sim_time=15780.0166665212 wall_time=1817.655 ratio=8.68152463835061 drones=0
+Bike: @PathFollow3D@162 Finish time: 15785.5833331878
+Bike: @PathFollow3D@138 Finish time: 15809.9333331874
+sim_time=15810.0166665207 wall_time=1819.524 ratio=8.6890948767484 drones=0
+Bike: @PathFollow3D@113 Finish time: 15820.9166665206
+Bike: @PathFollow3D@79 Finish time: 15822.1833331872
+Bike: @PathFollow3D@50 Finish time: 15835.4166665204
+sim_time=15840.0166665203 wall_time=1821.406 ratio=8.69658750795831 drones=0
+sim_time=15870.0166665199 wall_time=1823.274 ratio=8.70413150547854 drones=0
+sim_time=15900.0166665194 wall_time=1825.156 ratio=8.71159323724626 drones=0
+sim_time=15930.016666519 wall_time=1827.024 ratio=8.7191064083006 drones=0
+Bike: @PathFollow3D@94 Finish time: 15937.6833331856
+Bike: @PathFollow3D@82 Finish time: 15949.6833331854
+sim_time=15960.0166665186 wall_time=1828.907 ratio=8.72653265940727 drones=0
+Bike: @PathFollow3D@111 Finish time: 15982.1833331849
+sim_time=15990.0166665181 wall_time=1830.774 ratio=8.73401996451672 drones=0
+sim_time=16020.0166665177 wall_time=1832.657 ratio=8.74141569672759 drones=0
+Bike: @PathFollow3D@36 Finish time: 16048.9333331839
+Run time: 1834.458 seconds
 --- Debugging process stopped ---
+
 """
 # Parse all finish times
 times = [float(m) for m in re.findall(r"Finish time: ([\d.]+)", data)]
