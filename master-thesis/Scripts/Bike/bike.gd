@@ -36,6 +36,7 @@ var behavior = "cruise"  #cruise, attack
 var cohesion_c =  0.8    #Set by trial and error
 var separation_c = 0.05  #0.05   #Set by trial and error 
 var n_breakouts = 0
+var max_speed = 0
 
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
@@ -47,11 +48,13 @@ func _physics_process(delta):
 	if timer >= timer_threashold:
 		timer = timer-timer_threashold
 		coltroler(timer_threashold)
-		
+	
+	if speed>max_speed:
+		max_speed=speed
 	self.progress += speed * delta
 	if self.progress >= max_progress:
 		if not is_rl:
-			print("Bike: ", self.name, " Finish time: ", total_time, "  BreakOuts: ", n_breakouts)
+			print("Bike: ", self.name, " Finish time: ", total_time, " nBreakout: ", n_breakouts, "  Max_speed: ", max_speed, " MaxProgress: ", self.progress)
 		safe_queue_free()
 
 func coltroler(delta):

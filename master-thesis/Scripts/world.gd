@@ -317,8 +317,8 @@ func add_bike():
 	var random_watt_variant = watt_spread * rng.randi_range(-1, 2)
 
 	bike_instance.set_watts(
-		373 + random_watt_variant,
-		573 + random_watt_variant
+		393 + random_watt_variant,
+		593 + random_watt_variant
 	)
 
 	path_instance.add_child(bike_instance)
