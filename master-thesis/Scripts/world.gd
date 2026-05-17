@@ -121,10 +121,10 @@ func _physics_process(delta: float) -> void:
 		
 	update_cached_world_data()
 	
-	#timer += delta
-	#if timer >= timer_threashold:
-		#timer = timer-timer_threashold
-	update_bike_order2()
+	timer += delta
+	if timer >= timer_threashold:
+		timer = timer-timer_threashold
+		update_bike_order()
 		
 
 func update_cached_world_data():
@@ -151,6 +151,13 @@ func update_cached_world_data():
 			"position": d.global_position
 		})
 
+func erase_bike(node):
+	bike_process_list.erase(node)
+	bike_neighborhoods.resize(bike_process_list.size())
+	
+	for i in bike_process_list.size():
+		bike_process_list[i].race_index = i
+
 func update_bike_order2():
 	bike_process_list.sort_custom(func(a, b): return a.progress > b.progress)
 	var i = 0
@@ -163,15 +170,15 @@ func update_bike_order():
 	var n = bike_process_list.size()
 	
 	# Cache all progress values and rebuild index dict in one pass
-	var prog = []
+	var prog := PackedFloat32Array()
 	prog.resize(n)
 	for i in n:
 		var bike = bike_process_list[i]
 		prog[i] = bike.get_progress()
-		bike_index_dic[bike.get_instance_id()] = i
+		bike.race_index = i
 	
 	# Prefix sums for O(1) range-sum queries
-	var prefix = []
+	var prefix:= PackedFloat64Array()
 	prefix.resize(n + 1)
 	prefix[0] = 0.0
 	for i in n:

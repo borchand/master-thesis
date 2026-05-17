@@ -6,6 +6,7 @@ signal freeing_bike
 @onready var raycast = $RayCast3D
 @onready var bikebody = $BikeBody
 var world
+var race_index: int
 var rng = RandomNumberGenerator.new()
 var max_progress: float
 
@@ -39,7 +40,6 @@ func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
 	world = get_parent().get_parent()
 
-
 func _physics_process(delta):
 	timer += delta
 	total_time += delta
@@ -63,7 +63,7 @@ func control1(delta):
 	var wanted_power  = sustainable_watt
 
 	#var raycast_result = raycast.run_raycast()
-	var raycast_result = find_neighborhood2()
+	var raycast_result = find_neighborhood()
 	#var raycast_result = [0,0,0,0]
 	
 	if len(raycast_result) != 4:
@@ -171,10 +171,8 @@ func set_watts(sustainable_watt_ = 355, initial_breakout_watt_ = 531):
 	sustainable_watt = sustainable_watt_
 	initial_breakout_watt = initial_breakout_watt_
 
-
 func find_neighborhood():
-	var index = world.bike_index_dic[get_instance_id()]
-	return world.bike_neighborhoods[index]
+	return world.bike_neighborhoods[race_index]
 
 func find_neighborhood2():
 	var progessList = world.bike_process_list
@@ -221,6 +219,7 @@ func get_camera_node() -> Camera3D:
 	return $Camera3D
 
 func safe_queue_free() -> void:
+	world.erase_bike(self)
 	freeing_bike.emit(self)
 	bikebody.collision_layer = 0
 	queue_free()
