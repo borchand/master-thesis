@@ -5,6 +5,7 @@ signal freeing_bike
 
 @onready var raycast = $RayCast3D
 @onready var bikebody = $BikeBody
+var world
 var rng = RandomNumberGenerator.new()
 var max_progress: float
 
@@ -17,8 +18,8 @@ var is_rl: bool = false
 var is_training: bool = false
 
 var speed = 9.0
-var speedUpProbability = 12
-var speedDownProbability = 7
+var speedUpProbability = 6
+var speedDownProbability = 3.5
 var acceleration = 0.0
 
 var sustainable_force = 25 # not used
@@ -36,6 +37,8 @@ var separation_c = 0.05  #0.05   #Set by trial and error
 
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
+	world = get_parent().get_parent()
+
 
 func _physics_process(delta):
 	timer += delta
@@ -59,7 +62,10 @@ func control1(delta):
 	var elevation = -1 * bikebody.global_rotation.x #positive = going up
 	var wanted_power  = sustainable_watt
 
-	var raycast_result = raycast.run_raycast()
+	#var raycast_result = raycast.run_raycast()
+	var raycast_result = find_neighborhood2()
+	#var raycast_result = [0,0,0,0]
+	
 	if len(raycast_result) != 4:
 		print("Ray_cast length is not 3")
 		return
@@ -164,6 +170,30 @@ func watt_limited_by_stamina():
 func set_watts(sustainable_watt_ = 355, initial_breakout_watt_ = 531):
 	sustainable_watt = sustainable_watt_
 	initial_breakout_watt = initial_breakout_watt_
+
+
+func find_neighborhood():
+	var index = world.bike_index_dic[get_instance_id()]
+	return world.bike_neighborhoods[index]
+
+func find_neighborhood2():
+	var progessList = world.bike_process_list
+	var id = self.get_instance_id()
+	var index = world.bike_index_dic[id]
+	var bikeProgress = world.bike_process_list[index].get_progress()
+	var sum = 0
+	var n_bikes = 0 
+	var dist_to_bike_3th = null
+	var dist_to_bike_1st = null
+	while index > 0 and progessList[index-1].get_progress()-bikeProgress<30:
+		n_bikes += 1
+		sum += progessList[index-1].get_progress()-bikeProgress
+		if n_bikes == 1: 
+			dist_to_bike_1st = progessList[index-1].get_progress()-bikeProgress
+		if n_bikes == 3: 
+			dist_to_bike_3th = progessList[index-1].get_progress()-bikeProgress
+		index -= 1
+	return [n_bikes, (sum/max(1, n_bikes)), dist_to_bike_1st ,dist_to_bike_3th,]
 
 static func get_randomize_for_rl():
 	var _rng = RandomNumberGenerator.new()

@@ -7,11 +7,11 @@ func _ready() -> void:
 	timer_threashold= 1.0/get_parent().pr_sec_checks
 
 
-func _physics_process(delta): 
-	timer += delta
-	if timer >= timer_threashold:
-		timer = timer-timer_threashold
-		run_raycast()
+#func _physics_process(delta): 
+	#timer += delta
+	#if timer >= timer_threashold:
+		#timer = timer-timer_threashold
+		#run_raycast()
 
 
 func run_raycast():

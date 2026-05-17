@@ -36,13 +36,20 @@ var instance_id: int = -1
 var drone_list: Array = []
 
 var bike_count: int = 180
-var drone_count: int = 100
+var drone_count: int = 0
 
 @export var drone_spawn_spacing: float = 1.5
 @export var place_drone_along_road: bool = false
 
 var cached_bikes: Array = []
 var cached_drones: Array = []
+
+var pr_sec_checks = 4
+var timer_threashold = 1.0 / pr_sec_checks
+var timer = 0
+var bike_process_list: Array = []
+var bike_index_dic: Dictionary = {}
+var bike_neighborhoods: Array = []
 
 var start_time := 0
 var wall_start := 0
@@ -95,6 +102,7 @@ func _ready():
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 
 	update_cached_world_data()
+	update_bike_order2()
 
 
 func _physics_process(delta: float) -> void:
@@ -110,9 +118,14 @@ func _physics_process(delta: float) -> void:
 			" ratio=", sim_time / max(wall, 0.001),
 			" drones=", drone_list.size()
 		)
-
+		
 	update_cached_world_data()
-
+	
+	#timer += delta
+	#if timer >= timer_threashold:
+		#timer = timer-timer_threashold
+	update_bike_order2()
+		
 
 func update_cached_world_data():
 	cached_bikes.clear()
@@ -137,6 +150,57 @@ func update_cached_world_data():
 			"id": d.id,
 			"position": d.global_position
 		})
+
+func update_bike_order2():
+	bike_process_list.sort_custom(func(a, b): return a.progress > b.progress)
+	var i = 0
+	for x in bike_process_list:
+		bike_index_dic[bike_process_list[i].get_instance_id()] = i 
+		i += 1
+
+func update_bike_order():
+	bike_process_list.sort_custom(func(a, b): return a.progress > b.progress)
+	var n = bike_process_list.size()
+	
+	# Cache all progress values and rebuild index dict in one pass
+	var prog = []
+	prog.resize(n)
+	for i in n:
+		var bike = bike_process_list[i]
+		prog[i] = bike.get_progress()
+		bike_index_dic[bike.get_instance_id()] = i
+	
+	# Prefix sums for O(1) range-sum queries
+	var prefix = []
+	prefix.resize(n + 1)
+	prefix[0] = 0.0
+	for i in n:
+		prefix[i + 1] = prefix[i] + prog[i]
+	# Sliding window: left is the furthest-ahead bike still within 30m
+	# List is descending, so prog[0] is highest. For bike at index i,
+	# "ahead" bikes are at lower indices.
+	bike_neighborhoods.resize(n)
+	var left = 0
+	for i in n:
+		# Advance left past any bike now more than 30m ahead
+		while left < i and prog[left] - prog[i] >= 30.0:
+			left += 1
+		
+		# Window [left, i-1] contains all bikes ahead within 30m
+		var n_bikes = i - left
+		var avg_dist = 0.0
+		if n_bikes > 0:
+			var range_sum = (prefix[i] - prefix[left]) - n_bikes * prog[i]
+			avg_dist = range_sum / n_bikes
+			
+		var dist_1st = null
+		var dist_3rd = null
+		if i >= 1 and (i - 1) >= left:
+			dist_1st = prog[i - 1] - prog[i]
+		if i >= 3 and (i - 3) >= left:
+			dist_3rd = prog[i - 3] - prog[i]
+
+		bike_neighborhoods[i] = [n_bikes, avg_dist, dist_1st, dist_3rd]
 
 func add_drone(auto_place: bool = true):
 	var drone_instance = drone.instantiate()
@@ -252,7 +316,7 @@ func add_bike():
 
 	path_instance.add_child(bike_instance)
 	bike_instance.progress = (random_watt_variant / 2.0) + rng.randf_range(0.0, 2.0)
-
+	bike_process_list.append(bike_instance)
 	shared.bike_lists[instance_id].append(bike_instance)
 
 
