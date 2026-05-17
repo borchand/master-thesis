@@ -67,7 +67,7 @@ func _physics_process(delta: float):
 	TotalSpeed += speed
 	self.progress += speed * delta
 	if self.progress >= max_progress:
-		print("Bike: ", self.name, " Finish time: ", total_time, " Remaining_Timer: ", timer,  "  Watts: ", sustainable_watt)
+		print("Bike: ", self.name, " Finish time: ", total_time, " Remaining_Timer: ", timer,  "  Watts: ", sustainable_watt, " MaxSpeed: ", max_speed, "  Progress: ", self.progress, " MaxProgress: ", max_progress)
 		print("total_time: ", total_time, " total threashold: ", total_threashold, " Total_Speed: ", TotalSpeed, " Total_processcounter: ", processCounter, " Threahold_Counter: ", controllerCounter)
 		safe_queue_free()
 
