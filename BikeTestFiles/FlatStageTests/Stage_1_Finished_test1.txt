@@ -6,6 +6,35 @@ WattSpread: 9
 var speedUpProbability = 10
 var speedDownProbability = 4.5
 
+
+--- Debugging process stopped ---
+  Sequence  1:  59 bike(s)  |  13983
+  Sequence  2:   1 bike(s)  |  13985
+  Sequence  3:   3 bike(s)  |  13986
+  Sequence  4:   2 bike(s)  |  13989
+  Sequence  5:   2 bike(s)  |  13991
+  Sequence  6:   7 bike(s)  |  13993
+  Sequence  7:  30 bike(s)  |  14038
+  Sequence  8:   5 bike(s)  |  14046
+  Sequence  9:   4 bike(s)  |  14049
+  Sequence 10:   1 bike(s)  |  14052
+  Sequence 11:   7 bike(s)  |  14067
+  Sequence 12:  15 bike(s)  |  14184
+  Sequence 13:  13 bike(s)  |  14192
+  Sequence 14:  12 bike(s)  |  14210
+  Sequence 15:   1 bike(s)  |  14374
+  Sequence 16:   5 bike(s)  |  14441
+  Sequence 17:   2 bike(s)  |  14483
+  Sequence 18:   1 bike(s)  |  14492
+  Sequence 19:   1 bike(s)  |  14543
+  Sequence 20:   1 bike(s)  |  14544
+  Sequence 21:   1 bike(s)  |  14676
+  Sequence 22:   1 bike(s)  |  14687
+  Sequence 23:   1 bike(s)  |  14689
+  Sequence 24:   1 bike(s)  |  14763
+  Sequence 25:   1 bike(s)  |  14776
+  Sequence 26:   3 bike(s)  |  14835
+
 Godot Engine v4.6.2.stable.mono.official.71f334935 - https://godotengine.org
 OpenGL API 3.3.0 - Build 32.0.101.7026 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics
 
@@ -685,30 +714,3 @@ Bike: @PathFollow3D@109 Finish time: 14835.5333332016 nBreakout: 7  Max_speed: 2
 Bike: @PathFollow3D@61 Finish time: 14835.9333332016 nBreakout: 6  Max_speed: 20.223481275715 MaxProgress: 186499.40625
 Run time: 2008.616 seconds
 
---- Debugging process stopped ---
-  Sequence  1:  59 bike(s)  |  13983
-  Sequence  2:   1 bike(s)  |  13985
-  Sequence  3:   3 bike(s)  |  13986
-  Sequence  4:   2 bike(s)  |  13989
-  Sequence  5:   2 bike(s)  |  13991
-  Sequence  6:   7 bike(s)  |  13993
-  Sequence  7:  30 bike(s)  |  14038
-  Sequence  8:   5 bike(s)  |  14046
-  Sequence  9:   4 bike(s)  |  14049
-  Sequence 10:   1 bike(s)  |  14052
-  Sequence 11:   7 bike(s)  |  14067
-  Sequence 12:  15 bike(s)  |  14184
-  Sequence 13:  13 bike(s)  |  14192
-  Sequence 14:  12 bike(s)  |  14210
-  Sequence 15:   1 bike(s)  |  14374
-  Sequence 16:   5 bike(s)  |  14441
-  Sequence 17:   2 bike(s)  |  14483
-  Sequence 18:   1 bike(s)  |  14492
-  Sequence 19:   1 bike(s)  |  14543
-  Sequence 20:   1 bike(s)  |  14544
-  Sequence 21:   1 bike(s)  |  14676
-  Sequence 22:   1 bike(s)  |  14687
-  Sequence 23:   1 bike(s)  |  14689
-  Sequence 24:   1 bike(s)  |  14763
-  Sequence 25:   1 bike(s)  |  14776
-  Sequence 26:   3 bike(s)  |  14835
