@@ -19,7 +19,7 @@ var is_rl: bool = false
 var is_training: bool = false
 
 var speed = 9.0
-var speedUpProbability = 30
+var speedUpProbability = 10
 var speedDownProbability = 4.5
 var acceleration = 0.0
 
@@ -55,7 +55,7 @@ func _physics_process(delta):
 	self.progress += speed * delta
 	if self.progress >= max_progress:
 		if not is_rl:
-			print("Bike: ", self.name, " Finish time: ", total_time, " nBreakout: ", n_breakouts, "  Max_speed: ", max_speed, " MaxProgress: ", self.progress)
+			print("Bike: ", self.name, " Finish time: ", total_time, " nBreakout: ", n_breakouts, "  Max_speed: ", max_speed, " MaxProgress: ", self.progress )
 		safe_queue_free()
 
 func coltroler(delta):
