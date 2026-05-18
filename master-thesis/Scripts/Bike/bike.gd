@@ -31,6 +31,7 @@ var fatigue_threashold = 52800.0
 var b_stamina_degresse = 0.0000002
 var fatigue = 0
 var in_peloton = false
+var pelotonleader = false
 var behavior = "cruise"  #cruise, attack
 
 var cohesion_c =  0.8    #Set by trial and error
@@ -68,13 +69,16 @@ func control1(delta):
 
 	#var raycast_result = raycast.run_raycast()
 	var raycast_result = find_neighborhood()
-	#var raycast_result = [0,0,0,0]
 	
-	if len(raycast_result) != 4:
-		print("Ray_cast length is not 3")
+	if len(raycast_result) != 5:
+		print("Ray_cast length is not 5")
 		return
 	if raycast_result[0] == 0 or raycast_result[2] > 6 or progress_ratio >= 0.985: #you left the peleton or are in front
 		in_peloton = false
+		if raycast_result[4] != null and raycast_result[4]<3:
+			pelotonleader = true
+		else:
+			pelotonleader = false
 	else:
 		in_peloton = true
 
@@ -145,6 +149,8 @@ func calc_watt_current_state(speed_ms, elevation, acceleration_mss, in_peloton_=
 	var drag_modifier = 1
 	if in_peloton_:
 		drag_modifier = 0.7
+	elif pelotonleader:
+		drag_modifier = 0.85
 	return 72.68 * (acceleration_mss + 0.00278 * drag_modifier * speed_ms**2 + 0.03896 + 9.81 * sin(elevation)) * speed_ms
 
 func acceleration_based_on_speed(speed_ms, elevation, power, in_peloton_ = false):
@@ -156,6 +162,8 @@ func acceleration_based_on_speed(speed_ms, elevation, power, in_peloton_ = false
 	var drag_modifier = 1
 	if in_peloton_:
 		drag_modifier = 0.7
+	elif pelotonleader:
+		drag_modifier = 0.85
 		
 	return ((power * 0.97 / 70.5) / speed_ms) - 0.00278 * drag_modifier * speed_ms**2 - 0.03896 - 9.81 * sin(elevation)
 

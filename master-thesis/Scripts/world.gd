@@ -202,12 +202,16 @@ func update_bike_order():
 			
 		var dist_1st = null
 		var dist_3rd = null
+		var dist_behind = null
+		
 		if i >= 1 and (i - 1) >= left:
 			dist_1st = prog[i - 1] - prog[i]
 		if i >= 3 and (i - 3) >= left:
 			dist_3rd = prog[i - 3] - prog[i]
+		if i + 1 < n and prog[i] - prog[i + 1] < 4.1:
+			dist_behind = prog[i] - prog[i + 1]
 
-		bike_neighborhoods[i] = [n_bikes, avg_dist, dist_1st, dist_3rd]
+		bike_neighborhoods[i] = [n_bikes, avg_dist, dist_1st, dist_3rd, dist_behind]
 
 func add_drone(auto_place: bool = true):
 	var drone_instance = drone.instantiate()
@@ -317,8 +321,8 @@ func add_bike():
 	var random_watt_variant = watt_spread * rng.randi_range(-1, 2)
 
 	bike_instance.set_watts(
-		393 + random_watt_variant,
-		593 + random_watt_variant
+		423 + random_watt_variant,
+		623 + random_watt_variant
 	)
 
 	path_instance.add_child(bike_instance)
