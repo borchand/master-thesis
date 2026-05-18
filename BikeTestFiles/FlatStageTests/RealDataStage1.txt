@@ -1,19 +1,18 @@
-S1:	1 bike    -	13981
-S2:	1 bike    -	13985 
-S3:	1 bike    -	13987
-S4:     32 bikes  - 	13991
-S5:     3 bikes   -    	14004
-S6:    	1 bikes   -    	14011
-S7:     1 bikes   -    	14016
-S8:     55 bikes  -    	14030
-S9:    	8 bikes   -    	14057
-S10:   	3 bikes   -    	14077
-S11:   	2 bikes   -    	14084
-S12:   	1 bike    -    	14099
-S13:    1 bike    -    	14110
-S14:    3 bikes   -    	14125
-S15:    2 bikes   -    	14137
-S16:    34 bikes  -   	14309
-S17:    1 bikes   -    	14318
-S18:    18 bikes  -    	14392
-S19:    1 bikes   -    	14552
+S1:   35 bikes   -   13991
+S2:    3 bikes   -   14004
+S3:    1 bike    -   14011
+S4:    1 bike    -   14016
+S5:   66 bikes   -   14030
+S6:    8 bikes   -   14057
+S7:    3 bikes   -   14077
+S8:    2 bikes   -   14084
+S9:    1 bike    -   14099
+S10:   1 bike    -   14110
+S11:   3 bikes   -   14125
+S12:   2 bikes   -   14137
+S13:  35 bikes   -   14309
+S14:   1 bike    -   14318
+S15:  19 bikes   -   14382
+S16:   1 bike    -   14542
+
+

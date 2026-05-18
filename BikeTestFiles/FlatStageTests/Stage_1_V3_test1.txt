@@ -1,0 +1,7 @@
+var speedUpProbability = 4
+var speedDownProbability = 4.5
+var cohesion_c =  1.2
+var separation_c = 0.01
+Watts 424
+Watts 624 
+Spread: 9

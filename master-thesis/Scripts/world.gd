@@ -93,6 +93,7 @@ func _ready():
 		$Menu/OtherContainer.visible = false
 		$Menu.offset_bottom = 60.0
 	
+	set_stage_variables()
 	for i in range(bike_count):
 		add_bike()
 
@@ -161,14 +162,18 @@ func update_cached_world_data():
 
 func set_stage_variables():
 	match path_instance.route_file_path:
-		"res://stages/stage-1-route.json": 
-			return
+		"res://stages/stage-1-route.json":
+			bike_restWatt=423; bike_sprintWatt = 623; watt_spread = 9
+			bike_cohesion = 1.2; bike_seperation = 0.01; bike_speedupchance = 4.0; bike_speedDownChance = 4.5
 		"res://stages/stage-8-route.json":
-			return
+			bike_restWatt=348; bike_sprintWatt = 548; watt_spread = 7
+			bike_cohesion = 0.8; bike_seperation = 0.8; bike_speedupchance = 30.0; bike_speedDownChance = 4.5
 		"res://stages/stage-10-route.json":
-			return
+			bike_restWatt=400; bike_sprintWatt = 600; watt_spread = 9
+			bike_cohesion = 0.8; bike_seperation = 0.05; bike_speedupchance = 5.0; bike_speedDownChance = 4.5
 		"res://stages/stage-19-route.json":
-			return
+			bike_restWatt=400; bike_sprintWatt = 600; watt_spread = 9
+			bike_cohesion = 0.8; bike_seperation = 0.05; bike_speedupchance = 5.0; bike_speedDownChance = 4.5
 
 func erase_bike(node):
 	bike_process_list.erase(node)
@@ -331,11 +336,15 @@ func add_bike():
 
 	var random_watt_variant = watt_spread * rng.randi_range(-1, 2)
 
-	bike_instance.set_watts(
-		423 + random_watt_variant,
-		623 + random_watt_variant
+	bike_instance.set_variables(
+		bike_restWatt + random_watt_variant,
+		bike_sprintWatt + random_watt_variant,
+		bike_cohesion,
+		bike_seperation,
+		bike_speedupchance,
+		bike_speedDownChance
 	)
-
+	
 	path_instance.add_child(bike_instance)
 	bike_instance.progress = (random_watt_variant / 2.0) + rng.randf_range(0.0, 2.0)
 	bike_process_list.append(bike_instance)

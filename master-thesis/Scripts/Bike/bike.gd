@@ -18,11 +18,10 @@ var is_rl: bool = false
 var is_training: bool = false
 
 var speed = 9.0
-var speedUpProbability = 4
-var speedDownProbability = 4.5
+var speedUpProbability := 5.0
+var speedDownProbability := 4.5
 var acceleration = 0.0
 
-var sustainable_force = 25 # not used
 var sustainable_watt = null
 var initial_breakout_watt = null
 var a_fatigue_resistence = 0.00003
@@ -33,8 +32,8 @@ var in_peloton = false
 var pelotonleader = false
 var behavior = "cruise"  #cruise, attack
 
-var cohesion_c =  1.2    #Set by trial and error
-var separation_c = 0.01  #0.05   #Set by trial and error 
+var cohesion_c :=  0.8    #Set by trial and error
+var separation_c := 0.01  #0.05   #Set by trial and error 
 var n_breakouts = 0
 var max_speed = 0
 
@@ -42,13 +41,18 @@ func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
 	world = get_parent().get_parent()
 
+var printCheck = true
+
 func _physics_process(delta):
+	if printCheck:
+		printCheck = false
+		print(sustainable_watt, " ", initial_breakout_watt, " ", cohesion_c, " ", separation_c, " ", speedUpProbability, " ", speedDownProbability)
 	timer += delta
 	total_time += delta
 	if timer >= timer_threashold:
 		timer = timer-timer_threashold
 		coltroler(timer_threashold)
-	
+		
 	if speed>max_speed:
 		max_speed=speed
 	self.progress += speed * delta
@@ -178,9 +182,13 @@ func watt_limited_by_stamina():
 	var break_away_bonus = initial_breakout_watt-sustainable_watt
 	return break_away_bonus*exp(-1*b_stamina_degresse*break_away_bonus*total_time)
 
-func set_watts(sustainable_watt_ = 355, initial_breakout_watt_ = 531):
+func set_variables(sustainable_watt_ = 400, initial_breakout_watt_ = 600, cohesion_ = 0.8, seperation_ = 0.05, speedup_ = 5.0, speeddown_ = 4.5):
 	sustainable_watt = sustainable_watt_
 	initial_breakout_watt = initial_breakout_watt_
+	cohesion_c =  cohesion_    #Set by trial and error
+	separation_c = seperation_
+	speedUpProbability = speedup_
+	speedDownProbability = speeddown_
 
 func find_neighborhood():
 	return world.bike_neighborhoods[race_index]
