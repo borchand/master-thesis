@@ -1,7 +1,7 @@
 extends Node
 class_name CustomLogger
 
-var logging = false
+var logging = true
 var current_run_folders := {}
 
 var bikes = ""
@@ -67,3 +67,47 @@ func append_line(vehicle_id: String, vehicle_type: String, data):
 		file.seek_end()
 		file.store_line(",".join(data))
 		file.close()
+
+func _get_run_name(run_folder: String) -> String:
+	return run_folder.get_file()
+
+func log_bike_finish_time(
+	finish_time: float,
+):
+	if not logging:
+		return
+
+	var vehicle_type = "bike_finish_time"
+
+	if not current_run_folders.has(vehicle_type):
+		start_new_run(vehicle_type)
+
+	var run_folder = current_run_folders[vehicle_type]
+
+	var file_path = run_folder.path_join(
+		"%s_results.csv" % vehicle_type
+	)
+
+	var file_exists = FileAccess.file_exists(file_path)
+
+	var file = FileAccess.open(
+		file_path,
+		FileAccess.READ_WRITE if file_exists else FileAccess.WRITE
+	)
+
+	if not file_exists:
+		file.store_line(
+			"Bikes: %s, Drones: %s, Stage: %s, Size: %s"
+			% [bikes, drones, track, size]
+		)
+
+		file.store_line("Run, Finish Time")
+
+	file.seek_end()
+
+	file.store_line(
+		"%.4f"
+		% [finish_time]
+	)
+
+	file.close()
