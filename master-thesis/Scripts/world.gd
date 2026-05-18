@@ -311,7 +311,7 @@ func place_drone_along_middle_section(drone_instance, route_index, route_drone_c
 
 
 func add_bike():
-	var watt_spread = 9
+	var watt_spread = 7
 	var bike_instance = bike.instantiate()
 
 	bike_instance.connect("freeing_bike", bike_freed)
@@ -321,8 +321,8 @@ func add_bike():
 	var random_watt_variant = watt_spread * rng.randi_range(-1, 2)
 
 	bike_instance.set_watts(
-		423 + random_watt_variant,
-		623 + random_watt_variant
+		363 + random_watt_variant,
+		563 + random_watt_variant
 	)
 
 	path_instance.add_child(bike_instance)

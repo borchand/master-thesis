@@ -1,0 +1,33 @@
+S1:	51 bike    -	13826
+S2:	4 bikes    -	13831 
+S3:	3 bikes    -	13839
+S4:     3 bikes  - 	13849
+S5:     6 bikes   -    	13857
+S6:    	1 bikes   -    	13864
+S7:     18 bikes   -   	13869
+S8:     24 bikes  -    	13897
+S9:    	1 bikes   -    	13921
+S10:	3 bikes	  -	13928
+S11:   	8 bikes   -    	13939
+S12:   	3 bikes   -    	13948
+S13:   	2 bike    -    	13959
+S14:    10 bike    -    13967
+S15:    1 bikes   -    	13991
+S16:    1 bikes   -    	13998
+S17:    3 bikes  -   	14009
+S18:    2 bikes   -    	14030
+S19:    2 bikes  -    	14041
+S20:    3 bikes   -    	14077
+S21:    7 bikes   -    	14087
+S22:    1 bikes   -    	14094
+S23:    1 bikes   -    	14098
+S24:    2 bikes   -    	14105
+S25:    2 bikes   -    	14113
+S26:	2 bikes   -    	14133
+S27:    2 bikes   -    	14214
+S28:    3 bikes   -    	14228
+S29:    1 bikes   -    	14232
+S30:    4 bikes   -    	14273
+S31:    1 bikes   -    	14659
+
+
