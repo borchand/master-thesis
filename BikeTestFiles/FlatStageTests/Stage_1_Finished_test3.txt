@@ -1,6 +1,36 @@
-import re
+  Sequence  1:  25 bike(s)  |  14012
+  Sequence  2:   5 bike(s)  |  14015
+  Sequence  3:   1 bike(s)  |  14018
+  Sequence  4:   1 bike(s)  |  14019
+  Sequence  5:   1 bike(s)  |  14021
+  Sequence  6:   2 bike(s)  |  14022
+  Sequence  7:   1 bike(s)  |  14023
+  Sequence  8:   3 bike(s)  |  14024
+  Sequence  9:  15 bike(s)  |  14041
+  Sequence 10:   1 bike(s)  |  14043
+  Sequence 11:   4 bike(s)  |  14044
+  Sequence 12:   2 bike(s)  |  14047
+  Sequence 13:   5 bike(s)  |  14049
+  Sequence 14:   2 bike(s)  |  14053
+  Sequence 15:   8 bike(s)  |  14054
+  Sequence 16:   4 bike(s)  |  14059
+  Sequence 17:   3 bike(s)  |  14073
+  Sequence 18:  28 bike(s)  |  14075
+  Sequence 19:   1 bike(s)  |  14083
+  Sequence 20:  13 bike(s)  |  14084
+  Sequence 21:  21 bike(s)  |  14112
+  Sequence 22:  16 bike(s)  |  14122
+  Sequence 23:   5 bike(s)  |  14150
+  Sequence 24:   3 bike(s)  |  14183
+  Sequence 25:   4 bike(s)  |  14327
+  Sequence 26:   1 bike(s)  |  14482
+  Sequence 27:   1 bike(s)  |  14550
+  Sequence 28:   1 bike(s)  |  14598
+  Sequence 29:   1 bike(s)  |  14655
+  Sequence 30:   1 bike(s)  |  14986
+  Sequence 31:   1 bike(s)  |  15040
 
-data = """
+
 Godot Engine v4.6.2.stable.mono.official.71f334935 - https://godotengine.org
 OpenGL API 3.3.0 NVIDIA 560.94 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 2060
 
@@ -687,25 +717,3 @@ sim_time=15030.0166665321 wall_time=1567.8 ratio=9.58669260526349 drones=0
 Bike: @PathFollow3D@20 Finish time: 15040.4333331986 nBreakout: 4  Max_speed: 21.0051556337564 MaxProgress: 186499.40625
 Run time: 1568.117 seconds
 --- Debugging process stopped ---
-
-"""
-# Parse all finish times
-times = [float(m) for m in re.findall(r"Finish time: ([\d.]+)", data)]
-
-# Group into sequences where the gap between consecutive times is < 0.85
-GAP = 1.00
-sequences = []
-current_seq = [times[0]]
-
-for t in times[1:]:
-    if t - current_seq[-1] < GAP:
-        current_seq.append(t)
-    else:
-        sequences.append(current_seq)
-        current_seq = [t]
-sequences.append(current_seq)
-
-# Print results
-print(f"Found {len(sequences)} sequences (gap threshold: {GAP}):\n")
-for i, seq in enumerate(sequences, 1):
-    print(f"  Sequence {i:2d}: {len(seq):3d} bike(s)  |  {seq[0]:.0f}")# → {seq[-1]:.2f}")

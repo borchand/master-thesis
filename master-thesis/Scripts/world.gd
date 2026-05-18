@@ -102,7 +102,7 @@ func _ready():
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 
 	update_cached_world_data()
-	update_bike_order2()
+	update_bike_order()
 
 
 func _physics_process(delta: float) -> void:
@@ -157,13 +157,6 @@ func erase_bike(node):
 	
 	for i in bike_process_list.size():
 		bike_process_list[i].race_index = i
-
-func update_bike_order2():
-	bike_process_list.sort_custom(func(a, b): return a.progress > b.progress)
-	var i = 0
-	for x in bike_process_list:
-		bike_index_dic[bike_process_list[i].get_instance_id()] = i 
-		i += 1
 
 func update_bike_order():
 	bike_process_list.sort_custom(func(a, b): return a.progress > b.progress)
@@ -311,7 +304,7 @@ func place_drone_along_middle_section(drone_instance, route_index, route_drone_c
 
 
 func add_bike():
-	var watt_spread = 7
+	var watt_spread = 9
 	var bike_instance = bike.instantiate()
 
 	bike_instance.connect("freeing_bike", bike_freed)
@@ -321,8 +314,8 @@ func add_bike():
 	var random_watt_variant = watt_spread * rng.randi_range(-1, 2)
 
 	bike_instance.set_watts(
-		400 + random_watt_variant,
-		600 + random_watt_variant
+		423 + random_watt_variant,
+		623 + random_watt_variant
 	)
 
 	path_instance.add_child(bike_instance)
@@ -357,6 +350,7 @@ func reset_track_and_bike_and_drone() -> void:
 
 	place_all_drones()
 	update_cached_world_data()
+	update_bike_order()
 
 
 func respawn_drone(drone_instance: Node3D) -> void:

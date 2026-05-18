@@ -3,7 +3,6 @@ extends PathFollow3D
 class_name Bike
 signal freeing_bike
 
-@onready var raycast = $RayCast3D
 @onready var bikebody = $BikeBody
 var world
 var race_index: int
@@ -35,7 +34,7 @@ var pelotonleader = false
 var behavior = "cruise"  #cruise, attack
 
 var cohesion_c =  0.8    #Set by trial and error
-var separation_c = 0.8  #0.05   #Set by trial and error 
+var separation_c = 0.05  #0.05   #Set by trial and error 
 var n_breakouts = 0
 var max_speed = 0
 
@@ -67,15 +66,14 @@ func control1(delta):
 	var elevation = -1 * bikebody.global_rotation.x #positive = going up
 	var wanted_power  = sustainable_watt
 
-	#var raycast_result = raycast.run_raycast()
-	var raycast_result = find_neighborhood()
+	var neighborhood_result = find_neighborhood()
 	
-	if len(raycast_result) != 5:
+	if len(neighborhood_result) != 5:
 		print("Ray_cast length is not 5")
 		return
-	if raycast_result[0] == 0 or raycast_result[2] > 6 or progress_ratio >= 0.985: #you left the peleton or are in front
+	if neighborhood_result[0] == 0 or neighborhood_result[2] > 6 or progress_ratio >= 0.985: #you left the peleton or are in front
 		in_peloton = false
-		if raycast_result[4] != null and raycast_result[4]<3:
+		if neighborhood_result[4] != null and neighborhood_result[4]<3:
 			pelotonleader = true
 		else:
 			pelotonleader = false
@@ -84,7 +82,7 @@ func control1(delta):
 
 	behaviorChange(delta, elevation)
 	if behavior == "cruise":
-		wanted_power = cruise(elevation, raycast_result)
+		wanted_power = cruise(elevation, neighborhood_result)
 	elif  behavior == "attack":
 		wanted_power = attack()
 
@@ -186,25 +184,6 @@ func set_watts(sustainable_watt_ = 355, initial_breakout_watt_ = 531):
 
 func find_neighborhood():
 	return world.bike_neighborhoods[race_index]
-
-func find_neighborhood2():
-	var progessList = world.bike_process_list
-	var id = self.get_instance_id()
-	var index = world.bike_index_dic[id]
-	var bikeProgress = world.bike_process_list[index].get_progress()
-	var sum = 0
-	var n_bikes = 0 
-	var dist_to_bike_3th = null
-	var dist_to_bike_1st = null
-	while index > 0 and progessList[index-1].get_progress()-bikeProgress<30:
-		n_bikes += 1
-		sum += progessList[index-1].get_progress()-bikeProgress
-		if n_bikes == 1: 
-			dist_to_bike_1st = progessList[index-1].get_progress()-bikeProgress
-		if n_bikes == 3: 
-			dist_to_bike_3th = progessList[index-1].get_progress()-bikeProgress
-		index -= 1
-	return [n_bikes, (sum/max(1, n_bikes)), dist_to_bike_1st ,dist_to_bike_3th,]
 
 static func get_randomize_for_rl():
 	var _rng = RandomNumberGenerator.new()
