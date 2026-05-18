@@ -55,7 +55,7 @@ var start_time := 0
 var wall_start := 0
 var sim_time := 0.0
 var next_ratio_print_time := 30.0
-###
+
 var bike_restWatt := 400
 var bike_sprintWatt := 600
 var watt_spread := 9
@@ -163,7 +163,7 @@ func update_cached_world_data():
 func set_stage_variables():
 	match path_instance.route_file_path:
 		"res://stages/stage-1-route.json":
-			bike_restWatt=423; bike_sprintWatt = 623; watt_spread = 9
+			bike_restWatt=423; bike_sprintWatt = 623; watt_spread = 7
 			bike_cohesion = 1.2; bike_seperation = 0.01; bike_speedupchance = 4.0; bike_speedDownChance = 4.5
 		"res://stages/stage-8-route.json":
 			bike_restWatt=358; bike_sprintWatt = 558; watt_spread = 7
