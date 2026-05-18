@@ -163,7 +163,7 @@ func update_cached_world_data():
 func set_stage_variables():
 	match path_instance.route_file_path:
 		"res://stages/stage-1-route.json":
-			bike_restWatt=423; bike_sprintWatt = 623; watt_spread = 7
+			bike_restWatt=423; bike_sprintWatt = 623; watt_spread = 9
 			bike_cohesion = 1.2; bike_seperation = 0.01; bike_speedupchance = 4.0; bike_speedDownChance = 4.5
 		"res://stages/stage-8-route.json":
 			bike_restWatt=358; bike_sprintWatt = 558; watt_spread = 7
