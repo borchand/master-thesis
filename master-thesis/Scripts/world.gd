@@ -56,6 +56,14 @@ var wall_start := 0
 var sim_time := 0.0
 var next_ratio_print_time := 30.0
 
+var bike_restWatt := 400
+var bike_sprintWatt := 600
+var watt_spread := 9
+var bike_cohesion := 0.8
+var bike_seperation := 0.05
+var bike_speedupchance := 5.0
+var bike_speedDownChance := 4.5
+
 
 func _ready():
 	start_time = Time.get_ticks_msec()
@@ -84,7 +92,7 @@ func _ready():
 		$Menu/ToggleContainer.visible = false
 		$Menu/OtherContainer.visible = false
 		$Menu.offset_bottom = 60.0
-
+	
 	for i in range(bike_count):
 		add_bike()
 
@@ -150,6 +158,17 @@ func update_cached_world_data():
 			"id": d.id,
 			"position": d.global_position
 		})
+
+func set_stage_variables():
+	match path_instance.route_file_path:
+		"res://stages/stage-1-route.json": 
+			return
+		"res://stages/stage-8-route.json":
+			return
+		"res://stages/stage-10-route.json":
+			return
+		"res://stages/stage-19-route.json":
+			return
 
 func erase_bike(node):
 	bike_process_list.erase(node)
@@ -304,7 +323,6 @@ func place_drone_along_middle_section(drone_instance, route_index, route_drone_c
 
 
 func add_bike():
-	var watt_spread = 9
 	var bike_instance = bike.instantiate()
 
 	bike_instance.connect("freeing_bike", bike_freed)

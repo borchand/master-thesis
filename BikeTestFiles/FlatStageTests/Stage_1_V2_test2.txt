@@ -1,6 +1,34 @@
-import re
+  Sequence  1:  69 bike(s)  |  14003
+  Sequence  2:   2 bike(s)  |  14006
+  Sequence  3:   6 bike(s)  |  14008
+  Sequence  4:   7 bike(s)  |  14014
+  Sequence  5:   2 bike(s)  |  14044
+  Sequence  6:   4 bike(s)  |  14052
+  Sequence  7:  12 bike(s)  |  14062
+  Sequence  8:   1 bike(s)  |  14070
+  Sequence  9:  13 bike(s)  |  14071
+  Sequence 10:   2 bike(s)  |  14093
+  Sequence 11:   4 bike(s)  |  14095
+  Sequence 12:   3 bike(s)  |  14102
+  Sequence 13:   1 bike(s)  |  14104
+  Sequence 14:   2 bike(s)  |  14134
+  Sequence 15:   7 bike(s)  |  14205
+  Sequence 16:  15 bike(s)  |  14210
+  Sequence 17:   9 bike(s)  |  14227
+  Sequence 18:   4 bike(s)  |  14248
+  Sequence 19:   3 bike(s)  |  14288
+  Sequence 20:   5 bike(s)  |  14359
+  Sequence 21:   1 bike(s)  |  14466
+  Sequence 22:   1 bike(s)  |  14485
+  Sequence 23:   1 bike(s)  |  14515
+  Sequence 24:   1 bike(s)  |  14577
+  Sequence 25:   1 bike(s)  |  14672
+  Sequence 26:   1 bike(s)  |  14741
+  Sequence 27:   1 bike(s)  |  15000
+  Sequence 28:   1 bike(s)  |  15027
+  Sequence 29:   1 bike(s)  |  15028
 
-data = """
+
 Godot Engine v4.6.2.stable.mono.official.71f334935 - https://godotengine.org
 OpenGL API 3.3.0 NVIDIA 560.94 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 2060
 
@@ -686,25 +714,3 @@ Bike: @PathFollow3D@170 Finish time: 15026.7833331988 nBreakout: 2  Max_speed: 2
 Bike: @PathFollow3D@152 Finish time: 15028.4166665321 nBreakout: 3  Max_speed: 20.202777852942 MaxProgress: 186499.40625
 Run time: 1646.386 seconds
 --- Debugging process stopped ---
-
-"""
-# Parse all finish times
-times = [float(m) for m in re.findall(r"Finish time: ([\d.]+)", data)]
-
-# Group into sequences where the gap between consecutive times is < 0.85
-GAP = 1.00
-sequences = []
-current_seq = [times[0]]
-
-for t in times[1:]:
-    if t - current_seq[-1] < GAP:
-        current_seq.append(t)
-    else:
-        sequences.append(current_seq)
-        current_seq = [t]
-sequences.append(current_seq)
-
-# Print results
-print(f"Found {len(sequences)} sequences (gap threshold: {GAP}):\n")
-for i, seq in enumerate(sequences, 1):
-    print(f"  Sequence {i:2d}: {len(seq):3d} bike(s)  |  {seq[0]:.0f}")# → {seq[-1]:.2f}")

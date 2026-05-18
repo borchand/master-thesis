@@ -18,7 +18,7 @@ var is_rl: bool = false
 var is_training: bool = false
 
 var speed = 9.0
-var speedUpProbability = 5
+var speedUpProbability = 4
 var speedDownProbability = 4.5
 var acceleration = 0.0
 
@@ -33,7 +33,7 @@ var in_peloton = false
 var pelotonleader = false
 var behavior = "cruise"  #cruise, attack
 
-var cohesion_c =  0.8    #Set by trial and error
+var cohesion_c =  1.2    #Set by trial and error
 var separation_c = 0.01  #0.05   #Set by trial and error 
 var n_breakouts = 0
 var max_speed = 0
