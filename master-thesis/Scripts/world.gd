@@ -55,7 +55,7 @@ var start_time := 0
 var wall_start := 0
 var sim_time := 0.0
 var next_ratio_print_time := 30.0
-
+###
 var bike_restWatt := 400
 var bike_sprintWatt := 600
 var watt_spread := 9

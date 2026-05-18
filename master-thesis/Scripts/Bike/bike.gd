@@ -58,7 +58,7 @@ func _physics_process(delta):
 	self.progress += speed * delta
 	if self.progress >= max_progress:
 		if not is_rl:
-			print("Bike: ", self.name, " Finish time: ", total_time, " nBreakout: ", n_breakouts, "  Max_speed: ", max_speed, " MaxProgress: ", self.progress )
+			print("Bike: ", self.name, " Finish time: ", total_time, " nBreakout: ", n_breakouts, "  Max_speed: ", max_speed)
 		safe_queue_free()
 
 func coltroler(delta):
