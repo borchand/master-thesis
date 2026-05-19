@@ -1,6 +1,50 @@
-import re
+  Sequence  1:  23 bike(s)  |  13698
+  Sequence  2:   5 bike(s)  |  13704
+  Sequence  3:   6 bike(s)  |  13707
+  Sequence  4:   1 bike(s)  |  13709
+  Sequence  5:   1 bike(s)  |  13711
+  Sequence  6:  36 bike(s)  |  13756
+  Sequence  7:   2 bike(s)  |  13761
+  Sequence  8:   7 bike(s)  |  13764
+  Sequence  9:   1 bike(s)  |  13768
+  Sequence 10:   1 bike(s)  |  13769
+  Sequence 11:   1 bike(s)  |  13772
+  Sequence 12:   2 bike(s)  |  13777
+  Sequence 13:   1 bike(s)  |  13840
+  Sequence 14:  18 bike(s)  |  13841
+  Sequence 15:   4 bike(s)  |  13849
+  Sequence 16:   1 bike(s)  |  13852
+  Sequence 17:   1 bike(s)  |  13856
+  Sequence 18:   3 bike(s)  |  13858
+  Sequence 19:   1 bike(s)  |  13865
+  Sequence 20:   2 bike(s)  |  13869
+  Sequence 21:   2 bike(s)  |  13870
+  Sequence 22:   1 bike(s)  |  13872
+  Sequence 23:   3 bike(s)  |  13874
+  Sequence 24:  30 bike(s)  |  13877
+  Sequence 25:   4 bike(s)  |  13887
+  Sequence 26:   1 bike(s)  |  14011
+  Sequence 27:   1 bike(s)  |  14014
+  Sequence 28:   1 bike(s)  |  14038
+  Sequence 29:   2 bike(s)  |  14076
+  Sequence 30:   1 bike(s)  |  14112
+  Sequence 31:   1 bike(s)  |  14115
+  Sequence 32:   1 bike(s)  |  14173
+  Sequence 33:   1 bike(s)  |  14202
+  Sequence 34:   1 bike(s)  |  14216
+  Sequence 35:   1 bike(s)  |  14217
+  Sequence 36:   2 bike(s)  |  14219
+  Sequence 37:   1 bike(s)  |  14222
+  Sequence 38:   1 bike(s)  |  14266
+  Sequence 39:   1 bike(s)  |  14414
+  Sequence 40:   1 bike(s)  |  14473
+  Sequence 41:   1 bike(s)  |  14479
+  Sequence 42:   1 bike(s)  |  14490
+  Sequence 43:   1 bike(s)  |  14752
+  Sequence 44:   1 bike(s)  |  14771
+  Sequence 45:   1 bike(s)  |  14808
+  Sequence 46:   1 bike(s)  |  14813
 
-data = """
 Godot Engine v4.6.2.stable.mono.official.71f334935 - https://godotengine.org
 OpenGL API 3.3.0 - Build 32.0.101.7026 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics
 
@@ -859,25 +903,3 @@ Bike: @PathFollow3D@10 Finish time: 14808.233333202 nBreakout: 17  Max_speed: 17
 Bike: @PathFollow3D@129 Finish time: 14812.7166665353 nBreakout: 21  Max_speed: 17.5283843545039
 Run time: 1677.899 seconds
 --- Debugging process stopped ---
-
-"""
-# Parse all finish times
-times = [float(m) for m in re.findall(r"Finish time: ([\d.]+)", data)]
-
-# Group into sequences where the gap between consecutive times is < 0.85
-GAP = 1.00
-sequences = []
-current_seq = [times[0]]
-
-for t in times[1:]:
-    if t - current_seq[-1] < GAP:
-        current_seq.append(t)
-    else:
-        sequences.append(current_seq)
-        current_seq = [t]
-sequences.append(current_seq)
-
-# Print results
-print(f"Found {len(sequences)} sequences (gap threshold: {GAP}):\n")
-for i, seq in enumerate(sequences, 1):
-    print(f"  Sequence {i:2d}: {len(seq):3d} bike(s)  |  {seq[0]:.0f}")# → {seq[-1]:.2f}")
