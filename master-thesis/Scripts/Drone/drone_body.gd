@@ -76,6 +76,9 @@ func _ready():
 
 func _physics_process(_delta):
 	if is_training:
+		if is_rl:
+			apply_central_force(_cached_force)
+			rotate_towards_direction(_cached_rotation_dir)
 		return
 
 	should_check_camera = timestep % 30 == 0
@@ -84,8 +87,9 @@ func _physics_process(_delta):
 		if _boids_throttle % 3 == id % 3:
 			_compute_boids()
 		_boids_throttle += 1
-		apply_central_force(_cached_force)
-		rotate_towards_direction(_cached_rotation_dir)
+
+	apply_central_force(_cached_force)
+	rotate_towards_direction(_cached_rotation_dir)
 
 	if should_check_camera:
 		update_camera_readings_for_log()
@@ -125,6 +129,8 @@ func _compute_boids():
 	var clusters := _cluster_bikes(bike_data)
 	var assigned := _assigned_cluster_local(clusters, drone_data)
 	var bikes: Array = assigned["bikes"]
+
+	_draw_cluster_debug_lines([assigned])
 
 	var alignment_vector = alignment(bikes)
 	var cohesion_vector = cohesion(bikes)
@@ -578,6 +584,36 @@ func read_sensor(drones: Dictionary, bikes: Dictionary):
 		var data = get_bike_data(bike)
 		if should_check_camera:
 			if camera.is_position_in_frustum(bike.global_position):
+				camera_readings.append(data)
+		sensor_readings_bikes.append(data)
+
+func read_sensor_by_distance() -> void:
+	var sim = get_parent()
+	var self_pos := global_position
+	var sensor_radius_sq: float = shared.drone_communication_size * shared.drone_communication_size
+
+	camera_readings = []
+	sensor_readings_drones = []
+	sensor_readings_bikes = []
+
+	for d in sim.drone_list:
+		if d == self:
+			continue
+		if self_pos.distance_squared_to(d.global_position) <= sensor_radius_sq:
+			sensor_readings_drones.append({
+				"id": d.id,
+				"position": d.global_position,
+				"distance": self_pos.distance_to(d.global_position),
+				"direction": self_pos.direction_to(d.global_position)
+			})
+
+	for bike_instance in shared.bike_lists[sim.instance_id]:
+		var b: Bike_body = bike_instance.bikebody
+		if self_pos.distance_squared_to(b.global_position) > sensor_radius_sq:
+			continue
+		var data = get_bike_data(b)
+		if should_check_camera:
+			if camera.is_position_in_frustum(b.global_position):
 				camera_readings.append(data)
 		sensor_readings_bikes.append(data)
 
