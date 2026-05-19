@@ -44,9 +44,6 @@ func _ready():
 var printCheck = true
 
 func _physics_process(delta):
-	if printCheck:
-		printCheck = false
-		print(sustainable_watt, " ", initial_breakout_watt, " ", cohesion_c, " ", separation_c, " ", speedUpProbability, " ", speedDownProbability)
 	timer += delta
 	total_time += delta
 	if timer >= timer_threashold:

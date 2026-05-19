@@ -72,7 +72,7 @@ func _ready():
 	if not is_training:
 		start_logging()
 	body_entered.connect(_on_body_entered)
-	$CollisionShape3D.disabled = true
+	#$CollisionShape3D.disabled = true
 
 func _physics_process(_delta):
 	if is_training:
@@ -325,19 +325,20 @@ func separation():
 
 	return separation_vector * avoidfactor
 
-func height_force(bikes):
+var _smooth_target_y: float = 0.0
+
+func height_force(bikes) -> float:
 	if bikes.is_empty():
 		return 0.0
-
-	var highest_y = -INF
+	var highest_y := -INF
 	for bike in bikes:
-		highest_y = max(highest_y, bike.position.y)
-
-	var desired_y = highest_y + height_offset
-	var y_error = desired_y - global_position.y
-
+		highest_y = max(highest_y, bike["position"].y)
+	var desired_y := highest_y + height_offset
+	# Smooth the target so one bike dipping/rising doesn't yank the drone
+	_smooth_target_y = lerpf(_smooth_target_y, desired_y, 0.05)
+	var y_error := _smooth_target_y - global_position.y
 	return clamp(y_error * y_gain - linear_velocity.y * y_damp, -max_up_force, max_up_force)
-
+	
 func rotate_towards_direction(direction_vector: Vector3):
 	var desired_forward = flat_dir(direction_vector)
 
@@ -635,7 +636,8 @@ func get_bike_data(bike: Bike_body) -> Dictionary:
 # n = 10 -> 5
 # n = 20 -> 6
 func _coverage_score(n: int) -> int:
-	return round(log(float(n)) / log(1.9)) + 1
+	return round(pow(log(float(n)) / log(float(2.4)), 2.3)) + 1 
+	#return round(log(float(n)) / log(1.9)) + 1
 
 # ─── Logging ────────────────────────────────────────────────────────────────────
 
