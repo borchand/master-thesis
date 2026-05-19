@@ -166,7 +166,7 @@ func set_stage_variables():
 			bike_restWatt=423; bike_sprintWatt = 623; watt_spread = 9
 			bike_cohesion = 1.2; bike_seperation = 0.01; bike_speedupchance = 4.0; bike_speedDownChance = 4.5
 		"res://stages/stage-8-route.json":
-			bike_restWatt=358; bike_sprintWatt = 558; watt_spread = 9
+			bike_restWatt=358; bike_sprintWatt = 558; watt_spread = 10
 			bike_cohesion = 0.7; bike_seperation = 0.1; bike_speedupchance = 40.0; bike_speedDownChance = 4.5
 		"res://stages/stage-10-route.json":
 			bike_restWatt=400; bike_sprintWatt = 600; watt_spread = 9
