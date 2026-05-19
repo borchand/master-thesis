@@ -72,7 +72,7 @@ func _ready():
 	if not is_training:
 		start_logging()
 	body_entered.connect(_on_body_entered)
-	$CollisionShape3D.disabled = true
+	#$CollisionShape3D.disabled = true
 
 func _physics_process(_delta):
 	if is_training:
@@ -319,18 +319,6 @@ func separation():
 
 	return separation_vector * avoidfactor
 
-#func height_force(bikes):
-	#if bikes.is_empty():
-		#return 0.0
-#
-	#var highest_y = -INF
-	#for bike in bikes:
-		#highest_y = max(highest_y, bike.position.y)
-#
-	#var desired_y = highest_y + height_offset
-	#var y_error = desired_y - global_position.y
-#
-	#return clamp(y_error * y_gain - linear_velocity.y * y_damp, -max_up_force, max_up_force)
 var _smooth_target_y: float = 0.0
 
 func height_force(bikes) -> float:

@@ -36,7 +36,7 @@ var instance_id: int = -1
 var drone_list: Array = []
 
 var bike_count: int = 180
-var drone_count: int = 0
+var drone_count: int = 90
 
 @export var drone_spawn_spacing: float = 1.5
 @export var place_drone_along_road: bool = false
