@@ -37,7 +37,7 @@ var timestep = 1
 @export var centeringfactor = 2
 @export var matchingfactor = 0.4
 
-@export var version: Version = Version.Boids
+@export var version: Version = Version.BoidsPriorityGroups
 @export var random_selection_rate := 0.2
 var keep_selection_for_n_frames = 100
 
@@ -47,7 +47,7 @@ var keep_selection_for_n_frames = 100
 
 @export var coverage_radius := 10.0
 
-@export var debug_draw: bool = true
+@export var debug_draw: bool = false
 @export var debug_line_width: float = 0.1
 
 var _debug_bike_lines: Array[MeshInstance3D] = []
@@ -58,6 +58,12 @@ var _debug_cluster_target_line: MeshInstance3D = null
 @export var idle_until_needed := false
 @export var has_activated := true
 
+var should_check_camera = false
+
+var _cached_force: Vector3 = Vector3.ZERO
+var _cached_rotation_dir: Vector3 = Vector3.ZERO
+var _boids_throttle: int = 0
+
 func _ready():
 	id = _next_id
 	_next_id += 1
@@ -66,30 +72,145 @@ func _ready():
 	if not is_training:
 		start_logging()
 	body_entered.connect(_on_body_entered)
+	$CollisionShape3D.disabled = true
 
 func _physics_process(_delta):
-	if not is_rl:
-		boids()
-
-
-	if idle_until_needed and not has_activated:
-		read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
-
-		if not _should_activate_from_coverage():
-			linear_velocity = Vector3.ZERO
-			angular_velocity = Vector3.ZERO
-			timestep += 1
-			return
-
-		has_activated = true
-
 	if is_training:
+		if is_rl:
+			apply_central_force(_cached_force)
+			rotate_towards_direction(_cached_rotation_dir)
 		return
 
-	boids()
-	log_information(timestep)
+	should_check_camera = timestep % 30 == 0
+
+	if not is_rl:
+		if _boids_throttle % 3 == id % 3:
+			_compute_boids()
+		_boids_throttle += 1
+
+	apply_central_force(_cached_force)
+	rotate_towards_direction(_cached_rotation_dir)
+
+	if should_check_camera:
+		update_camera_readings_for_log()
+		log_information(timestep)
+
 	timestep += 1
 	collision_at_time_step = 0
+
+func _compute_boids():
+	var sim = get_parent()
+	var self_pos = global_position
+	var sensor_radius_sq: float = shared.drone_communication_size * shared.drone_communication_size
+
+	var bike_data: Array = []
+	for bike_instance in shared.bike_lists[sim.instance_id]:
+		var b = bike_instance.bikebody
+		if self_pos.distance_squared_to(b.global_position) > sensor_radius_sq:
+			continue
+		var fwd = -b.global_transform.basis.z
+		fwd.y = 0.0
+		bike_data.append({
+			"position": b.global_position,
+			"velocity": fwd.normalized() * bike_instance.speed,
+			"id": b.bike_id
+		})
+
+	var drone_data: Array = []
+	for d in sim.drone_list:
+		if d == self:
+			continue
+		if self_pos.distance_squared_to(d.global_position) <= sensor_radius_sq:
+			drone_data.append({"id": d.id, "position": d.global_position})
+
+	sensor_readings_bikes = bike_data
+	sensor_readings_drones = drone_data
+
+	var clusters := _cluster_bikes(bike_data)
+	var assigned := _assigned_cluster_local(clusters, drone_data)
+	var bikes: Array = assigned["bikes"]
+
+	_draw_cluster_debug_lines([assigned])
+
+	var alignment_vector = alignment(bikes)
+	var cohesion_vector = cohesion(bikes)
+	var separation_vector = separation_fast()
+
+	var direction_vector = alignment_vector + cohesion_vector + separation_vector
+	direction_vector.y = height_force(bikes)
+
+	_cached_force = clamp_vector(direction_vector, max_force)
+	_cached_rotation_dir = -alignment_vector
+
+func _assigned_cluster_local(clusters: Array, local_drones: Array) -> Dictionary:
+	if clusters.is_empty():
+		return {
+			"centroid": Vector3.ZERO,
+			"velocity": Vector3.ZERO,
+			"size": 0,
+			"bikes": []
+		}
+
+	var best: Dictionary = {}
+	var best_val = -INF
+
+	var self_pos = global_position
+	var coverage_radius_sq = coverage_radius * coverage_radius
+	var forward = flat_dir(-global_transform.basis.z)
+
+	for cluster in clusters:
+		var centroid: Vector3 = cluster["centroid"]
+		var v = _coverage_score(cluster["size"])
+		var self_dist_sq = self_pos.distance_squared_to(centroid)
+
+		var count := 0
+		for d in local_drones:
+			var d_dist_sq = d["position"].distance_squared_to(centroid)
+			if d_dist_sq < self_dist_sq or d_dist_sq < coverage_radius_sq:
+				count += 1
+		v -= count
+
+		var to_cluster = centroid - self_pos
+		to_cluster.y = 0.0
+		if to_cluster.length_squared() > 0.0001 and forward.dot(to_cluster.normalized()) < 0.0:
+			v *= 0.8
+
+		if v > best_val:
+			best_val = v
+			best = cluster
+
+	return best
+
+func separation_fast():
+	var separation_vector = Vector3.ZERO
+	var avoid_radius_sq = avoid_radius * avoid_radius
+	var self_pos = global_position
+
+	for drone in sensor_readings_drones:
+		if drone["id"] == id:
+			continue
+
+		var diff = self_pos - drone["position"]
+		diff.y = 0.0
+
+		var dist_sq = diff.length_squared()
+
+		if dist_sq > avoid_radius_sq:
+			continue
+
+		dist_sq = max(dist_sq, 0.0001)
+		separation_vector += diff / dist_sq
+
+	return separation_vector * avoidfactor
+
+func update_camera_readings_for_log():
+	camera_readings.clear()
+
+	var bikes = get_parent().cached_bikes
+
+	for bike in bikes:
+		if camera.is_position_in_frustum(bike["position"]):
+			camera_readings.append(bike)
 
 func set_tunable_parameters(params: Dictionary):
 	avoid_radius = params["avoid_radius"]
@@ -345,7 +466,7 @@ func _should_activate_from_coverage():
 	for cluster in clusters:
 		var required_coverage = _coverage_score(cluster.size)
 		var covering_drones = _count_drones_covering_cluster(cluster)
-
+		
 		if covering_drones < required_coverage:
 			return true
 
@@ -357,10 +478,9 @@ func _count_drones_covering_cluster(cluster):
 
 	for drone in sensor_readings_drones:
 		var drone_pos: Vector3 = drone["position"]
-
+		
 		if drone_pos.distance_to(centroid) <= coverage_radius:
 			count += 1
-
 	return count
 
 # ─── Debug ────────────────────────────────────────────────────────────────────
@@ -462,8 +582,39 @@ func read_sensor(drones: Dictionary, bikes: Dictionary):
 
 	for bike in bikes:
 		var data = get_bike_data(bike)
-		if camera.is_position_in_frustum(bike.global_position):
-			camera_readings.append(data)
+		if should_check_camera:
+			if camera.is_position_in_frustum(bike.global_position):
+				camera_readings.append(data)
+		sensor_readings_bikes.append(data)
+
+func read_sensor_by_distance() -> void:
+	var sim = get_parent()
+	var self_pos := global_position
+	var sensor_radius_sq: float = shared.drone_communication_size * shared.drone_communication_size
+
+	camera_readings = []
+	sensor_readings_drones = []
+	sensor_readings_bikes = []
+
+	for d in sim.drone_list:
+		if d == self:
+			continue
+		if self_pos.distance_squared_to(d.global_position) <= sensor_radius_sq:
+			sensor_readings_drones.append({
+				"id": d.id,
+				"position": d.global_position,
+				"distance": self_pos.distance_to(d.global_position),
+				"direction": self_pos.direction_to(d.global_position)
+			})
+
+	for bike_instance in shared.bike_lists[sim.instance_id]:
+		var b: Bike_body = bike_instance.bikebody
+		if self_pos.distance_squared_to(b.global_position) > sensor_radius_sq:
+			continue
+		var data = get_bike_data(b)
+		if should_check_camera:
+			if camera.is_position_in_frustum(b.global_position):
+				camera_readings.append(data)
 		sensor_readings_bikes.append(data)
 
 func get_bike_data(bike: Bike_body) -> Dictionary:
