@@ -10,7 +10,7 @@ enum Version { BoidsRl, GroupingRl, GroupingBoidsRl }
 # GroupingBoidsRl: path to a trained BoidsRl ONNX model used for low-level movement
 @export var boids_rl_model_path: String = ""
 
-@onready var drone: RigidBody3D = $".."
+@onready var drone: Drone = $".."
 
 var _boids_rl_model: ONNXModel = null
 var _debug_lines: Array[MeshInstance3D] = []
@@ -25,6 +25,8 @@ var _grouping_rl_clusters: Array = []
 var _grouping_rl_selected_cluster: Dictionary = {}
 var _grouping_rl_cluster_dots: Array[MeshInstance3D] = []
 var _grouping_rl_selected_line: MeshInstance3D = null
+
+var _rl_throttle: int = 0
 
 # ─── RL setup ────────────────────────────────────────────────────────────────────
 
@@ -50,6 +52,11 @@ func _physics_process(_delta):
 		done = true
 		needs_reset = true
 		return
+
+	if not world.is_training:
+		_rl_throttle += 1
+		if _rl_throttle % 3 != drone.id % 3:
+			return
 
 	if rl_version == Version.GroupingRl or rl_version == Version.GroupingBoidsRl:
 		_physics_process_grouping_rl()
@@ -107,7 +114,7 @@ func reset():
 # ─── Boids RL ────────────────────────────────────────────────────────────────────
 
 func _physics_process_boids_rl(world) -> void:
-	drone.read_sensor(drone.drone_sensor.drone_set, drone.drone_sensor.bike_set)
+	drone.read_sensor_by_distance()
 
 	if drone.sensor_readings_bikes.is_empty():
 		reward -= 0.5
@@ -294,16 +301,43 @@ func _set_action_boids_rl(action) -> void:
 		"matching_factor":  _remap_action(action["matching_factor"][0],  0.01, 1.0),
 	})
 
-	drone.boids_bikes(drone.sensor_readings_bikes)
+	_update_cached_force(drone.sensor_readings_bikes)
 
 # ─── Grouping RL ────────────────────────────────────────────────────────────────────
 
 func _physics_process_grouping_rl() -> void:
-	drone.read_sensor(drone.drone_sensor.drone_set, drone.drone_sensor.bike_set)
-	_grouping_rl_clusters = drone._cluster_bikes(drone.sensor_readings_bikes)
+	drone.read_sensor_by_distance()
+	var all_clusters := drone._cluster_bikes(drone.sensor_readings_bikes)
+	all_clusters.sort_custom(func(a, b): return drone.global_position.distance_squared_to(a.centroid) < drone.global_position.distance_squared_to(b.centroid))
+	_grouping_rl_clusters = all_clusters.slice(0, 4)
 
-	if _grouping_rl_clusters.is_empty():
+	# #5: Re-snap selected cluster to the closest match in the freshly rebuilt list so
+	# centroid comparisons in the obs and reward functions always reference a live cluster.
+	if not _grouping_rl_selected_cluster.is_empty() and not _grouping_rl_clusters.is_empty():
+		var prev = _grouping_rl_selected_cluster.centroid
+		var best = _grouping_rl_clusters[0]
+		var best_d = prev.distance_squared_to(best.centroid)
+		for c in _grouping_rl_clusters.slice(1):
+			var d = prev.distance_squared_to(c.centroid)
+			if d < best_d:
+				best_d = d
+				best = c
+		_grouping_rl_selected_cluster = best
+
+	var world = drone.get_parent()
+
+	if drone.sensor_readings_bikes.is_empty():
 		reward -= 0.5
+		# Only the first drone checks the collective condition to avoid multiple resets.
+		if world.is_training and drone == world.drone_list[0]:
+			var any_has_bikes := false
+			for d in world.drone_list:
+				if not d.sensor_readings_bikes.is_empty():
+					any_has_bikes = true
+					break
+			if not any_has_bikes:
+				done = true
+				needs_reset = true
 		return
 
 	_draw_debug_grouping_rl()
@@ -311,73 +345,63 @@ func _physics_process_grouping_rl() -> void:
 		_compute_reward_grouping_rl()
 
 func _compute_reward_grouping_rl() -> void:
-	# Global coverage reward: how well the visible fleet collectively covers all
-	# clusters. Each cluster contributes min(drones_on_cluster, coverage_score)
-	# so the agent learns to spread the fleet — not stack on one cluster.
-	var total_covered := 0.0
-	var max_coverable := 0.0
+	reward = 0.0
+	if _grouping_rl_selected_cluster.is_empty() or _grouping_rl_clusters.is_empty():
+		reward -= 0.1
+		return
 
-	for cluster in _grouping_rl_clusters:
-		var score = drone._coverage_score(cluster.size)
-		max_coverable += float(score)
+	var self_dist := drone.global_position.distance_to(_grouping_rl_selected_cluster.centroid)
 
-		# Count drones covering this cluster (closer than self or within coverage_radius).
-		var self_dist := drone.global_position.distance_to(cluster.centroid)
-		var drones_on := 0
-		for reading in drone.sensor_readings_drones:
-			var d = reading.position.distance_to(cluster.centroid)
-			if d < self_dist or d < drone.coverage_radius:
-				drones_on += 1
+	# #1: Shaped approach reward — penalty scales with distance outside coverage_radius,
+	# providing a gradient that guides the drone toward the cluster.
+	if self_dist >= drone.coverage_radius:
+		var dist_ratio := self_dist / drone.coverage_radius
+		reward = -clamp(dist_ratio, 1.0, 3.0) * 0.05
+		return
 
-		# Count self if this drone selected this cluster.
-		if not _grouping_rl_selected_cluster.is_empty() and \
-				_grouping_rl_selected_cluster.centroid == cluster.centroid:
+	var drones_on := 0
+	for reading in drone.sensor_readings_drones:
+		if reading.position.distance_to(_grouping_rl_selected_cluster.centroid) < drone.coverage_radius:
 			drones_on += 1
 
-		# Reward coverage up to the score; excess drones add nothing.
-		total_covered += minf(float(drones_on), float(score))
-
-	if max_coverable > 0.0:
-		reward += total_covered / max_coverable
+	# #2: Cluster-size-weighted reward that goes negative when over-staffed.
+	# Sign flips at drones_on == 1: first drone is wanted (+size_weight), second is
+	# neutral (0), third+ is actively repelled (-size_weight per extra drone).
+	# The over-staffing penalty exceeds the transit penalty (max -0.15/step), so
+	# excess drones always have a net incentive to leave and find an uncovered cluster.
+	var total_bikes := float(max(1, drone.sensor_readings_bikes.size()))
+	var size_weight := float(_grouping_rl_selected_cluster.size) / total_bikes
+	reward = size_weight * (1.0 - float(drones_on))
 
 # 20 observations for grouping rl (local allocation state):
-#   4 clusters × 5 features (exists, coverage_score, drones_on, deficit, distance)
+#   4 clusters × 5 features (exists, bike_count, drones_on, under_coverage, distance)
 #
-# All features are derived from this drone's own sensor sphere (30 m radius) —
-# no fleet-wide aggregation. The policy must infer allocation quality from
-# what it can locally observe, as in a real swarm.
+# Raw bike counts and drone counts are exposed — no _coverage_score heuristic baked in —
+# so the agent learns the optimal staffing ratio from experience.
 func _get_obs_grouping_rl() -> Dictionary:
 	var obs: Array = []
 
-	# Max score possible = score if all visible bikes were in one cluster.
-	var max_score := float(max(1, drone._coverage_score(
-		max(1, drone.sensor_readings_bikes.size())
-	)))
-	# Max drones_on = all visible drones + self.
+	var max_bikes := float(max(1, drone.sensor_readings_bikes.size()))
 	var max_drones := float(max(1, drone.sensor_readings_drones.size() + 1))
 
 	for i in 4:
 		if i < _grouping_rl_clusters.size():
 			var c = _grouping_rl_clusters[i]
-			var score := float(drone._coverage_score(c.size))
 			var self_dist := drone.global_position.distance_to(c.centroid)
 
-			# Count nearby drones already covering this cluster.
 			var drones_on := 0
 			for reading in drone.sensor_readings_drones:
-				var d = reading.position.distance_to(c.centroid)
-				if d < self_dist or d < drone.coverage_radius:
+				if reading.position.distance_to(c.centroid) < drone.coverage_radius:
 					drones_on += 1
-			# Count self if currently assigned here.
 			if not _grouping_rl_selected_cluster.is_empty() and \
 					_grouping_rl_selected_cluster.centroid == c.centroid:
 				drones_on += 1
 
-			obs.append(1.0)                                                          # exists
-			obs.append(clamp(score / max_score, 0.0, 1.0))                          # need (relative to max visible)
-			obs.append(clamp(float(drones_on) / max_drones, 0.0, 1.0))              # staffing (relative to visible fleet)
-			obs.append(clamp((score - float(drones_on)) / max_score, -1.0, 1.0))    # deficit (+) or surplus (-)
-			obs.append(clamp(self_dist / 30.0, 0.0, 1.0))                           # distance to cluster
+			obs.append(1.0)                                                             # exists
+			obs.append(clamp(float(c.size) / max_bikes, 0.0, 1.0))                     # bike count (relative to visible bikes)
+			obs.append(clamp(float(drones_on) / max_drones, 0.0, 1.0))                 # drone staffing
+			obs.append(clamp((float(c.size) - float(drones_on)) / max_bikes, 0.0, 1.0)) # under-coverage (bikes not yet matched by a drone)
+			obs.append(clamp(self_dist / 30.0, 0.0, 1.0))                              # distance to cluster
 		else:
 			for _j in 5:
 				obs.append(0.0)
@@ -395,33 +419,41 @@ func _set_action_grouping_rl(action) -> void:
 	if _grouping_rl_clusters.is_empty():
 		return
 
-	# Argmax over the 4 score outputs, restricted to valid cluster indices.
+	# Argmax over the 4 score outputs
 	var scores = action["cluster_scores"]
 	var best_idx = 0
 	var best_score = -INF
-	for i in min(scores.size(), _grouping_rl_clusters.size()):
+	for i in scores.size():
 		if scores[i] > best_score:
 			best_score = scores[i]
 			best_idx = i
 
-	_grouping_rl_selected_cluster = _grouping_rl_clusters[best_idx]
+	if best_idx >= _grouping_rl_clusters.size():
+		_grouping_rl_selected_cluster = {}
+		return
 
-	drone.boids_bikes(_grouping_rl_selected_cluster.bikes)
+	_grouping_rl_selected_cluster = _grouping_rl_clusters[best_idx]
+	_update_cached_force(_grouping_rl_selected_cluster.bikes)
 
 # ─── Grouping + BoidsRl ──────────────────────────────────────────────────────────────────
 
 func _set_action_grouping_boids_rl(action) -> void:
 	if _grouping_rl_clusters.is_empty():
+		print("No clusters available — cannot set action")
 		return
 
-	# Same cluster selection as GroupingRl.
 	var scores = action["cluster_scores"]
 	var best_idx = 0
 	var best_score = -INF
-	for i in min(scores.size(), _grouping_rl_clusters.size()):
+	for i in scores.size():
 		if scores[i] > best_score:
 			best_score = scores[i]
 			best_idx = i
+
+	if best_idx >= _grouping_rl_clusters.size():
+		_grouping_rl_selected_cluster = {}
+		return
+
 	_grouping_rl_selected_cluster = _grouping_rl_clusters[best_idx]
 
 	assert(_boids_rl_model != null, "GroupingBoidsRl requires a BoidsRl ONNX model — set boids_rl_model_path")
@@ -436,9 +468,20 @@ func _set_action_grouping_boids_rl(action) -> void:
 		"matching_factor":  _remap_action(output[3], 0.01, 1.0),
 	})
 
-	drone.boids_bikes(_grouping_rl_selected_cluster.bikes)
+	_update_cached_force(_grouping_rl_selected_cluster.bikes)
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
+
+func _update_cached_force(bikes: Array) -> void:
+	var alignment_vector = drone.alignment(bikes)
+	var cohesion_vector = drone.cohesion(bikes)
+	var separation_vector = drone.separation_fast()
+
+	var direction = alignment_vector + cohesion_vector + separation_vector
+	direction.y = drone.height_force(bikes)
+
+	drone._cached_force = drone.clamp_vector(direction, drone.max_force)
+	drone._cached_rotation_dir = -alignment_vector
 
 # Remap a value from the RL output range [-1, 1] to [low, high].
 func _remap_action(value: float, low: float, high: float) -> float:
