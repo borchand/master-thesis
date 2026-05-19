@@ -6,14 +6,14 @@ Coordinate system (metres):
   lat  = lateral direction (positive = left)
   elevation = vertical
 
-Each track is 100 segments × 25 m = 2 500 m total.
+Each track is 100 segments × 50 m = 5 000 m total.
 """
 
 import json, math, os
 
 OUT_DIR = "master-thesis/stages"
-STEP    = 25.0   # metres between waypoints
-STEPS   = 100    # number of segments → 201 points, 5 000 m total
+STEP    = 50.0   # metres between waypoints
+STEPS   = 100    # number of segments → 101 points, 5 000 m total
 
 
 def build_track(heading_fn, elevation_fn):
@@ -57,7 +57,7 @@ def build_hairpin_track(step=10.0, hairpin_radius=40.0, elevation_fn=None):
 
     arc_len    = math.pi * hairpin_radius          # 180° arc length
     turn_steps = max(2, round(arc_len / step))     # waypoints for the U-turn
-    total_m    = 2500.0
+    total_m    = 5000.0
     arc_total  = 2 * turn_steps * step
     straight_m = (total_m - arc_total) / 3.0       # three straight segments
     str_steps  = round(straight_m / step)

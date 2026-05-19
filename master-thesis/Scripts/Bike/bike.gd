@@ -33,7 +33,7 @@ var pelotonleader = false
 var behavior = "cruise"  #cruise, attack
 
 var cohesion_c :=  0.8    #Set by trial and error
-var separation_c := 0.01  #0.05   #Set by trial and error 
+var separation_c := 0.01  #0.05   #Set by trial and error
 var n_breakouts = 0
 var max_speed = 0
 
@@ -49,7 +49,7 @@ func _physics_process(delta):
 	if timer >= timer_threashold:
 		timer = timer-timer_threashold
 		coltroler(timer_threashold)
-		
+
 	if speed>max_speed:
 		max_speed=speed
 	self.progress += speed * delta
@@ -69,7 +69,7 @@ func control1(delta):
 	var wanted_power  = sustainable_watt
 
 	var neighborhood_result = find_neighborhood()
-	
+
 	if len(neighborhood_result) != 5:
 		print("Ray_cast length is not 5")
 		return
@@ -136,7 +136,7 @@ func behaviorChange(delta, elevation_):
 		if rng.randi_range(0,10000) < (speedUpProbability * (elevation_ / 0.034) * delta) / max(1-progress_ratio, 0.15): # max(1-progress_ratio, 0.15):
 			behavior = "attack"
 			n_breakouts += 1
-	
+
 func fatigue_changes(current_watt):
 	if current_watt == sustainable_watt:
 		return
@@ -164,7 +164,7 @@ func acceleration_based_on_speed(speed_ms, elevation, power, in_peloton_ = false
 		drag_modifier = 0.7
 	elif pelotonleader:
 		drag_modifier = 0.85
-		
+
 	return ((power * 0.97 / 70.5) / speed_ms) - 0.00278 * drag_modifier * speed_ms**2 - 0.03896 - 9.81 * sin(elevation)
 
 func max_possible_power():
@@ -193,7 +193,7 @@ func find_neighborhood():
 
 static func get_randomize_for_rl():
 	var _rng = RandomNumberGenerator.new()
-	
+
 	var _speed = _rng.randf_range(6.0, 18.0)
 	var _speedUpProbability = _rng.randi_range(4, 16)
 	var _cohesion_c = _rng.randf_range(0.1, 1.0)

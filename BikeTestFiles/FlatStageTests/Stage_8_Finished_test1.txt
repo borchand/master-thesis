@@ -5,6 +5,42 @@ var separation_c = 0.8
 Watts 348
 Watts 548
 
+ Sequence  1:  57 bike(s)  |  13951
+  Sequence  2:   2 bike(s)  |  13961
+  Sequence  3:   6 bike(s)  |  13963
+  Sequence  4:   2 bike(s)  |  13967
+  Sequence  5:   3 bike(s)  |  13969
+  Sequence  6:   1 bike(s)  |  13972
+  Sequence  7:   1 bike(s)  |  14051
+  Sequence  8:   1 bike(s)  |  14053
+  Sequence  9:  35 bike(s)  |  14054
+  Sequence 10:   2 bike(s)  |  14065
+  Sequence 11:   5 bike(s)  |  14067
+  Sequence 12:   1 bike(s)  |  14138
+  Sequence 13:  30 bike(s)  |  14139
+  Sequence 14:   2 bike(s)  |  14147
+  Sequence 15:   1 bike(s)  |  14149
+  Sequence 16:  12 bike(s)  |  14151
+  Sequence 17:   1 bike(s)  |  14155
+  Sequence 18:   1 bike(s)  |  14156
+  Sequence 19:   1 bike(s)  |  14159
+  Sequence 20:   1 bike(s)  |  14259
+  Sequence 21:   1 bike(s)  |  14261
+  Sequence 22:   1 bike(s)  |  14263
+  Sequence 23:   2 bike(s)  |  14273
+  Sequence 24:   1 bike(s)  |  14277
+  Sequence 25:   1 bike(s)  |  14286
+  Sequence 26:   1 bike(s)  |  14303
+  Sequence 27:   1 bike(s)  |  14312
+  Sequence 28:   1 bike(s)  |  14376
+  Sequence 29:   1 bike(s)  |  14622
+  Sequence 30:   1 bike(s)  |  14705
+  Sequence 31:   1 bike(s)  |  14711
+  Sequence 32:   1 bike(s)  |  14719
+  Sequence 33:   1 bike(s)  |  14798
+  Sequence 34:   1 bike(s)  |  14885
+
+
 Godot Engine v4.6.2.stable.mono.official.71f334935 - https://godotengine.org
 OpenGL API 3.3.0 - Build 32.0.101.7026 - Compatibility - Using Device: Intel - Intel(R) Iris(R) Xe Graphics
 
@@ -688,37 +724,3 @@ Run time: 1863.096 seconds
 --- Debugging process stopped ---
  
 
- Sequence  1:  57 bike(s)  |  13951
-  Sequence  2:   2 bike(s)  |  13961
-  Sequence  3:   6 bike(s)  |  13963
-  Sequence  4:   2 bike(s)  |  13967
-  Sequence  5:   3 bike(s)  |  13969
-  Sequence  6:   1 bike(s)  |  13972
-  Sequence  7:   1 bike(s)  |  14051
-  Sequence  8:   1 bike(s)  |  14053
-  Sequence  9:  35 bike(s)  |  14054
-  Sequence 10:   2 bike(s)  |  14065
-  Sequence 11:   5 bike(s)  |  14067
-  Sequence 12:   1 bike(s)  |  14138
-  Sequence 13:  30 bike(s)  |  14139
-  Sequence 14:   2 bike(s)  |  14147
-  Sequence 15:   1 bike(s)  |  14149
-  Sequence 16:  12 bike(s)  |  14151
-  Sequence 17:   1 bike(s)  |  14155
-  Sequence 18:   1 bike(s)  |  14156
-  Sequence 19:   1 bike(s)  |  14159
-  Sequence 20:   1 bike(s)  |  14259
-  Sequence 21:   1 bike(s)  |  14261
-  Sequence 22:   1 bike(s)  |  14263
-  Sequence 23:   2 bike(s)  |  14273
-  Sequence 24:   1 bike(s)  |  14277
-  Sequence 25:   1 bike(s)  |  14286
-  Sequence 26:   1 bike(s)  |  14303
-  Sequence 27:   1 bike(s)  |  14312
-  Sequence 28:   1 bike(s)  |  14376
-  Sequence 29:   1 bike(s)  |  14622
-  Sequence 30:   1 bike(s)  |  14705
-  Sequence 31:   1 bike(s)  |  14711
-  Sequence 32:   1 bike(s)  |  14719
-  Sequence 33:   1 bike(s)  |  14798
-  Sequence 34:   1 bike(s)  |  14885

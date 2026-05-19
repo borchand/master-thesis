@@ -1,0 +1,259 @@
+
+  Sequence  1:  47 bike(s)  |  13980
+  Sequence  2:   7 bike(s)  |  13985
+  Sequence  3:   6 bike(s)  |  13987
+  Sequence  4:   1 bike(s)  |  13990
+  Sequence  5:   3 bike(s)  |  13991
+  Sequence  6:   1 bike(s)  |  13993
+  Sequence  7:   5 bike(s)  |  13995
+  Sequence  8:   1 bike(s)  |  13997
+  Sequence  9:   4 bike(s)  |  13999
+  Sequence 10:  69 bike(s)  |  14055
+  Sequence 11:   9 bike(s)  |  14064
+  Sequence 12:   1 bike(s)  |  14068
+  Sequence 13:  12 bike(s)  |  14069
+  Sequence 14:   1 bike(s)  |  14287
+  Sequence 15:   1 bike(s)  |  14442
+  Sequence 16:   2 bike(s)  |  14457
+  Sequence 17:   1 bike(s)  |  14487
+  Sequence 18:   1 bike(s)  |  14504
+  Sequence 19:   1 bike(s)  |  14505
+  Sequence 20:   1 bike(s)  |  14611
+  Sequence 21:   1 bike(s)  |  14613
+  Sequence 22:   1 bike(s)  |  14614
+  Sequence 23:   1 bike(s)  |  14624
+  Sequence 24:   1 bike(s)  |  14801
+  Sequence 25:   1 bike(s)  |  14973
+  Sequence 26:   1 bike(s)  |  15234
+
+
+
+Godot Engine v4.6.2.stable.mono.official.71f334935 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 560.94 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 2060
+
+348 548 0.8 0.8 30.0 4.5
+
+Bike: @PathFollow3D@123 Finish time: 13979.7999998807 nBreakout: 12  Max_speed: 20.1728938515352 MaxProgress: 174707.375
+Bike: @PathFollow3D@99 Finish time: 13979.9499998807 nBreakout: 7  Max_speed: 19.3801609686658 MaxProgress: 174707.375
+sim_time=13980.0166665474 wall_time=1606.8 ratio=8.70053315070163 drones=0
+Bike: @PathFollow3D@61 Finish time: 13980.0499998807 nBreakout: 6  Max_speed: 19.5629836947458 MaxProgress: 174707.375
+Bike: @PathFollow3D@71 Finish time: 13980.1499998807 nBreakout: 9  Max_speed: 19.8208771447903 MaxProgress: 174707.375
+Bike: @PathFollow3D@128 Finish time: 13980.5166665474 nBreakout: 9  Max_speed: 19.6692748502678 MaxProgress: 174707.375
+Bike: @PathFollow3D@145 Finish time: 13980.5499998807 nBreakout: 14  Max_speed: 19.712254628773 MaxProgress: 174707.375
+Bike: @PathFollow3D@104 Finish time: 13980.6499998807 nBreakout: 11  Max_speed: 19.5752467010917 MaxProgress: 174707.375
+Bike: @PathFollow3D@78 Finish time: 13980.8166665474 nBreakout: 9  Max_speed: 20.1035473675831 MaxProgress: 174707.375
+Bike: @PathFollow3D@115 Finish time: 13980.883333214 nBreakout: 9  Max_speed: 20.0988498152423 MaxProgress: 174707.375
+Bike: @PathFollow3D@83 Finish time: 13980.9499998807 nBreakout: 16  Max_speed: 19.2849616566489 MaxProgress: 174707.375
+Bike: @PathFollow3D@110 Finish time: 13981.083333214 nBreakout: 9  Max_speed: 19.8956545833384 MaxProgress: 174707.375
+Bike: @PathFollow3D@93 Finish time: 13981.1499998807 nBreakout: 10  Max_speed: 19.7968879479066 MaxProgress: 174707.375
+Bike: @PathFollow3D@149 Finish time: 13981.4166665474 nBreakout: 10  Max_speed: 19.7188389270334 MaxProgress: 174707.375
+Bike: @PathFollow3D@50 Finish time: 13981.4666665474 nBreakout: 17  Max_speed: 19.7310011041023 MaxProgress: 174707.375
+Bike: @PathFollow3D@178 Finish time: 13981.5499998807 nBreakout: 10  Max_speed: 19.8449638410932 MaxProgress: 174707.375
+Bike: @PathFollow3D@8 Finish time: 13981.733333214 nBreakout: 15  Max_speed: 19.5756724127491 MaxProgress: 174707.375
+Bike: @PathFollow3D@150 Finish time: 13981.8166665474 nBreakout: 11  Max_speed: 19.6140704737459 MaxProgress: 174707.375
+Bike: @PathFollow3D@132 Finish time: 13981.9666665474 nBreakout: 12  Max_speed: 19.751487329391 MaxProgress: 174707.375
+Bike: @PathFollow3D@40 Finish time: 13982.0166665474 nBreakout: 10  Max_speed: 19.662145275482 MaxProgress: 174707.375
+Bike: @PathFollow3D@46 Finish time: 13982.0499998807 nBreakout: 11  Max_speed: 19.8826143003807 MaxProgress: 174707.375
+Bike: @PathFollow3D@179 Finish time: 13982.0666665473 nBreakout: 11  Max_speed: 19.8190419606655 MaxProgress: 174707.375
+Bike: @PathFollow3D@25 Finish time: 13982.0999998807 nBreakout: 16  Max_speed: 20.1084104499823 MaxProgress: 174707.375
+Bike: @PathFollow3D@155 Finish time: 13982.133333214 nBreakout: 10  Max_speed: 19.7514027651218 MaxProgress: 174707.375
+Bike: @PathFollow3D@77 Finish time: 13982.1999998807 nBreakout: 11  Max_speed: 20.1194821333135 MaxProgress: 174707.375
+Bike: @PathFollow3D@28 Finish time: 13982.233333214 nBreakout: 17  Max_speed: 20.0676405362881 MaxProgress: 174707.375
+Bike: @PathFollow3D@23 Finish time: 13982.3166665473 nBreakout: 10  Max_speed: 20.124539384821 MaxProgress: 174707.375
+Bike: @PathFollow3D@60 Finish time: 13982.3999998807 nBreakout: 10  Max_speed: 19.9974334808747 MaxProgress: 174707.375
+Bike: @PathFollow3D@75 Finish time: 13982.483333214 nBreakout: 11  Max_speed: 20.1138271922043 MaxProgress: 174707.375
+Bike: @PathFollow3D@53 Finish time: 13982.5166665473 nBreakout: 6  Max_speed: 20.0485355706151 MaxProgress: 174707.375
+Bike: @PathFollow3D@116 Finish time: 13982.5166665473 nBreakout: 12  Max_speed: 19.8769427282164 MaxProgress: 174707.375
+Bike: @PathFollow3D@124 Finish time: 13982.5499998807 nBreakout: 12  Max_speed: 19.1001609976684 MaxProgress: 174707.375
+Bike: @PathFollow3D@119 Finish time: 13982.6499998807 nBreakout: 17  Max_speed: 19.7102861376307 MaxProgress: 174707.375
+Bike: @PathFollow3D@102 Finish time: 13982.733333214 nBreakout: 8  Max_speed: 19.7821768393542 MaxProgress: 174707.375
+Bike: @PathFollow3D@166 Finish time: 13982.8499998807 nBreakout: 10  Max_speed: 20.1230590633965 MaxProgress: 174707.375
+Bike: @PathFollow3D@44 Finish time: 13982.9166665473 nBreakout: 12  Max_speed: 20.1389889595403 MaxProgress: 174707.375
+Bike: @PathFollow3D@147 Finish time: 13983.0666665473 nBreakout: 12  Max_speed: 19.7201574509684 MaxProgress: 174707.375
+Bike: @PathFollow3D@112 Finish time: 13983.2166665473 nBreakout: 10  Max_speed: 19.9177370836415 MaxProgress: 174707.375
+Bike: @PathFollow3D@64 Finish time: 13983.2499998807 nBreakout: 15  Max_speed: 20.2210718409731 MaxProgress: 174707.375
+Bike: @PathFollow3D@29 Finish time: 13983.2999998807 nBreakout: 12  Max_speed: 19.7253367547345 MaxProgress: 174707.375
+Bike: @PathFollow3D@7 Finish time: 13983.433333214 nBreakout: 11  Max_speed: 19.7597298434263 MaxProgress: 174707.375
+Bike: @PathFollow3D@121 Finish time: 13983.4499998807 nBreakout: 11  Max_speed: 19.6182930849659 MaxProgress: 174707.375
+Bike: @PathFollow3D@181 Finish time: 13983.4999998807 nBreakout: 13  Max_speed: 20.1851719256285 MaxProgress: 174707.375
+Bike: @PathFollow3D@15 Finish time: 13983.7166665473 nBreakout: 12  Max_speed: 19.710840078146 MaxProgress: 174707.375
+Bike: @PathFollow3D@24 Finish time: 13983.7666665473 nBreakout: 7  Max_speed: 20.1909680863882 MaxProgress: 174707.375
+Bike: @PathFollow3D@66 Finish time: 13983.9999998807 nBreakout: 11  Max_speed: 20.1148755303552 MaxProgress: 174707.375
+Bike: @PathFollow3D@109 Finish time: 13984.033333214 nBreakout: 12  Max_speed: 19.3503543944855 MaxProgress: 174707.375
+Bike: @PathFollow3D@92 Finish time: 13984.1166665473 nBreakout: 10  Max_speed: 20.0408173409791 MaxProgress: 174707.375
+Bike: @PathFollow3D@95 Finish time: 13985.433333214 nBreakout: 16  Max_speed: 20.0716867539516 MaxProgress: 174707.375
+Bike: @PathFollow3D@36 Finish time: 13985.5666665473 nBreakout: 6  Max_speed: 19.7652843091711 MaxProgress: 174707.375
+Bike: @PathFollow3D@45 Finish time: 13986.1999998806 nBreakout: 12  Max_speed: 20.0638963485266 MaxProgress: 174707.375
+Bike: @PathFollow3D@90 Finish time: 13986.4166665473 nBreakout: 12  Max_speed: 19.697582589978 MaxProgress: 174707.375
+Bike: @PathFollow3D@151 Finish time: 13986.433333214 nBreakout: 11  Max_speed: 19.478140582852 MaxProgress: 174707.375
+Bike: @PathFollow3D@144 Finish time: 13986.4499998806 nBreakout: 9  Max_speed: 20.1359827159155 MaxProgress: 174707.375
+Bike: @PathFollow3D@54 Finish time: 13986.4666665473 nBreakout: 9  Max_speed: 19.8151082246024 MaxProgress: 174707.375
+Bike: @PathFollow3D@100 Finish time: 13987.4666665473 nBreakout: 11  Max_speed: 19.7150963251569 MaxProgress: 174707.375
+Bike: @PathFollow3D@137 Finish time: 13987.6999998806 nBreakout: 13  Max_speed: 19.4115475535925 MaxProgress: 174707.375
+Bike: @PathFollow3D@62 Finish time: 13987.9499998806 nBreakout: 13  Max_speed: 20.0788466706692 MaxProgress: 174707.375
+Bike: @PathFollow3D@18 Finish time: 13988.5166665473 nBreakout: 11  Max_speed: 19.7313325485963 MaxProgress: 174707.375
+Bike: @PathFollow3D@43 Finish time: 13988.5166665473 nBreakout: 14  Max_speed: 19.3963345959304 MaxProgress: 174707.375
+Bike: @PathFollow3D@70 Finish time: 13988.9999998806 nBreakout: 8  Max_speed: 20.0316854040851 MaxProgress: 174707.375
+Bike: @PathFollow3D@135 Finish time: 13990.0333332139 nBreakout: 10  Max_speed: 19.3481090615054 MaxProgress: 174707.375
+Bike: @PathFollow3D@111 Finish time: 13991.2166665472 nBreakout: 11  Max_speed: 19.7490055350362 MaxProgress: 174707.375
+Bike: @PathFollow3D@177 Finish time: 13991.4833332139 nBreakout: 10  Max_speed: 19.7582091257978 MaxProgress: 174707.375
+Bike: @PathFollow3D@107 Finish time: 13991.9333332139 nBreakout: 10  Max_speed: 19.7804665600672 MaxProgress: 174707.375
+Bike: @PathFollow3D@176 Finish time: 13992.9833332139 nBreakout: 7  Max_speed: 19.8220915502365 MaxProgress: 174707.375
+Bike: @PathFollow3D@89 Finish time: 13994.8333332138 nBreakout: 13  Max_speed: 19.4958352884176 MaxProgress: 174707.375
+Bike: @PathFollow3D@173 Finish time: 13994.8333332138 nBreakout: 4  Max_speed: 19.8080118584593 MaxProgress: 174707.375
+Bike: @PathFollow3D@158 Finish time: 13994.8499998805 nBreakout: 14  Max_speed: 19.7061732281673 MaxProgress: 174707.375
+Bike: @PathFollow3D@49 Finish time: 13995.0166665472 nBreakout: 13  Max_speed: 19.9135986562442 MaxProgress: 174707.375
+Bike: @PathFollow3D@14 Finish time: 13995.2333332138 nBreakout: 9  Max_speed: 19.8471135376294 MaxProgress: 174707.375
+Bike: @PathFollow3D@182 Finish time: 13997.4499998805 nBreakout: 11  Max_speed: 19.7328123935641 MaxProgress: 174707.375
+Bike: @PathFollow3D@32 Finish time: 13998.8999998804 nBreakout: 14  Max_speed: 19.7854788863878 MaxProgress: 174707.375
+Bike: @PathFollow3D@141 Finish time: 13999.2166665471 nBreakout: 10  Max_speed: 19.7444461846632 MaxProgress: 174707.375
+Bike: @PathFollow3D@167 Finish time: 13999.5666665471 nBreakout: 11  Max_speed: 20.1620883618179 MaxProgress: 174707.375
+Bike: @PathFollow3D@9 Finish time: 14000.2499998804 nBreakout: 12  Max_speed: 19.4714961580057 MaxProgress: 174707.375
+sim_time=14010.0166665469 wall_time=1609.002 ratio=8.70727113238327 drones=0
+sim_time=14040.0166665465 wall_time=1610.838 ratio=8.71597061066756 drones=0
+Bike: @PathFollow3D@97 Finish time: 14054.7999998796 nBreakout: 12  Max_speed: 19.3546670374047 MaxProgress: 174707.375
+Bike: @PathFollow3D@138 Finish time: 14054.9666665463 nBreakout: 10  Max_speed: 18.6149825646176 MaxProgress: 174707.375
+Bike: @PathFollow3D@33 Finish time: 14055.1999998796 nBreakout: 16  Max_speed: 19.5423725122857 MaxProgress: 174707.375
+Bike: @PathFollow3D@114 Finish time: 14055.1999998796 nBreakout: 8  Max_speed: 19.3678490028003 MaxProgress: 174707.375
+Bike: @PathFollow3D@30 Finish time: 14055.5499998796 nBreakout: 8  Max_speed: 18.8711656795374 MaxProgress: 174707.375
+Bike: @PathFollow3D@133 Finish time: 14055.6333332129 nBreakout: 6  Max_speed: 19.1374274224885 MaxProgress: 174707.375
+Bike: @PathFollow3D@156 Finish time: 14055.9166665463 nBreakout: 14  Max_speed: 19.2302846533425 MaxProgress: 174707.375
+Bike: @PathFollow3D@180 Finish time: 14056.1166665463 nBreakout: 12  Max_speed: 19.5936364848852 MaxProgress: 174707.375
+Bike: @PathFollow3D@68 Finish time: 14056.1333332129 nBreakout: 10  Max_speed: 18.912482454896 MaxProgress: 174707.375
+Bike: @PathFollow3D@172 Finish time: 14056.1666665463 nBreakout: 14  Max_speed: 19.2627205130677 MaxProgress: 174707.375
+Bike: @PathFollow3D@12 Finish time: 14056.1999998796 nBreakout: 11  Max_speed: 19.3574410987938 MaxProgress: 174707.375
+Bike: @PathFollow3D@22 Finish time: 14056.4833332129 nBreakout: 12  Max_speed: 19.158977909246 MaxProgress: 174707.375
+Bike: @PathFollow3D@17 Finish time: 14056.5999998796 nBreakout: 10  Max_speed: 19.3608199846626 MaxProgress: 174707.375
+Bike: @PathFollow3D@86 Finish time: 14056.6166665463 nBreakout: 10  Max_speed: 19.3413335019054 MaxProgress: 174707.375
+Bike: @PathFollow3D@168 Finish time: 14056.6499998796 nBreakout: 11  Max_speed: 19.4543207724512 MaxProgress: 174707.375
+Bike: @PathFollow3D@20 Finish time: 14056.6999998796 nBreakout: 11  Max_speed: 19.3668499163597 MaxProgress: 174707.375
+Bike: @PathFollow3D@139 Finish time: 14056.6999998796 nBreakout: 10  Max_speed: 19.2289143053459 MaxProgress: 174707.375
+Bike: @PathFollow3D@175 Finish time: 14056.7166665463 nBreakout: 13  Max_speed: 19.3796850646769 MaxProgress: 174707.375
+Bike: @PathFollow3D@96 Finish time: 14056.7333332129 nBreakout: 7  Max_speed: 19.3839038654762 MaxProgress: 174707.375
+Bike: @PathFollow3D@85 Finish time: 14056.7499998796 nBreakout: 11  Max_speed: 19.2271063659565 MaxProgress: 174707.375
+Bike: @PathFollow3D@88 Finish time: 14056.7666665463 nBreakout: 16  Max_speed: 19.412947551084 MaxProgress: 174707.375
+Bike: @PathFollow3D@47 Finish time: 14056.9333332129 nBreakout: 9  Max_speed: 19.2485362916774 MaxProgress: 174707.375
+Bike: @PathFollow3D@159 Finish time: 14057.3166665463 nBreakout: 11  Max_speed: 19.2316886186803 MaxProgress: 174707.375
+Bike: @PathFollow3D@163 Finish time: 14057.3333332129 nBreakout: 11  Max_speed: 19.3224225540472 MaxProgress: 174707.375
+Bike: Bike Finish time: 14057.4166665463 nBreakout: 12  Max_speed: 18.6165171028703 MaxProgress: 174707.375
+Bike: @PathFollow3D@38 Finish time: 14057.4666665463 nBreakout: 12  Max_speed: 19.4123829786609 MaxProgress: 174707.375
+Bike: @PathFollow3D@140 Finish time: 14057.6499998796 nBreakout: 14  Max_speed: 19.2500673528629 MaxProgress: 174707.375
+Bike: @PathFollow3D@152 Finish time: 14057.6499998796 nBreakout: 11  Max_speed: 19.3773236237485 MaxProgress: 174707.375
+Bike: @PathFollow3D@67 Finish time: 14057.7166665462 nBreakout: 16  Max_speed: 19.3993784285316 MaxProgress: 174707.375
+Bike: @PathFollow3D@164 Finish time: 14057.7166665462 nBreakout: 11  Max_speed: 19.3775702825824 MaxProgress: 174707.375
+Bike: @PathFollow3D@171 Finish time: 14057.7166665462 nBreakout: 11  Max_speed: 19.0460711760242 MaxProgress: 174707.375
+Bike: @PathFollow3D@81 Finish time: 14057.7499998796 nBreakout: 12  Max_speed: 19.3219078024166 MaxProgress: 174707.375
+Bike: @PathFollow3D@130 Finish time: 14057.7833332129 nBreakout: 17  Max_speed: 19.2384181779373 MaxProgress: 174707.375
+Bike: @PathFollow3D@31 Finish time: 14057.9333332129 nBreakout: 13  Max_speed: 19.0177498929909 MaxProgress: 174707.375
+Bike: @PathFollow3D@13 Finish time: 14058.0499998796 nBreakout: 10  Max_speed: 19.0262354889497 MaxProgress: 174707.375
+Bike: @PathFollow3D@10 Finish time: 14058.0666665462 nBreakout: 10  Max_speed: 18.9447929740193 MaxProgress: 174707.375
+Bike: @PathFollow3D@160 Finish time: 14058.0999998796 nBreakout: 12  Max_speed: 18.9019816402549 MaxProgress: 174707.375
+Bike: @PathFollow3D@76 Finish time: 14058.1666665462 nBreakout: 13  Max_speed: 19.3069098461641 MaxProgress: 174707.375
+Bike: @PathFollow3D@26 Finish time: 14058.4333332129 nBreakout: 12  Max_speed: 19.3513754874175 MaxProgress: 174707.375
+Bike: @PathFollow3D@165 Finish time: 14058.7166665462 nBreakout: 16  Max_speed: 19.1145822034287 MaxProgress: 174707.375
+Bike: @PathFollow3D@59 Finish time: 14059.1666665462 nBreakout: 10  Max_speed: 18.9624055860227 MaxProgress: 174707.375
+Bike: @PathFollow3D@39 Finish time: 14059.1833332129 nBreakout: 11  Max_speed: 19.2423008179315 MaxProgress: 174707.375
+Bike: @PathFollow3D@183 Finish time: 14059.2999998796 nBreakout: 11  Max_speed: 19.267502037219 MaxProgress: 174707.375
+Bike: @PathFollow3D@126 Finish time: 14059.3666665462 nBreakout: 15  Max_speed: 19.6420674199619 MaxProgress: 174707.375
+Bike: @PathFollow3D@157 Finish time: 14059.4166665462 nBreakout: 9  Max_speed: 19.0883756710772 MaxProgress: 174707.375
+Bike: @PathFollow3D@146 Finish time: 14059.4333332129 nBreakout: 9  Max_speed: 19.5740499255369 MaxProgress: 174707.375
+Bike: @PathFollow3D@125 Finish time: 14059.4833332129 nBreakout: 7  Max_speed: 19.2852816786919 MaxProgress: 174707.375
+Bike: @PathFollow3D@34 Finish time: 14059.5333332129 nBreakout: 12  Max_speed: 19.3176631923759 MaxProgress: 174707.375
+Bike: @PathFollow3D@113 Finish time: 14059.5333332129 nBreakout: 9  Max_speed: 18.8386305901343 MaxProgress: 174707.375
+Bike: @PathFollow3D@63 Finish time: 14059.6499998796 nBreakout: 15  Max_speed: 19.2764143427692 MaxProgress: 174707.375
+Bike: @PathFollow3D@136 Finish time: 14059.6666665462 nBreakout: 15  Max_speed: 19.4891472900761 MaxProgress: 174707.375
+Bike: @PathFollow3D@73 Finish time: 14059.7166665462 nBreakout: 9  Max_speed: 19.3106582262557 MaxProgress: 174707.375
+Bike: @PathFollow3D@56 Finish time: 14059.7999998796 nBreakout: 9  Max_speed: 19.4436811464565 MaxProgress: 174707.375
+Bike: @PathFollow3D@98 Finish time: 14059.8499998796 nBreakout: 10  Max_speed: 19.1230982251238 MaxProgress: 174707.375
+Bike: @PathFollow3D@51 Finish time: 14059.8666665462 nBreakout: 12  Max_speed: 19.2484050423433 MaxProgress: 174707.375
+Bike: @PathFollow3D@170 Finish time: 14059.9666665462 nBreakout: 13  Max_speed: 19.0850154091782 MaxProgress: 174707.375
+Bike: @PathFollow3D@122 Finish time: 14060.1166665462 nBreakout: 10  Max_speed: 18.7689813329757 MaxProgress: 174707.375
+Bike: @PathFollow3D@80 Finish time: 14060.1833332129 nBreakout: 13  Max_speed: 19.4352740394107 MaxProgress: 174707.375
+Bike: @PathFollow3D@118 Finish time: 14060.2999998795 nBreakout: 13  Max_speed: 18.7672934339809 MaxProgress: 174707.375
+Bike: @PathFollow3D@21 Finish time: 14060.4333332129 nBreakout: 11  Max_speed: 19.312700271489 MaxProgress: 174707.375
+Bike: @PathFollow3D@153 Finish time: 14061.1499998795 nBreakout: 14  Max_speed: 19.0053395121067 MaxProgress: 174707.375
+Bike: @PathFollow3D@127 Finish time: 14061.2499998795 nBreakout: 11  Max_speed: 19.4962493357905 MaxProgress: 174707.375
+Bike: @PathFollow3D@162 Finish time: 14061.2499998795 nBreakout: 9  Max_speed: 18.804659943293 MaxProgress: 174707.375
+Bike: @PathFollow3D@19 Finish time: 14061.2666665462 nBreakout: 10  Max_speed: 19.2627930397852 MaxProgress: 174707.375
+Bike: @PathFollow3D@174 Finish time: 14061.7333332129 nBreakout: 10  Max_speed: 19.2598604940183 MaxProgress: 174707.375
+Bike: @PathFollow3D@48 Finish time: 14061.9833332129 nBreakout: 13  Max_speed: 19.3256668088721 MaxProgress: 174707.375
+Bike: @PathFollow3D@120 Finish time: 14062.0833332129 nBreakout: 13  Max_speed: 19.0887593208996 MaxProgress: 174707.375
+Bike: @PathFollow3D@82 Finish time: 14062.7333332128 nBreakout: 12  Max_speed: 19.3436743907234 MaxProgress: 174707.375
+Bike: @PathFollow3D@55 Finish time: 14063.0666665462 nBreakout: 11  Max_speed: 19.1901409332381 MaxProgress: 174707.375
+Bike: @PathFollow3D@6 Finish time: 14064.1499998795 nBreakout: 16  Max_speed: 19.3417388685203 MaxProgress: 174707.375
+Bike: @PathFollow3D@52 Finish time: 14064.4499998795 nBreakout: 15  Max_speed: 19.2987109353269 MaxProgress: 174707.375
+Bike: @PathFollow3D@94 Finish time: 14064.5333332128 nBreakout: 19  Max_speed: 19.0976930571923 MaxProgress: 174707.375
+Bike: @PathFollow3D@65 Finish time: 14064.8999998795 nBreakout: 10  Max_speed: 19.0080927661413 MaxProgress: 174707.375
+Bike: @PathFollow3D@42 Finish time: 14065.0166665461 nBreakout: 11  Max_speed: 19.1018306146985 MaxProgress: 174707.375
+Bike: @PathFollow3D@69 Finish time: 14065.8833332128 nBreakout: 11  Max_speed: 19.4135302626746 MaxProgress: 174707.375
+Bike: @PathFollow3D@143 Finish time: 14066.0999998795 nBreakout: 9  Max_speed: 19.2531548161263 MaxProgress: 174707.375
+Bike: @PathFollow3D@57 Finish time: 14066.1833332128 nBreakout: 12  Max_speed: 19.3250583573609 MaxProgress: 174707.375
+Bike: @PathFollow3D@103 Finish time: 14066.2499998795 nBreakout: 8  Max_speed: 19.3984365665983 MaxProgress: 174707.375
+Bike: @PathFollow3D@35 Finish time: 14068.2666665461 nBreakout: 8  Max_speed: 19.2801161361141 MaxProgress: 174707.375
+Bike: @PathFollow3D@101 Finish time: 14069.3333332127 nBreakout: 10  Max_speed: 19.3164799932505 MaxProgress: 174707.375
+sim_time=14070.0166665461 wall_time=1612.346 ratio=8.72642513861545 drones=0
+Bike: @PathFollow3D@169 Finish time: 14070.3166665461 nBreakout: 12  Max_speed: 19.2489729057326 MaxProgress: 174707.375
+Bike: @PathFollow3D@129 Finish time: 14070.3499998794 nBreakout: 13  Max_speed: 19.2826759355658 MaxProgress: 174707.375
+Bike: @PathFollow3D@134 Finish time: 14070.3833332127 nBreakout: 13  Max_speed: 18.9916380919282 MaxProgress: 174707.375
+Bike: @PathFollow3D@105 Finish time: 14070.4833332127 nBreakout: 12  Max_speed: 18.8192635608815 MaxProgress: 174707.375
+Bike: @PathFollow3D@58 Finish time: 14070.7333332127 nBreakout: 10  Max_speed: 19.2243454119886 MaxProgress: 174707.375
+Bike: @PathFollow3D@106 Finish time: 14071.2333332127 nBreakout: 11  Max_speed: 19.3520608332323 MaxProgress: 174707.375
+Bike: @PathFollow3D@74 Finish time: 14071.5499998794 nBreakout: 6  Max_speed: 18.6284006106823 MaxProgress: 174707.375
+Bike: @PathFollow3D@142 Finish time: 14071.566666546 nBreakout: 8  Max_speed: 19.3508027633185 MaxProgress: 174707.375
+Bike: @PathFollow3D@84 Finish time: 14072.466666546 nBreakout: 14  Max_speed: 18.4868283164306 MaxProgress: 174707.375
+Bike: @PathFollow3D@41 Finish time: 14072.866666546 nBreakout: 16  Max_speed: 19.299958627987 MaxProgress: 174707.375
+Bike: @PathFollow3D@11 Finish time: 14072.9499998794 nBreakout: 10  Max_speed: 19.2292411370715 MaxProgress: 174707.375
+sim_time=14100.0166665456 wall_time=1613.291 ratio=8.73990908431624 drones=0
+sim_time=14130.0166665452 wall_time=1614.225 ratio=8.75343689172525 drones=0
+sim_time=14160.0166665448 wall_time=1615.16 ratio=8.76694362573662 drones=0
+sim_time=14190.0166665443 wall_time=1616.094 ratio=8.78044016408967 drones=0
+sim_time=14220.0166665439 wall_time=1617.042 ratio=8.7938449752968 drones=0
+sim_time=14250.0166665435 wall_time=1617.976 ratio=8.80731028553171 drones=0
+sim_time=14280.016666543 wall_time=1618.911 ratio=8.82075461006999 drones=0
+Bike: @PathFollow3D@108 Finish time: 14287.1999998762 nBreakout: 13  Max_speed: 18.8877381149073 MaxProgress: 174707.375
+sim_time=14310.0166665426 wall_time=1619.845 ratio=8.83418886778832 drones=0
+sim_time=14340.0166665421 wall_time=1620.792 ratio=8.84753667746518 drones=0
+sim_time=14370.0166665417 wall_time=1621.726 ratio=8.86093992853398 drones=0
+sim_time=14400.0166665413 wall_time=1622.662 ratio=8.87431681184453 drones=0
+sim_time=14430.0166665408 wall_time=1623.595 ratio=8.88769469389893 drones=0
+Bike: @PathFollow3D@91 Finish time: 14441.7166665407 nBreakout: 8  Max_speed: 18.7904652684879 MaxProgress: 174707.375
+Bike: @PathFollow3D@131 Finish time: 14457.3333332071 nBreakout: 12  Max_speed: 18.8217081567022 MaxProgress: 174707.375
+Bike: @PathFollow3D@184 Finish time: 14457.6499998738 nBreakout: 16  Max_speed: 18.7347742798305 MaxProgress: 174707.375
+sim_time=14460.0166665404 wall_time=1624.542 ratio=8.90098050191401 drones=0
+Bike: @PathFollow3D@148 Finish time: 14487.0833332067 nBreakout: 18  Max_speed: 18.6723789668024 MaxProgress: 174707.375
+sim_time=14490.01666654 wall_time=1625.477 ratio=8.91431663846364 drones=0
+Bike: @PathFollow3D@161 Finish time: 14503.5833332064 nBreakout: 13  Max_speed: 18.3296951877179 MaxProgress: 174707.375
+Bike: @PathFollow3D@87 Finish time: 14504.7999998731 nBreakout: 12  Max_speed: 18.6661680888981 MaxProgress: 174707.375
+sim_time=14520.0166665395 wall_time=1626.411 ratio=8.92764293068574 drones=0
+sim_time=14550.0166665391 wall_time=1627.345 ratio=8.94095392589714 drones=0
+sim_time=14580.0166665386 wall_time=1628.292 ratio=8.95417816125035 drones=0
+sim_time=14610.0166665382 wall_time=1629.227 ratio=8.96745307224727 drones=0
+Bike: @PathFollow3D@72 Finish time: 14610.7833332049 nBreakout: 16  Max_speed: 19.2699231909945 MaxProgress: 174707.375
+Bike: @PathFollow3D@27 Finish time: 14612.7999998715 nBreakout: 15  Max_speed: 19.3064348299246 MaxProgress: 174707.375
+Bike: @PathFollow3D@37 Finish time: 14613.9666665382 nBreakout: 15  Max_speed: 18.8292818643939 MaxProgress: 174707.375
+Bike: @PathFollow3D@79 Finish time: 14624.466666538 nBreakout: 14  Max_speed: 19.2446319100551 MaxProgress: 174707.375
+sim_time=14640.0166665378 wall_time=1630.161 ratio=8.98071826435412 drones=0
+sim_time=14670.0166665373 wall_time=1631.094 ratio=8.99397377866471 drones=0
+sim_time=14700.0166665369 wall_time=1632.043 ratio=9.00712583341058 drones=0
+sim_time=14730.0166665365 wall_time=1632.977 ratio=9.02034545896021 drones=0
+sim_time=14760.016666536 wall_time=1633.911 ratio=9.0335499709201 drones=0
+sim_time=14790.0166665356 wall_time=1634.844 ratio=9.04674492889572 drones=0
+Bike: @PathFollow3D@16 Finish time: 14801.1833332021 nBreakout: 10  Max_speed: 18.2222004737076 MaxProgress: 174707.375
+sim_time=14820.0166665352 wall_time=1635.793 ratio=9.05983621799039 drones=0
+sim_time=14850.0166665347 wall_time=1636.727 ratio=9.07299547605356 drones=0
+sim_time=14880.0166665343 wall_time=1637.66 ratio=9.08614527223861 drones=0
+sim_time=14910.0166665338 wall_time=1638.595 ratio=9.09926898747637 drones=0
+sim_time=14940.0166665334 wall_time=1639.543 ratio=9.11230548179182 drones=0
+sim_time=14970.016666533 wall_time=1640.478 ratio=9.12539922299048 drones=0
+Bike: @PathFollow3D@117 Finish time: 14973.3999998663 nBreakout: 10  Max_speed: 17.6701229480011 MaxProgress: 174707.375
+sim_time=15000.0166665325 wall_time=1641.412 ratio=9.13848361443229 drones=0
+sim_time=15030.0166665321 wall_time=1642.346 ratio=9.15155312372186 drones=0
+sim_time=15060.0166665317 wall_time=1643.294 ratio=9.16452969860029 drones=0
+sim_time=15090.0166665312 wall_time=1644.228 ratio=9.17756945297807 drones=0
+sim_time=15120.0166665308 wall_time=1645.162 ratio=9.19059440136035 drones=0
+sim_time=15150.0166665304 wall_time=1646.095 ratio=9.20361016012463 drones=0
+sim_time=15180.0166665299 wall_time=1647.044 ratio=9.21652163908792 drones=0
+sim_time=15210.0166665295 wall_time=1647.978 ratio=9.22950225459896 drones=0
+Bike: @PathFollow3D@154 Finish time: 15233.5499998625 nBreakout: 13  Max_speed: 17.6165547701772 MaxProgress: 174707.375
+Run time: 1648.714 seconds
+--- Debugging process stopped ---
