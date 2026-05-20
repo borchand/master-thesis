@@ -130,12 +130,12 @@ func _load_and_init():
 	_loading_label.text = "Building scene…"
 	await get_tree().process_frame
 
-	# Load stage from log metadata
+	# Always load the track from the log metadata, not from scene defaults.
 	var stage_path = "res://stages/%s-route.json" % replay_manager.stage
 	var path_node = $BikePath3d
-	if path_node.route_file_path != stage_path:
-		path_node.route_file_path = stage_path
-		path_node.load_coords()
+	path_node.curve.clear_points()
+	path_node.route_file_path = stage_path
+	path_node.load_coords()
 
 	_spawn_bikes()
 	_spawn_drones()
@@ -193,14 +193,22 @@ func _process(_delta: float):
 	var t = replay_manager.current_time
 
 	for bike_id in bike_nodes:
-		bike_nodes[bike_id].global_position = replay_manager.get_bike_position(bike_id, t)
+		var frames: Array = replay_manager.bike_data[bike_id]
+		var active = frames.size() > 0 and t <= frames[-1]["ts"] / float(ReplayManager.LOG_TICK_RATE)
+		bike_nodes[bike_id].visible = active
+		if active:
+			bike_nodes[bike_id].global_position = replay_manager.get_bike_position(bike_id, t)
 
 	for drone_id in drone_nodes:
-		var state = replay_manager.get_drone_state(drone_id, t)
-		drone_nodes[drone_id].global_position = state["pos"]
-		drone_nodes[drone_id].material_override = (
-			_drone_mat_collision if state["collisions"] > 0 else _drone_mat_ok
-		)
+		var frames: Array = replay_manager.drone_data[drone_id]
+		var active = frames.size() > 0 and t <= frames[-1]["ts"] / float(ReplayManager.LOG_TICK_RATE)
+		drone_nodes[drone_id].visible = active
+		if active:
+			var state = replay_manager.get_drone_state(drone_id, t)
+			drone_nodes[drone_id].global_position = state["pos"]
+			drone_nodes[drone_id].material_override = (
+				_drone_mat_collision if state["collisions"] > 0 else _drone_mat_ok
+			)
 
 	_update_follow_camera()
 
