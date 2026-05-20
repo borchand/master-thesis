@@ -292,7 +292,12 @@ func place_drone(drone_instance: Node3D, bike_index: int):
 
 func drone_freed(freed_drone):
 	drone_list.erase(freed_drone)
-	shared.drone_lists[instance_id].erase(freed_drone)
+
+	if is_instance_valid(freed_drone.camera):
+		shared.drone_camera_lists[instance_id].erase(freed_drone.camera)
+
+	if shared.followed_drone_index >= shared.drone_camera_lists[instance_id].size():
+		shared.followed_drone_index = max(0, shared.drone_camera_lists[instance_id].size() - 1)
 
 func place_drone_along_middle_section(drone_instance, route_index, route_drone_count):
 	var curve := path_instance.curve

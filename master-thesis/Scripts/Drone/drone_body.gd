@@ -81,7 +81,7 @@ func _ready():
 
 func _physics_process(_delta):
 	if self.position.distance_to(last_point) < 60 and sensor_readings_bikes.is_empty():
-		queue_free()
+		safe_queue_free()
 		return
 
 	if is_training:
@@ -649,7 +649,7 @@ func _coverage_score(n: int) -> int:
 	#return round(log(float(n)) / log(1.9)) + 1
 
 func safe_queue_free() -> void:
-	get_parent().erase_drone(self)
+	#get_parent().erase_drone(self)
 	freeing_drone.emit(self)
 	queue_free()
 
