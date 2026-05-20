@@ -6,6 +6,7 @@ static var _next_id: int = 1
 var id: int
 
 enum Version { Boids, BoidsPriorityAttractionFields, BoidsPriorityGroups }
+enum Cluster_version {V1, V2}
 
 var is_rl: bool = false
 var is_training: bool = false
@@ -37,6 +38,8 @@ var timestep = 1
 @export var avoidfactor = 5
 @export var centeringfactor = 2
 @export var matchingfactor = 0.4
+
+@export var cluster_version: Cluster_version = Cluster_version.V1
 
 @export var version: Version = Version.BoidsPriorityGroups
 @export var random_selection_rate := 0.2
@@ -81,7 +84,7 @@ func _ready():
 	last_point = path.to_global(curve.get_point_position(curve.point_count - 1))
 
 func _physics_process(_delta):
-	if self.position.distance_to(last_point) < 60 and sensor_readings_bikes.is_empty():
+	if self.position.distance_to(last_point) < 60 and not has_nearby_bike_now():
 		safe_queue_free()
 		return
 
@@ -137,7 +140,7 @@ func _compute_boids():
 	sensor_readings_drones = drone_data
 
 	var clusters := _cluster_bikes(bike_data)
-	var assigned := _assigned_cluster_local_v2(clusters, drone_data)
+	var assigned = _assigned_cluster_local_v2(clusters, drone_data) if cluster_version == Cluster_version.V2 else _assigned_cluster_local(clusters, drone_data)
 	var bikes: Array = assigned["bikes"]
 
 	_draw_cluster_debug_lines([assigned])
@@ -703,6 +706,20 @@ func get_bike_data(bike: Bike_body) -> Dictionary:
 		"velocity":  flat_dir(-bike.global_transform.basis.z) * bike.get_parent().speed,
 		"id": bike.bike_id
 	}
+
+func has_nearby_bike_now() -> bool:
+	var sim = get_parent()
+	var radius_sq = shared.drone_communication_size * shared.drone_communication_size
+
+	for bike_instance in shared.bike_lists[sim.instance_id]:
+		if not is_instance_valid(bike_instance):
+			continue
+
+		var b = bike_instance.bikebody
+		if global_position.distance_squared_to(b.global_position) <= radius_sq:
+			return true
+
+	return false
 
 # log base 1.9 of n + 1, rounded to nearest int.
 # n = 1 -> 1
