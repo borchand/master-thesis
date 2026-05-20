@@ -172,8 +172,8 @@ func set_stage_variables():
 			bike_restWatt=360; bike_sprintWatt = 460; watt_spread = 2
 			bike_cohesion = 3.0; bike_seperation = 0.01; bike_speedupchance = 0.1; bike_speedDownChance = 4.5
 		"res://stages/stage-19-route.json":
-			bike_restWatt=400; bike_sprintWatt = 600; watt_spread = 9
-			bike_cohesion = 0.8; bike_seperation = 0.05; bike_speedupchance = 5.0; bike_speedDownChance = 4.5
+			bike_restWatt=550; bike_sprintWatt = 750; watt_spread = 9
+			bike_cohesion = 3.0; bike_seperation = 0.01; bike_speedupchance = 1.0; bike_speedDownChance = 4.5
 
 func erase_bike(node):
 	bike_process_list.erase(node)
