@@ -110,8 +110,9 @@ func _input(event):
 			shared.followed_drone_index = (shared.followed_drone_index - 1 + drone_cameras.size()) % drone_cameras.size()
 
 
-	if event.is_action_released("follow_next_bike"):
-		shared.follow_bike_in_pos = (shared.follow_bike_in_pos - 1 + bikes.size()) % bikes.size()
+	if not bikes.is_empty():
+		if event.is_action_released("follow_next_bike"):
+			shared.follow_bike_in_pos = (shared.follow_bike_in_pos - 1 + bikes.size()) % bikes.size()
 
-	if event.is_action_released("follow_prev_bike"):
-		shared.follow_bike_in_pos = (shared.follow_bike_in_pos + 1) % bikes.size()
+		if event.is_action_released("follow_prev_bike"):
+			shared.follow_bike_in_pos = (shared.follow_bike_in_pos + 1) % bikes.size()

@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://csol5ydc08vbu"]
+
+[ext_resource type="Script" uid="uid://do78eldguq8lk" path="res://Scripts/Replay/replay_world.gd" id="1"]
+[ext_resource type="Script" uid="uid://8jp2it32jtap" path="res://Scripts/camera_3d.gd" id="2"]
+[ext_resource type="PackedScene" uid="uid://bxvm5tel50r7s" path="res://Scenes/Bike/Bike_Path3d.tscn" id="3"]
+[ext_resource type="Script" uid="uid://b3ui8wkm4hyq" path="res://Scripts/Bike/bike_path.gd" id="4"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
+sky_horizon_color = Color(0.64528894, 0.67970026, 0.66589224, 1)
+ground_bottom_color = Color(0.13039571, 0.19904113, 0.047809124, 1)
+ground_horizon_color = Color(0.64528894, 0.67970026, 0.66589224, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("ProceduralSkyMaterial_1")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+tonemap_mode = 2
+ssao_enabled = true
+
+[node name="ReplayWorld" type="Node3D" unique_id=790985764]
+script = ExtResource("1")
+REPLAY_RUN = "run_2"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1027087717]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1223388208]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1444947785]
+transform = Transform3D(1, 0, 0, 0, -0.16804208, 0.9857798, 0, -0.9857798, -0.16804208, 2.081163, 65.78595, -17.228928)
+script = ExtResource("2")
+
+[node name="BikePath3d" parent="." unique_id=2080840722 instance=ExtResource("3")]
+script = ExtResource("4")
