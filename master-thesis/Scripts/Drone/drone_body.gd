@@ -63,6 +63,7 @@ var should_check_camera = false
 var _cached_force: Vector3 = Vector3.ZERO
 var _cached_rotation_dir: Vector3 = Vector3.ZERO
 var _boids_throttle: int = 0
+var _last_cluster_centroid: Vector3 = Vector3.ZERO
 
 func _ready():
 	id = _next_id
@@ -127,7 +128,7 @@ func _compute_boids():
 	sensor_readings_drones = drone_data
 
 	var clusters := _cluster_bikes(bike_data)
-	var assigned := _assigned_cluster_local(clusters, drone_data)
+	var assigned := _assigned_cluster_local_v2(clusters, drone_data)
 	var bikes: Array = assigned["bikes"]
 
 	_draw_cluster_debug_lines([assigned])
@@ -180,6 +181,73 @@ func _assigned_cluster_local(clusters: Array, local_drones: Array) -> Dictionary
 			best = cluster
 
 	return best
+
+func _assigned_cluster_local_v2(clusters: Array, local_drones: Array) -> Dictionary:
+	if clusters.is_empty():
+		return {"centroid": Vector3.ZERO, "velocity": Vector3.ZERO, "size": 0, "bikes": []}
+
+	var self_pos = global_position
+	var coverage_radius_sq = coverage_radius * coverage_radius
+
+	# Count competing drones per cluster.
+	# A drone counts as a competitor if it is closer to the cluster than self,
+	# or is already within coverage_radius (considered "covering" regardless of distance).
+	var drone_counts := {}
+	for i in range(clusters.size()):
+		drone_counts[i] = 0
+	for d in local_drones:
+		var closest_idx := 0
+		var closest_dist_sq := INF
+		for i in range(clusters.size()):
+			var dist_sq = d["position"].distance_squared_to(clusters[i]["centroid"])
+			if dist_sq < closest_dist_sq:
+				closest_dist_sq = dist_sq
+				closest_idx = i
+		var self_dist_sq = self_pos.distance_squared_to(clusters[closest_idx]["centroid"])
+		if closest_dist_sq < self_dist_sq or closest_dist_sq < coverage_radius_sq:
+			drone_counts[closest_idx] += 1
+
+	# Find which cluster is the continuation of the last assigned one (for hysteresis).
+	var last_idx := -1
+	if _last_cluster_centroid != Vector3.ZERO:
+		var min_dist_sq := INF
+		for i in range(clusters.size()):
+			var d = clusters[i]["centroid"].distance_squared_to(_last_cluster_centroid)
+			if d < min_dist_sq:
+				min_dist_sq = d
+				last_idx = i
+
+	var best: Dictionary = {}
+	var best_val := -INF
+
+	for i in range(clusters.size()):
+		var cluster = clusters[i]
+		var need := _coverage_score(cluster["size"])
+		var count = drone_counts[i]
+
+		# Normalized coverage score: fraction of needed drones still missing.
+		# Empty cluster → +1.0, exactly staffed → 0.0, double-staffed → -1.0.
+		# Proportional in both directions regardless of cluster size,
+		# so missing half always scores 0.5 and being over by 100% always scores -1.0.
+		var v: float = float(need - count) / float(need)
+
+		# Hysteresis: require a real advantage before switching clusters.
+		if i == last_idx:
+			v += 0
+
+		# Mild distance tie-breaker so distant clusters win when scores are equal.
+		v += self_pos.distance_to(cluster["centroid"]) * 0.005
+
+		if v > best_val:
+			best_val = v
+			best = cluster
+
+	if best.is_empty():
+		return {"centroid": Vector3.ZERO, "velocity": Vector3.ZERO, "size": 0, "bikes": []}
+
+	_last_cluster_centroid = best["centroid"]
+	return best
+	
 
 func separation_fast():
 	var separation_vector = Vector3.ZERO
@@ -635,6 +703,14 @@ func get_bike_data(bike: Bike_body) -> Dictionary:
 # n = 5 -> 4
 # n = 10 -> 5
 # n = 20 -> 6
+# log base 2.4 of n, to the power of 2.3, rounded to nearest int, plus 1 (for small n).
+# n = 1 -> 1
+# n = 2 -> 2
+# n = 5 -> 5
+# n = 10 -> 10
+# n = 20 -> 18
+# n = 50 -> 32
+# n = 100 -> 47
 func _coverage_score(n: int) -> int:
 	return round(pow(log(float(n)) / log(float(2.4)), 2.3)) + 1 
 	#return round(log(float(n)) / log(1.9)) + 1
