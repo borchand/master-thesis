@@ -783,30 +783,37 @@ func get_bike_data(bike: Bike_body) -> Dictionary:
 	}
 
 func _collect_bikes_in_range() -> Array:
-	var sim = get_parent()
 	var self_pos := global_position
 	var sensor_radius_sq: float = shared.drone_communication_size * shared.drone_communication_size
 	var result: Array = []
-	for bike_instance in shared.bike_lists[sim.instance_id]:
-		var b: Bike_body = bike_instance.bikebody
-		if self_pos.distance_squared_to(b.global_position) <= sensor_radius_sq:
-			result.append(get_bike_data(b))
+	for bike in get_parent().cached_bikes:
+		var dist_sq := self_pos.distance_squared_to(bike["position"])
+		if dist_sq <= sensor_radius_sq:
+			var dist := sqrt(dist_sq)
+			result.append({
+				"position":  bike["position"],
+				"velocity":  bike["velocity"],
+				"id":        bike["id"],
+				"distance":  dist,
+				"direction": self_pos.direction_to(bike["position"]),
+			})
 	return result
 
 func _collect_drones_in_range() -> Array:
-	var sim = get_parent()
 	var self_pos := global_position
 	var sensor_radius_sq: float = shared.drone_communication_size * shared.drone_communication_size
 	var result: Array = []
-	for d in sim.drone_list:
-		if d == self:
+	for drone in get_parent().cached_drones:
+		if drone["id"] == id:
 			continue
-		if self_pos.distance_squared_to(d.global_position) <= sensor_radius_sq:
+		var dist_sq := self_pos.distance_squared_to(drone["position"])
+		if dist_sq <= sensor_radius_sq:
+			var dist := sqrt(dist_sq)
 			result.append({
-				"id": d.id,
-				"position": d.global_position,
-				"distance": self_pos.distance_to(d.global_position),
-				"direction": self_pos.direction_to(d.global_position),
+				"id":        drone["id"],
+				"position":  drone["position"],
+				"distance":  dist,
+				"direction": self_pos.direction_to(drone["position"]),
 			})
 	return result
 
