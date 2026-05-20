@@ -1,5 +1,6 @@
 extends RigidBody3D
 class_name Drone
+signal freeing_drone
 
 static var _next_id: int = 1
 var id: int
@@ -64,6 +65,8 @@ var _cached_force: Vector3 = Vector3.ZERO
 var _cached_rotation_dir: Vector3 = Vector3.ZERO
 var _boids_throttle: int = 0
 
+var last_point = null
+
 func _ready():
 	id = _next_id
 	_next_id += 1
@@ -72,9 +75,15 @@ func _ready():
 	if not is_training:
 		start_logging()
 	body_entered.connect(_on_body_entered)
-	#$CollisionShape3D.disabled = true
+	var path = get_parent().get_node("BikePath3d") as Path3D
+	var curve = path.curve
+	last_point = path.to_global(curve.get_point_position(curve.point_count - 1))
 
 func _physics_process(_delta):
+	if self.position.distance_to(last_point) < 60 and sensor_readings_bikes.is_empty():
+		safe_queue_free()
+		return
+
 	if is_training:
 		if is_rl:
 			apply_central_force(_cached_force)
@@ -638,6 +647,11 @@ func get_bike_data(bike: Bike_body) -> Dictionary:
 func _coverage_score(n: int) -> int:
 	return round(pow(log(float(n)) / log(float(2.4)), 2.3)) + 1 
 	#return round(log(float(n)) / log(1.9)) + 1
+
+func safe_queue_free() -> void:
+	#get_parent().erase_drone(self)
+	freeing_drone.emit(self)
+	queue_free()
 
 # ─── Logging ────────────────────────────────────────────────────────────────────
 

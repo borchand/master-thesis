@@ -45,6 +45,14 @@ func _process(delta):
 
 
 	elif shared.follow_drone and not drone_cameras.is_empty():
+		shared.followed_drone_index = int(shared.followed_drone_index)
+
+		if shared.followed_drone_index >= drone_cameras.size():
+			shared.followed_drone_index = drone_cameras.size() - 1
+
+		if shared.followed_drone_index < 0:
+			shared.followed_drone_index = 0
+
 		var drone_camera = drone_cameras[shared.followed_drone_index]
 		drone_camera.set_current(true)
 	else:

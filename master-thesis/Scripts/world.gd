@@ -107,7 +107,7 @@ func _ready():
 			var bike_index = i % shared.bike_lists[instance_id].size()
 			place_drone(drone_list[i], bike_index)
 
-	$Menu/OtherContainer/FollowDroneInPos.max_value = drone_count - 1
+	$Menu/OtherContainer/FollowDroneInPos.max_value = max(0, drone_list.size() - 1)
 	$Menu/OtherContainer/FollowBikeInPos.max_value = bike_count - 1
 
 	update_cached_world_data()
@@ -135,7 +135,6 @@ func _physics_process(delta: float) -> void:
 		timer = timer-timer_threashold
 		update_bike_order()
 
-
 func update_cached_world_data():
 	cached_bikes.clear()
 	cached_drones.clear()
@@ -154,7 +153,11 @@ func update_cached_world_data():
 			"id": bike_body.bike_id
 		})
 
-	for d in drone_list:
+	for d in drone_list.duplicate():
+		if not is_instance_valid(d):
+			drone_list.erase(d)
+			continue
+
 		cached_drones.append({
 			"id": d.id,
 			"position": d.global_position
@@ -232,6 +235,7 @@ func update_bike_order():
 
 func add_drone(auto_place: bool = true):
 	var drone_instance = drone.instantiate()
+	drone_instance.connect("freeing_drone", drone_freed)
 	drone_instance.is_rl = is_rl
 	drone_instance.is_training = is_training
 
@@ -286,6 +290,14 @@ func place_drone(drone_instance: Node3D, bike_index: int):
 
 	drone_instance.set_position(desired_pos)
 
+func drone_freed(freed_drone):
+	drone_list.erase(freed_drone)
+
+	if is_instance_valid(freed_drone.camera):
+		shared.drone_camera_lists[instance_id].erase(freed_drone.camera)
+
+	if shared.followed_drone_index >= shared.drone_camera_lists[instance_id].size():
+		shared.followed_drone_index = max(0, shared.drone_camera_lists[instance_id].size() - 1)
 
 func place_drone_along_middle_section(drone_instance, route_index, route_drone_count):
 	var curve := path_instance.curve
