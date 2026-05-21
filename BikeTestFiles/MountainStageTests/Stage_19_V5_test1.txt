@@ -1,6 +1,79 @@
-import re
+  Sequence  1:  17 bike(s)  |  10514
+  Sequence  2:   1 bike(s)  |  10547
+  Sequence  3:   1 bike(s)  |  10551
+  Sequence  4:   8 bike(s)  |  10582
+  Sequence  5:   1 bike(s)  |  10590
+  Sequence  6:   1 bike(s)  |  10600
+  Sequence  7:   2 bike(s)  |  10601
+  Sequence  8:   2 bike(s)  |  10604
+  Sequence  9:   1 bike(s)  |  10607
+  Sequence 10:   6 bike(s)  |  10629
+  Sequence 11:   4 bike(s)  |  10632
+  Sequence 12:   5 bike(s)  |  10635
+  Sequence 13:   1 bike(s)  |  10643
+  Sequence 14:   2 bike(s)  |  10644
+  Sequence 15:   1 bike(s)  |  10655
+  Sequence 16:   3 bike(s)  |  10663
+  Sequence 17:   1 bike(s)  |  10686
+  Sequence 18:   1 bike(s)  |  10729
+  Sequence 19:   3 bike(s)  |  10731
+  Sequence 20:   3 bike(s)  |  10751
+  Sequence 21:   1 bike(s)  |  10769
+  Sequence 22:   1 bike(s)  |  10778
+  Sequence 23:  30 bike(s)  |  10789
+  Sequence 24:   6 bike(s)  |  10812
+  Sequence 25:   3 bike(s)  |  10819
+  Sequence 26:   1 bike(s)  |  10824
+  Sequence 27:   1 bike(s)  |  10841
+  Sequence 28:   1 bike(s)  |  10844
+  Sequence 29:   3 bike(s)  |  10847
+  Sequence 30:   3 bike(s)  |  10852
+  Sequence 31:   1 bike(s)  |  10857
+  Sequence 32:   1 bike(s)  |  10867
+  Sequence 33:   1 bike(s)  |  10871
+  Sequence 34:   1 bike(s)  |  10897
+  Sequence 35:   1 bike(s)  |  10931
+  Sequence 36:   1 bike(s)  |  10933
+  Sequence 37:   1 bike(s)  |  10934
+  Sequence 38:   2 bike(s)  |  10973
+  Sequence 39:   1 bike(s)  |  10981
+  Sequence 40:   9 bike(s)  |  10985
+  Sequence 41:   1 bike(s)  |  10992
+  Sequence 42:   1 bike(s)  |  10994
+  Sequence 43:   2 bike(s)  |  11002
+  Sequence 44:   3 bike(s)  |  11003
+  Sequence 45:   1 bike(s)  |  11019
+  Sequence 46:   1 bike(s)  |  11029
+  Sequence 47:   2 bike(s)  |  11031
+  Sequence 48:   1 bike(s)  |  11035
+  Sequence 49:   1 bike(s)  |  11046
+  Sequence 50:   1 bike(s)  |  11052
+  Sequence 51:   1 bike(s)  |  11066
+  Sequence 52:   2 bike(s)  |  11067
+  Sequence 53:   1 bike(s)  |  11090
+  Sequence 54:   2 bike(s)  |  11102
+  Sequence 55:   2 bike(s)  |  11106
+  Sequence 56:   1 bike(s)  |  11107
+  Sequence 57:   1 bike(s)  |  11160
+  Sequence 58:   3 bike(s)  |  11170
+  Sequence 59:   2 bike(s)  |  11173
+  Sequence 60:   4 bike(s)  |  11213
+  Sequence 61:   1 bike(s)  |  11301
+  Sequence 62:   1 bike(s)  |  11340
+  Sequence 63:   1 bike(s)  |  11407
+  Sequence 64:   1 bike(s)  |  11409
+  Sequence 65:   1 bike(s)  |  11554
+  Sequence 66:   1 bike(s)  |  11562
+  Sequence 67:   1 bike(s)  |  11574
+  Sequence 68:   1 bike(s)  |  11592
+  Sequence 69:   2 bike(s)  |  11719
+  Sequence 70:   1 bike(s)  |  11724
+  Sequence 71:   1 bike(s)  |  11731
+  Sequence 72:   1 bike(s)  |  11739
+  Sequence 73:   1 bike(s)  |  11749
 
-data = """
+
+
 Godot Engine v4.6.2.stable.mono.official.71f334935 - https://godotengine.org
 OpenGL API 3.3.0 NVIDIA 560.94 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 2060
 
@@ -709,25 +782,3 @@ Bike: @PathFollow3D@116 Finish time: 11739.26666658 nBreakout: 3  Max_speed: 26.
 Bike: @PathFollow3D@94 Finish time: 11749.0666665798 nBreakout: 4  Max_speed: 26.4740663159812
 Run time: 1160.781 seconds
 --- Debugging process stopped ---
-
-"""
-# Parse all finish times
-times = [float(m) for m in re.findall(r"Finish time: ([\d.]+)", data)]
-
-# Group into sequences where the gap between consecutive times is < 0.85
-GAP = 1.00
-sequences = []
-current_seq = [times[0]]
-
-for t in times[1:]:
-    if t - current_seq[-1] < GAP:
-        current_seq.append(t)
-    else:
-        sequences.append(current_seq)
-        current_seq = [t]
-sequences.append(current_seq)
-
-# Print results
-print(f"Found {len(sequences)} sequences (gap threshold: {GAP}):\n")
-for i, seq in enumerate(sequences, 1):
-    print(f"  Sequence {i:2d}: {len(seq):3d} bike(s)  |  {seq[0]:.0f}")# → {seq[-1]:.2f}")
