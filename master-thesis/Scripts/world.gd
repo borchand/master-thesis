@@ -7,26 +7,18 @@ const drone = preload("res://Scenes/Drone/Drone.tscn")
 @export var is_rl: bool = false
 
 @export var min_bike_count: int = 1
-@export var max_bike_count: int = 20
-@export var drone_counts_per_instance: Array[int] = [1, 2, 8, 15]
+@export var max_bike_count: Array[int] = [5, 20, 50, 100]
+@export var drone_counts_per_instance: Array[int] = [1, 4, 16, 40]
 
 const RL_TRACKS: Array[String] = [
-	"res://stages/rl-5k-straight-flat.json",
-	"res://stages/rl-5k-straight-uphill.json",
-	"res://stages/rl-5k-straight-downhill.json",
-	"res://stages/rl-5k-rolling-hills.json",
-	"res://stages/rl-5k-valley.json",
-	"res://stages/rl-5k-mountain.json",
-	"res://stages/rl-5k-left-arc.json",
-	"res://stages/rl-5k-right-arc.json",
-	"res://stages/rl-5k-s-curve.json",
-	"res://stages/rl-5k-zigzag.json",
-	"res://stages/rl-5k-left-arc-uphill.json",
-	"res://stages/rl-5k-right-arc-downhill.json",
-	"res://stages/rl-5k-s-curve-uphill.json",
-	"res://stages/rl-5k-rolling-left-arc.json",
-	"res://stages/rl-5k-hairpin.json",
-	"res://stages/rl-5k-hairpin-uphill.json",
+	  "res://stages/rl-2k-technical-hills.json",
+	  "res://stages/rl-2k-technical.json",
+	  "res://stages/rl-2k-switchback.json", 
+	  "res://stages/rl-2k-straight-flat.json",
+	  "res://stages/rl-2k-left-arc.json",
+	  "res://stages/rl-2k-right-arc.json",
+	  "res://stages/rl-2k-technical-downhill-hairpin.json",
+	  "res://stages/rl-2k-downhill-left-right.json",
 ]
 
 @onready var path_instance: Path3D
@@ -75,11 +67,11 @@ func _ready():
 	if is_rl and is_training:
 		path_instance.call("preload_tracks", RL_TRACKS)
 		randomize_track()
-		bike_count = randi_range(min_bike_count, max_bike_count)
-
+		
 		if instance_id < drone_counts_per_instance.size():
 			drone_count = drone_counts_per_instance[instance_id]
-
+	
+			bike_count = randi_range(min_bike_count, max_bike_count[instance_id])
 	if not is_training:
 		logging.add_info(
 			bike_count,
@@ -381,8 +373,8 @@ func reset_track_and_bike_and_drone() -> void:
 
 	randomize_track()
 	print("Track randomization took ", Time.get_ticks_msec() - time, " ms")
-
-	bike_count = randi_range(min_bike_count, max_bike_count)
+	
+	bike_count = randi_range(min_bike_count, max_bike_count[instance_id])
 
 	for i in bike_count:
 		add_bike()

@@ -1,18 +1,20 @@
 extends AIController3D
+class_name DroneRL
 
 enum Version { BoidsRl, GroupingRl, GroupingBoidsRl }
 
 @export var rl_version: Version = Version.BoidsRl
 @export var no_bike_reset_steps: int = 500
 # Boids RL filming reward parameters
-@export var optimal_film_dist: float = 10.0   # ideal horizontal distance to bike centroid (metres)
-@export var film_dist_tolerance: float = 5.0  # half-width of the reward tent (metres)
+@export var optimal_film_dist: float = 6.0   # ideal horizontal distance to bike centroid (metres)
+@export var film_dist_tolerance: float = 3.0  # half-width of the reward tent (metres)
 # GroupingBoidsRl: path to a trained BoidsRl ONNX model used for low-level movement
 @export var boids_rl_model_path: String = ""
 
 @onready var drone: Drone = $".."
 
 var _boids_rl_model: ONNXModel = null
+var _boids_rl_assigned_bikes: Array = []
 var _debug_lines: Array[MeshInstance3D] = []
 var _debug_force_line: MeshInstance3D = null
 var _debug_torque_line: MeshInstance3D = null
@@ -26,7 +28,7 @@ var _grouping_rl_selected_cluster: Dictionary = {}
 var _grouping_rl_cluster_dots: Array[MeshInstance3D] = []
 var _grouping_rl_selected_line: MeshInstance3D = null
 
-var _rl_throttle: int = 0
+var _prev_avg_bike_vel: Vector3 = Vector3.ZERO
 
 # ─── RL setup ────────────────────────────────────────────────────────────────────
 
@@ -43,6 +45,10 @@ func _ready():
 func _physics_process(_delta):
 	if not get_parent().is_rl:
 		return
+	if drone.is_queued_for_deletion():
+		done = true
+		needs_reset = true
+		return
 	if needs_reset:
 		reset()
 		return
@@ -53,22 +59,23 @@ func _physics_process(_delta):
 		needs_reset = true
 		return
 
-	if not world.is_training:
-		_rl_throttle += 1
-		if _rl_throttle % 3 != drone.id % 3:
-			return
-
 	if rl_version == Version.GroupingRl or rl_version == Version.GroupingBoidsRl:
 		_physics_process_grouping_rl()
 		return
 
 	if rl_version == Version.BoidsRl:
-		_physics_process_boids_rl(world)
+		if world.is_training:
+			_physics_process_boids_rl(world)
 		return
 
 func get_obs() -> Dictionary:
 	match rl_version:
-		Version.BoidsRl: return _get_obs_boids_rl()
+		Version.BoidsRl:
+			if not drone.is_training:
+				drone.read_sensor_by_distance()
+				_boids_rl_assigned_bikes = _compute_assigned_bikes()
+			return _get_obs_boids_rl(_boids_rl_assigned_bikes, drone._filter_camera(_boids_rl_assigned_bikes), drone.sensor_readings_drones)
+
 		Version.GroupingRl: return _get_obs_grouping_rl()
 		Version.GroupingBoidsRl: return _get_obs_grouping_rl()
 	return {}
@@ -113,8 +120,16 @@ func reset():
 
 # ─── Boids RL ────────────────────────────────────────────────────────────────────
 
+func _compute_assigned_bikes() -> Array:
+	var clusters := drone._cluster_bikes(drone.sensor_readings_bikes)
+	var assigned = drone._assigned_cluster_local_v2(clusters, drone.sensor_readings_drones) \
+		if drone.cluster_version == drone.Cluster_version.V2 \
+		else drone._assigned_cluster_local(clusters, drone.sensor_readings_drones)
+	return assigned["bikes"]
+
 func _physics_process_boids_rl(world) -> void:
 	drone.read_sensor_by_distance()
+	_boids_rl_assigned_bikes = _compute_assigned_bikes()
 
 	if drone.sensor_readings_bikes.is_empty():
 		reward -= 0.5
@@ -130,33 +145,47 @@ func _physics_process_boids_rl(world) -> void:
 				needs_reset = true
 
 	_draw_debug_lines()
-	_compute_reward_boids_rl()
-	
+	_compute_reward_boids_rl_v2()
 
-func _compute_reward_boids_rl() -> void:
-
-	for reading in drone.sensor_readings_drones:
-		if reading.distance < drone.avoid_radius:
-			var proximity = 1.0 - (reading.distance / drone.avoid_radius)
-			reward -= proximity * 2.0
-
-	var nearby_count = drone.sensor_readings_bikes.size()
+func _compute_reward_boids_rl_v2() -> void:
+	var nearby_count = _boids_rl_assigned_bikes.size()
 	if nearby_count == 0:
 		return
 
-	var bikes_in_camera = drone.camera_readings
+	var bikes_in_camera = drone._filter_camera(_boids_rl_assigned_bikes)
 	var visible_count = bikes_in_camera.size()
 
-	# Primary: fraction of locally sensed bikes that are in frame.
+	# +1 when all cluster bikes visible, -1 when none, linear in between
 	var coverage = float(visible_count) / float(nearby_count)
-	reward += coverage
+	reward += 2.0 * coverage - 1.0
+
+	# Small proximity bonus — decays linearly to 0 at 3× optimal_film_dist
+	var bike_centroid := Vector3.ZERO
+	for reading in _boids_rl_assigned_bikes:
+		bike_centroid += reading.position
+	bike_centroid /= float(nearby_count)
+	var horiz_dist := Vector3(bike_centroid.x - drone.global_position.x, 0.0, bike_centroid.z - drone.global_position.z).length()
+	reward += clamp(1.0 - horiz_dist / (optimal_film_dist * 3.0), 0.0, 1.0) * 0.2
+
+func _compute_reward_boids_rl() -> void:
+	var nearby_count = _boids_rl_assigned_bikes.size()
+	if nearby_count == 0:
+		return
+
+	var bikes_in_camera = drone._filter_camera(_boids_rl_assigned_bikes)
+	var visible_count = bikes_in_camera.size()
+
+	# Primary: fraction of assigned cluster bikes that are in frame (squared for
+	# stronger gradient near zero — losing coverage costs much more than gaining it).
+	var coverage = float(visible_count) / float(nearby_count)
+	reward += coverage * coverage
 
 	if visible_count > 0:
 		var camera = drone.get_camera_node()
 		var cam_inv = camera.global_transform.basis.inverse()
 		var centroid_cam = Vector2.ZERO
 
-		for bike_data in drone.camera_readings:
+		for bike_data in bikes_in_camera:
 			var to_bike = cam_inv * (bike_data["position"] - camera.global_position)
 			var fwd = -to_bike.z
 			if fwd > 0.01:
@@ -166,13 +195,12 @@ func _compute_reward_boids_rl() -> void:
 		centroid_cam /= float(visible_count)
 		reward += (1.0 - clamp(centroid_cam.length(), 0.0, 1.0)) * 0.3
 
-	# Bonus when all locally sensed bikes are in frame.
+	# Bonus when all assigned cluster bikes are in frame.
 	if visible_count == nearby_count:
 		reward += 0.5
 
-	# Centroid of locally sensed bikes (sensor sphere, not global list).
 	var bike_centroid = Vector3.ZERO
-	for reading in drone.sensor_readings_bikes:
+	for reading in _boids_rl_assigned_bikes:
 		bike_centroid += reading.position
 	bike_centroid /= float(nearby_count)
 
@@ -188,22 +216,23 @@ func _compute_reward_boids_rl() -> void:
 	var dist_reward = 1.0 - clamp(abs(horiz_dist - optimal_film_dist) / film_dist_tolerance, 0.0, 1.0)
 	reward += dist_reward * 0.3
 
-# 16 observations for boids rl (camera-coverage / boids parameter tuning):
+# 13 observations for boids rl (camera-coverage / following):
 #   coverage (1), centroid_cam xy (2), full_coverage flag (1),
 #   dist_error (1), camera_facing (1),
-#   avg_bike_vel xz in drone-local frame (2), bike_spread (1), bike_count_norm (1),
-#   nearest_drone (1), drones_in_sep_zone (1), own velocity xyz (3), drone_count_norm (1)
-func _get_obs_boids_rl() -> Dictionary:
-	var nearby_count = drone.sensor_readings_bikes.size()
+#   avg_bike_vel xz in drone-local frame (2), own velocity xyz (3),
+#   avg_bike_vel delta xz in drone-local frame (2) — encodes turn rate / heading change
+func _get_obs_boids_rl(bikes : Array, camera_readings : Array, drone_sensor_readings : Array) -> Dictionary:
+	var nearby_count = bikes.size()
 	var obs: Array = []
 
 	if nearby_count == 0:
-		for _i in 16:
+		_prev_avg_bike_vel = Vector3.ZERO
+		for _i in 13:
 			obs.append(0.0)
 		return {"obs": obs}
 
 	# --- Camera coverage ---
-	var bikes_in_camera = drone.camera_readings
+	var bikes_in_camera = camera_readings
 	var visible_count = bikes_in_camera.size()
 	obs.append(float(visible_count) / float(nearby_count))
 
@@ -224,7 +253,7 @@ func _get_obs_boids_rl() -> Dictionary:
 
 	# --- Spatial relationship to centroid of locally sensed bikes ---
 	var bike_centroid = Vector3.ZERO
-	for reading in drone.sensor_readings_bikes:
+	for reading in bikes:
 		bike_centroid += reading.position
 	bike_centroid /= float(nearby_count)
 
@@ -242,36 +271,12 @@ func _get_obs_boids_rl() -> Dictionary:
 	# Average bike velocity in drone-local XZ frame: tells the agent how fast
 	# and in which direction the group is moving (key for matching_factor tuning).
 	var avg_vel := Vector3.ZERO
-	for reading in drone.sensor_readings_bikes:
+	for reading in bikes:
 		avg_vel += reading.velocity
 	avg_vel /= float(nearby_count)
 	var local_avg_vel = drone.global_transform.basis.inverse() * avg_vel
 	obs.append(clamp(local_avg_vel.x / 22.0, -1.0, 1.0))
 	obs.append(clamp(local_avg_vel.z / 22.0, -1.0, 1.0))
-
-	# Bike spread: average distance from group centroid, normalised by sensor radius.
-	# High spread → centering_factor should increase to pull drones toward the group.
-	var spread := 0.0
-	for reading in drone.sensor_readings_bikes:
-		var flat := Vector2(reading.position.x - bike_centroid.x, reading.position.z - bike_centroid.z)
-		spread += flat.length()
-	spread /= float(nearby_count)
-	obs.append(clamp(spread / 30.0, 0.0, 1.0))
-
-	# How many bikes are nearby, normalised by sensor capacity (max_bike_count = 8).
-	obs.append(clamp(float(nearby_count) / 8.0, 0.0, 1.0))
-
-	# --- Drone separation ---
-	var nearest_dist_norm = 1.0
-	var in_zone = 0
-	for reading in drone.sensor_readings_drones:
-		var d_norm = reading.distance / (drone.avoid_radius * 2.0)
-		if d_norm < nearest_dist_norm:
-			nearest_dist_norm = d_norm
-		if reading.distance < drone.avoid_radius:
-			in_zone += 1
-	obs.append(clamp(nearest_dist_norm, 0.0, 1.0))
-	obs.append(clamp(float(in_zone) / 5.0, 0.0, 1.0))
 
 	# --- Own velocity in drone-local frame ---
 	var local_vel = drone.global_transform.basis.inverse() * drone.linear_velocity
@@ -279,29 +284,32 @@ func _get_obs_boids_rl() -> Dictionary:
 	obs.append(clamp(local_vel.y / 15.0, -1.0, 1.0))
 	obs.append(clamp(local_vel.z / 15.0, -1.0, 1.0))
 
-	# How many other drones are nearby, normalised by drone_count export.
-	obs.append(clamp(float(drone.sensor_readings_drones.size()) / 10.0, 0.0, 1.0))
+	# --- Bike group velocity delta (turn rate): change since last obs query ---
+	# Non-zero when the peloton is cornering; lets the agent anticipate tight turns.
+	var vel_delta = avg_vel - _prev_avg_bike_vel
+	_prev_avg_bike_vel = avg_vel
+	var local_vel_delta = drone.global_transform.basis.inverse() * vel_delta
+	obs.append(clamp(local_vel_delta.x / 2.0, -1.0, 1.0))
+	obs.append(clamp(local_vel_delta.z / 2.0, -1.0, 1.0))
 
 	return {"obs": obs}
 
 func _get_action_space_boids_rl() -> Dictionary:
-
 	return {
-		"avoid_radius": {"size": 1, "action_type": "continuous"},
-		"avoid_factor": {"size": 1, "action_type": "continuous"},
 		"centering_factor": {"size": 1, "action_type": "continuous"},
 		"matching_factor": {"size": 1, "action_type": "continuous"},
 	}
 
 func _set_action_boids_rl(action) -> void:
 	drone.set_tunable_parameters({
-		"avoid_radius":     _remap_action(action["avoid_radius"][0],     1.0, 8.0),
-		"avoid_factor":     _remap_action(action["avoid_factor"][0],     1.0, 20.0),
-		"centering_factor": _remap_action(action["centering_factor"][0], 0.1,  5.0),
-		"matching_factor":  _remap_action(action["matching_factor"][0],  0.01, 1.0),
+		"avoid_radius":     drone.avoid_radius,
+		"avoid_factor":     drone.avoidfactor,
+		"centering_factor": centering_factor_remap_action(action["centering_factor"][0]),
+		"matching_factor":  matching_factor_remap_action(action["matching_factor"][0]),
 	})
 
-	_update_cached_force(drone.sensor_readings_bikes)
+	var bikes = _boids_rl_assigned_bikes if not _boids_rl_assigned_bikes.is_empty() else drone.sensor_readings_bikes
+	_update_cached_force(bikes)
 
 # ─── Grouping RL ────────────────────────────────────────────────────────────────────
 
@@ -345,7 +353,6 @@ func _physics_process_grouping_rl() -> void:
 		_compute_reward_grouping_rl()
 
 func _compute_reward_grouping_rl() -> void:
-	reward = 0.0
 	if _grouping_rl_selected_cluster.is_empty() or _grouping_rl_clusters.is_empty():
 		reward -= 0.1
 		return
@@ -356,7 +363,7 @@ func _compute_reward_grouping_rl() -> void:
 	# providing a gradient that guides the drone toward the cluster.
 	if self_dist >= drone.coverage_radius:
 		var dist_ratio := self_dist / drone.coverage_radius
-		reward = -clamp(dist_ratio, 1.0, 3.0) * 0.05
+		reward -= clamp(dist_ratio, 1.0, 3.0) * 0.05
 		return
 
 	var drones_on := 0
@@ -371,7 +378,7 @@ func _compute_reward_grouping_rl() -> void:
 	# excess drones always have a net incentive to leave and find an uncovered cluster.
 	var total_bikes := float(max(1, drone.sensor_readings_bikes.size()))
 	var size_weight := float(_grouping_rl_selected_cluster.size) / total_bikes
-	reward = size_weight * (1.0 - float(drones_on))
+	reward += size_weight * (1.0 - float(drones_on))
 
 # 20 observations for grouping rl (local allocation state):
 #   4 clusters × 5 features (exists, bike_count, drones_on, under_coverage, distance)
@@ -458,14 +465,14 @@ func _set_action_grouping_boids_rl(action) -> void:
 
 	assert(_boids_rl_model != null, "GroupingBoidsRl requires a BoidsRl ONNX model — set boids_rl_model_path")
 
-	var boids_obs = _get_obs_boids_rl()
+	var boids_obs = _get_obs_boids_rl(drone.sensor_readings_bikes, drone._filter_camera(drone.sensor_readings_bikes), drone.sensor_readings_drones)
 	var result = _boids_rl_model.run_inference(boids_obs["obs"], 1)
 	var output = result["output"]
 	drone.set_tunable_parameters({
-		"avoid_radius":     _remap_action(output[0], 1.0, 8.0),
-		"avoid_factor":     _remap_action(output[1], 1.0, 20.0),
-		"centering_factor": _remap_action(output[2], 0.1,  5.0),
-		"matching_factor":  _remap_action(output[3], 0.01, 1.0),
+		"avoid_radius":     avoid_radius_remap_action(output[0]),
+		"avoid_factor":     avoid_factor_remap_action(output[1]),
+		"centering_factor": centering_factor_remap_action(output[2]),
+		"matching_factor":  matching_factor_remap_action(output[3]),
 	})
 
 	_update_cached_force(_grouping_rl_selected_cluster.bikes)
@@ -482,6 +489,18 @@ func _update_cached_force(bikes: Array) -> void:
 
 	drone._cached_force = drone.clamp_vector(direction, drone.max_force)
 	drone._cached_rotation_dir = -alignment_vector
+
+func avoid_radius_remap_action(action):
+	return _remap_action(action,     5.0, 12.0)
+
+func avoid_factor_remap_action(action):
+	return _remap_action(action,     1.0, 6.0)
+
+func centering_factor_remap_action(action):
+	return _remap_action(action, 1, 10.0)
+
+func matching_factor_remap_action(action):
+	return _remap_action(action, 0.0, 1.0)
 
 # Remap a value from the RL output range [-1, 1] to [low, high].
 func _remap_action(value: float, low: float, high: float) -> float:

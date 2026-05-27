@@ -215,6 +215,7 @@ func _training_process():
 
 
 func _inference_process():
+	agents_inference = agents_inference.filter(func(a): return is_instance_valid(a))
 	if agents_inference.size() > 0:
 		var obs: Array = _get_obs_from_agents(agents_inference)
 		var actions = []
@@ -519,7 +520,8 @@ func _reset_agents(agents = all_agents):
 func _get_obs_from_agents(agents: Array = all_agents):
 	var obs = []
 	for agent in agents:
-		obs.append(agent.get_obs())
+		if is_instance_valid(agent):
+			obs.append(agent.get_obs())
 	return obs
 
 

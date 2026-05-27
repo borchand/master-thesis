@@ -15,6 +15,8 @@ gravity_scale = 0.0
 can_sleep = false
 angular_damp = 6.0
 script = ExtResource("2_0xxxp")
+cluster_version = 1
+version = 3
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1101559629]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00048828125, 0.03894043, 0.006225586)
@@ -38,6 +40,5 @@ script = ExtResource("4_6hc2f")
 
 [node name="DroneRL" type="Node3D" parent="." unique_id=210817093]
 script = ExtResource("5_6hc2f")
-rl_version = 1
-boids_rl_model_path = "res://boids_10_000_000.onnx"
+boids_rl_model_path = "res://boids_35_000_000.onnx"
 metadata/_custom_type_script = "uid://dg8tmq3tcha7"
