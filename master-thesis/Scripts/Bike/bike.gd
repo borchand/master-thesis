@@ -54,7 +54,7 @@ func _physics_process(delta):
 		max_speed=speed
 	self.progress += speed * delta
 	if self.progress >= max_progress:
-		if not is_rl:
+		if not is_training:
 			logging.log_bike_finish_time(total_time)
 			#print("Bike: ", self.name, " Finish time: ", total_time, " nBreakout: ", n_breakouts, "  Max_speed: ", max_speed, " MaxProgress: ", self.progress )
 		safe_queue_free()
