@@ -98,6 +98,12 @@ parser.add_argument(
     "value. Note: On resuming training, the schedule will reset. If disabled, constant LR will be used.",
 )
 parser.add_argument(
+    "--learning_rate",
+    default=0.0001,
+    type=float,
+    help="Learning rate for the PPO optimizer. Default: 0.0001.",
+)
+parser.add_argument(
     "--viz",
     action="store_true",
     help="If set, the simulation will be displayed in a window during training. Otherwise "
@@ -267,7 +273,7 @@ def linear_schedule(initial_value: float) -> Callable[[float], float]:
 
 
 if args.resume_model_path is None:
-    learning_rate = 0.0003 if not args.linear_lr_schedule else linear_schedule(0.0003)
+    learning_rate = args.learning_rate if not args.linear_lr_schedule else linear_schedule(args.learning_rate)
     model: PPO = PPO(
         "MultiInputPolicy",
         env,

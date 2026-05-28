@@ -5,7 +5,7 @@ signal freeing_drone
 static var _next_id: int = 1
 var id: int
 
-enum Version { Boids, BoidsPriorityAttractionFields, BoidsPriorityGroups, BoidsPriorityGroupsWithRl }
+enum Version { Boids, BoidsPriorityAttractionFields, BoidsPriorityGroups }
 enum Cluster_version {V1, V2}
 
 var is_rl: bool = false
@@ -50,9 +50,6 @@ var keep_selection_for_n_frames = 100
 @export var cluster_distance_threshold := 10.0
 
 @export var coverage_radius := 10.0
-# BoidsPriorityGroupsWithRl: path to a trained BoidsRl ONNX model used for parameter tuning
-@export var boids_rl_model_path: String = ""
-var _boids_rl_model: ONNXModel = null
 
 @export var debug_draw: bool = false
 @export var debug_line_width: float = 0.1
@@ -85,8 +82,6 @@ func _ready():
 	var path = get_parent().get_node("BikePath3d") as Path3D
 	var curve = path.curve
 	last_point = path.to_global(curve.get_point_position(curve.point_count - 1))
-	if version == Version.BoidsPriorityGroupsWithRl and boids_rl_model_path != "":
-		_boids_rl_model = ONNXModel.new(boids_rl_model_path, 1)
 
 func _physics_process(_delta):
 	if self.position.distance_to(last_point) < 60 and not has_nearby_bike_now():
@@ -103,10 +98,7 @@ func _physics_process(_delta):
 
 	if not is_rl:
 		if _boids_throttle % 3 == id % 3:
-			if version == Version.BoidsPriorityGroupsWithRl:
-				_compute_boids_with_model()
-			else:
-				_compute_boids()
+			_compute_boids()
 		_boids_throttle += 1
 
 	apply_central_force(_cached_force)
@@ -138,119 +130,6 @@ func _compute_boids():
 
 	_cached_force = clamp_vector(direction_vector, max_force)
 	_cached_rotation_dir = -alignment_vector
-
-func _compute_boids_with_model():
-	assert(_boids_rl_model != null, "HeuristicModelBoids requires boids_rl_model_path to be set")
-
-	sensor_readings_drones = _collect_drones_in_range()
-
-	var all_bikes := _collect_bikes_in_range()
-	var clusters := _cluster_bikes(all_bikes)
-	var assigned = _assigned_cluster_local_v2(clusters, sensor_readings_drones) if cluster_version == Cluster_version.V2 else _assigned_cluster_local(clusters, sensor_readings_drones)
-
-	sensor_readings_bikes = assigned["bikes"]
-	camera_readings = _filter_camera(sensor_readings_bikes)
-
-	_draw_cluster_debug_lines([assigned])
-
-	if not sensor_readings_bikes.is_empty():
-		var obs := _build_boids_rl_obs()
-		var result := _boids_rl_model.run_inference(obs, 1)
-		var output = result["output"]
-		set_tunable_parameters({
-			"avoid_radius":     _remap_boids_action(output[0], 1.0, 8.0),
-			"avoid_factor":     _remap_boids_action(output[1], 1.0, 20.0),
-			"centering_factor": _remap_boids_action(output[2], 0.1,  5.0),
-			"matching_factor":  _remap_boids_action(output[3], 0.01, 1.0),
-		})
-
-	var alignment_vector = alignment(sensor_readings_bikes)
-	var cohesion_vector = cohesion(sensor_readings_bikes)
-	var separation_vector = separation_fast()
-
-	var direction_vector = alignment_vector + cohesion_vector + separation_vector
-	direction_vector.y = height_force(sensor_readings_bikes)
-
-	_cached_force = clamp_vector(direction_vector, max_force)
-	_cached_rotation_dir = -alignment_vector
-
-func _build_boids_rl_obs() -> Array:
-	var obs: Array = []
-	var nearby_count = sensor_readings_bikes.size()
-
-	if nearby_count == 0:
-		for _i in 16:
-			obs.append(0.0)
-		return obs
-
-	var visible_count := camera_readings.size()
-	obs.append(float(visible_count) / float(nearby_count))
-
-	var cam_inv = camera.global_transform.basis.inverse()
-	var centroid_cam := Vector2.ZERO
-	if visible_count > 0:
-		for bike_data in camera_readings:
-			var to_bike = cam_inv * (bike_data["position"] - camera.global_position)
-			var fwd = -to_bike.z
-			if fwd > 0.01:
-				centroid_cam.x += clamp(to_bike.x / fwd, -1.0, 1.0)
-				centroid_cam.y += clamp(to_bike.y / fwd, -1.0, 1.0)
-		centroid_cam /= float(visible_count)
-	obs.append(centroid_cam.x)
-	obs.append(centroid_cam.y)
-	obs.append(1.0 if visible_count == nearby_count else 0.0)
-
-	var bike_centroid := Vector3.ZERO
-	for reading in sensor_readings_bikes:
-		bike_centroid += reading.position
-	bike_centroid /= float(nearby_count)
-
-	var to_centroid := bike_centroid - global_position
-	to_centroid.y = 0.0
-	var horiz_dist := to_centroid.length()
-
-	obs.append(clamp((horiz_dist - 10.0) / 5.0, -1.0, 1.0))
-
-	var drone_forward := -global_transform.basis.z
-	drone_forward.y = 0.0
-	obs.append(drone_forward.normalized().dot(to_centroid.normalized()) if horiz_dist > 0.1 else 0.0)
-
-	var avg_vel := Vector3.ZERO
-	for reading in sensor_readings_bikes:
-		avg_vel += reading.velocity
-	avg_vel /= float(nearby_count)
-	var local_avg_vel := global_transform.basis.inverse() * avg_vel
-	obs.append(clamp(local_avg_vel.x / 22.0, -1.0, 1.0))
-	obs.append(clamp(local_avg_vel.z / 22.0, -1.0, 1.0))
-
-	var spread := 0.0
-	for reading in sensor_readings_bikes:
-		var flat := Vector2(reading.position.x - bike_centroid.x, reading.position.z - bike_centroid.z)
-		spread += flat.length()
-	spread /= float(nearby_count)
-	obs.append(clamp(spread / 30.0, 0.0, 1.0))
-
-	obs.append(clamp(float(nearby_count) / 8.0, 0.0, 1.0))
-
-	var nearest_dist_norm := 1.0
-	var in_zone := 0
-	for reading in sensor_readings_drones:
-		var d_norm = reading.distance / (avoid_radius * 2.0)
-		if d_norm < nearest_dist_norm:
-			nearest_dist_norm = d_norm
-		if reading.distance < avoid_radius:
-			in_zone += 1
-	obs.append(clamp(nearest_dist_norm, 0.0, 1.0))
-	obs.append(clamp(float(in_zone) / 5.0, 0.0, 1.0))
-
-	var local_vel := global_transform.basis.inverse() * linear_velocity
-	obs.append(clamp(local_vel.x / 15.0, -1.0, 1.0))
-	obs.append(clamp(local_vel.y / 15.0, -1.0, 1.0))
-	obs.append(clamp(local_vel.z / 15.0, -1.0, 1.0))
-
-	obs.append(clamp(float(sensor_readings_drones.size()) / 10.0, 0.0, 1.0))
-
-	return obs
 
 func _remap_boids_action(value: float, min_val: float, max_val: float) -> float:
 	return min_val + (clamp(value, -1.0, 1.0) + 1.0) * 0.5 * (max_val - min_val)
@@ -860,8 +739,9 @@ func _coverage_score(n: int) -> int:
 
 func safe_queue_free() -> void:
 	#get_parent().erase_drone(self)
-	freeing_drone.emit(self)
-	queue_free()
+	if not is_training:
+		freeing_drone.emit(self)
+		queue_free()
 
 # ─── Logging ────────────────────────────────────────────────────────────────────
 

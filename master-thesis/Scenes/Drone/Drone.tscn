@@ -39,6 +39,5 @@ script = ExtResource("4_6hc2f")
 
 [node name="DroneRL" type="Node3D" parent="." unique_id=210817093]
 script = ExtResource("5_6hc2f")
-rl_version = 1
-boids_rl_model_path = "res://boids_10_000_000.onnx"
+boids_rl_model_path = "res://boids_35_000_000.onnx"
 metadata/_custom_type_script = "uid://dg8tmq3tcha7"

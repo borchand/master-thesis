@@ -195,23 +195,31 @@ static func get_randomize_for_rl():
 	var _rng = RandomNumberGenerator.new()
 
 	var _speed = _rng.randf_range(6.0, 18.0)
-	var _speedUpProbability = _rng.randi_range(4, 16)
-	var _cohesion_c = _rng.randf_range(0.1, 1.0)
-	var _separation_c = _rng.randf_range(0.01, 1)
+	var _speedUpProbability = _rng.randi_range(.1, 50)
+	var _speedDownProbability = _rng.randi_range(3, 10)
+	var _cohesion_c = _rng.randf_range(0.1, 5.0)
+	var _separation_c = _rng.randf_range(0.01, .2)
+	var _initial_breakout_watt = _rng.randf_range(450.0, 600.0)
+	var _sustainable_watt = _rng.randf_range(300.0, 450.0)
 
 	return {
 		"speed": _speed,
 		"speedUpProbability": _speedUpProbability,
 		"cohesion_c": _cohesion_c,
 		"separation_c": _separation_c,
+		"initial_breakout_watt": _initial_breakout_watt,
+		"sustainable_watt": _sustainable_watt,
+		"speedDownProbability": _speedDownProbability
 	}
 
 func set_randomize_for_rl(dict) -> void:
 	speed = dict["speed"]
 	speedUpProbability = dict["speedUpProbability"]
+	speedDownProbability = dict["speedDownProbability"]
 	cohesion_c = dict["cohesion_c"]
 	separation_c = dict["separation_c"]
-
+	initial_breakout_watt = dict["initial_breakout_watt"]
+	sustainable_watt = dict["sustainable_watt"]
 
 func get_camera_node() -> Camera3D:
 	return $Camera3D
