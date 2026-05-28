@@ -5,7 +5,7 @@ signal freeing_drone
 static var _next_id: int = 1
 var id: int
 
-enum Version { Boids, BoidsPriorityAttractionFields, BoidsPriorityGroups, BoidsPriorityGroupsWithRl }
+enum Version { Boids, BoidsPriorityAttractionFields, BoidsPriorityGroups }
 enum Cluster_version {V1, V2}
 
 var is_rl: bool = false
