@@ -8,7 +8,7 @@
 [node name="Sync" type="Node" parent="." unique_id=295556960]
 script = ExtResource("1_ojf0l")
 control_mode = 2
-onnx_model_path = "res://boids_2.onnx"
+onnx_model_path = "res://boids.onnx"
 metadata/_custom_type_script = "uid://c16g2vvptkvge"
 
 [node name="World" parent="." unique_id=1006143094 instance=ExtResource("2_37uq0")]
