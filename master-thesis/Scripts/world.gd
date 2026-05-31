@@ -167,8 +167,11 @@ func set_stage_variables():
 			bike_restWatt=360; bike_sprintWatt = 460; watt_spread = 2
 			bike_cohesion = 3.0; bike_seperation = 0.01; bike_speedupchance = 0.1; bike_speedDownChance = 4.5
 		"res://stages/stage-19-route.json":
-			bike_restWatt=625; bike_sprintWatt = 825; watt_spread = 18
-			bike_cohesion = 1.5; bike_seperation = 0.001; bike_speedupchance = 0.00001; bike_speedDownChance = 14.5
+			bike_restWatt=360; bike_sprintWatt = 460; watt_spread = 2
+			bike_cohesion = 3.0; bike_seperation = 0.01; bike_speedupchance = 0.1; bike_speedDownChance = 4.5
+		#"res://stages/stage-19-route.json":
+		#	bike_restWatt=625; bike_sprintWatt = 825; watt_spread = 18
+		#	bike_cohesion = 1.5; bike_seperation = 0.001; bike_speedupchance = 0.00001; bike_speedDownChance = 14.5
 
 func erase_bike(node):
 	bike_process_list.erase(node)
