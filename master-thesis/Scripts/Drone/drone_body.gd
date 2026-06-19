@@ -15,7 +15,6 @@ var collision_at_time_step = 0
 var timestep = 1
 
 @onready var camera: Camera3D = $"Camera3D"
-@onready var drone_sensor: DroneCommunication = $"Drone_communication"
 
 @onready var camera_readings = []
 @onready var sensor_readings_drones = []
@@ -277,8 +276,9 @@ func set_tunable_parameters(params: Dictionary):
 	centeringfactor = params["centering_factor"]
 	matchingfactor = params["matching_factor"]
 
+# old boids method
 func boids():
-	read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
+	#read_sensor(drone_sensor.drone_set, drone_sensor.bike_set)
 
 	var alignment_vector: Vector3
 	var cohesion_vector: Vector3
