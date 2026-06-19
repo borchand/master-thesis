@@ -15,7 +15,7 @@ var collision_at_time_step = 0
 var timestep = 1
 
 @onready var camera: Camera3D = $"Camera3D"
-@onready var drone_sensor: DroneCommunication = $"Drone_communication"
+#@onready var drone_sensor: DroneCommunication = $"Drone_communication"
 
 @onready var camera_readings = []
 @onready var sensor_readings_drones = []
