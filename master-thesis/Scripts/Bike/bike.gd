@@ -21,6 +21,8 @@ var speed = 9.0
 var speedUpProbability := 5.0
 var speedDownProbability := 4.5
 var acceleration = 0.0
+var prevousHeading = null
+var turningRadious = null
 
 var sustainable_watt = null
 var initial_breakout_watt = null
@@ -37,9 +39,12 @@ var separation_c := 0.01  #0.05   #Set by trial and error
 var n_breakouts = 0
 var max_speed = 0
 
+var times_corner_was_an_effect = 0
+
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
 	world = get_parent().get_parent()
+	prevousHeading = bikebody.global_rotation.z
 
 var printCheck = true
 
@@ -53,11 +58,13 @@ func _physics_process(delta):
 	if speed>max_speed:
 		max_speed=speed
 	self.progress += speed * delta
+	
 	if self.progress >= max_progress:
 		if not is_training:
 			logging.log_bike_finish_time(total_time)
-			#print("Bike: ", self.name, " Finish time: ", total_time, " nBreakout: ", n_breakouts, "  Max_speed: ", max_speed, " MaxProgress: ", self.progress )
+			print("Bike: ", self.name, " Finish time: ", total_time, " nBreakout: ", n_breakouts, "  Max_speed: ", max_speed, " MaxProgress: ", self.progress, " times_corner_was_an_effect: ", self.times_corner_was_an_effect )
 		safe_queue_free()
+	prevousHeading = bikebody.global_rotation.z
 
 func coltroler(delta):
 	#control1(delta)
@@ -87,6 +94,16 @@ func control1(delta):
 		wanted_power = cruise(elevation, neighborhood_result)
 	elif  behavior == "attack":
 		wanted_power = attack()
+	
+	#new
+	var dTheta = changeInHeading()
+	var capSpeed = getCapSpeedInTurn(dTheta, delta)
+	var a_lat = getLateralAcceleration(dTheta, delta)
+	if a_lat  > 0.7 * 9.81: #maximumgrip
+		times_corner_was_an_effect += 1
+		var deacceration_time = 1 
+		var wanted_acceleration = (capSpeed-speed)/deacceration_time
+		wanted_power = calc_watt_current_state(speed,elevation,wanted_acceleration, in_peloton)
 
 	var atcual_power = wanted_power
 	if wanted_power > sustainable_watt:
@@ -229,3 +246,23 @@ func safe_queue_free() -> void:
 	freeing_bike.emit(self)
 	bikebody.collision_layer = 0
 	queue_free()
+
+func changeInHeading():
+	var dTheta = bikebody.global_rotation.z - prevousHeading
+	if dTheta > PI:
+		dTheta = dTheta - PI
+	return dTheta
+	
+func getCapSpeedInTurn(changeInTurn, changeInTime): #Newtonian mechanics
+	var omega = changeInTurn/changeInTime
+	if omega < 0.000001:    #it is a straigth line to speed cap due to corner
+		return 200
+	else:
+		return  0.7 * 9.81/ omega #maximum friction available: F = μ·m·g
+
+func getLateralAcceleration(changeInTurn, changeInTime):
+	var omega = changeInTurn/changeInTime
+	return omega*speed     #lateral_acceleration
+	
+	
+	
