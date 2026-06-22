@@ -22,7 +22,6 @@ var speedUpProbability := 5.0
 var speedDownProbability := 4.5
 var acceleration = 0.0
 var prevousHeading = null
-var turningRadious = null
 
 var sustainable_watt = null
 var initial_breakout_watt = null
@@ -44,9 +43,8 @@ var times_corner_was_an_effect = 0
 func _ready():
 	max_progress = self.get_parent().curve.get_baked_length()
 	world = get_parent().get_parent()
-	prevousHeading = bikebody.global_rotation.z
+	prevousHeading = get_heading()
 
-var printCheck = true
 
 func _physics_process(delta):
 	timer += delta
@@ -62,9 +60,9 @@ func _physics_process(delta):
 	if self.progress >= max_progress:
 		if not is_training:
 			logging.log_bike_finish_time(total_time)
-			print("Bike: ", self.name, " Finish time: ", total_time, " nBreakout: ", n_breakouts, "  Max_speed: ", max_speed, " MaxProgress: ", self.progress, " times_corner_was_an_effect: ", self.times_corner_was_an_effect )
+			print("Bike: ", self.name, " Finish time: ", total_time, " nBreakout: ", n_breakouts, "  Max_speed: ", max_speed, " MaxProgress: ", self.progress, " times_corner_was_an_effect: ", self.times_corner_was_an_effect)
 		safe_queue_free()
-	prevousHeading = bikebody.global_rotation.z
+	
 
 func coltroler(delta):
 	#control1(delta)
@@ -248,9 +246,9 @@ func safe_queue_free() -> void:
 	queue_free()
 
 func changeInHeading():
-	var dTheta = bikebody.global_rotation.z - prevousHeading
-	if dTheta > PI:
-		dTheta = dTheta - PI
+	var current = get_heading()
+	var dTheta = wrapf(current - prevousHeading, -PI, PI)
+	prevousHeading = current
 	return dTheta
 	
 func getCapSpeedInTurn(changeInTurn, changeInTime): #Newtonian mechanics
@@ -264,5 +262,7 @@ func getLateralAcceleration(changeInTurn, changeInTime):
 	var omega = changeInTurn/changeInTime
 	return omega*speed     #lateral_acceleration
 	
-	
+func get_heading() -> float:
+	var f = bikebody.global_transform.basis.z   # bike's Z axis in world space (a direction)
+	return atan2(f.x, f.z) 
 	
